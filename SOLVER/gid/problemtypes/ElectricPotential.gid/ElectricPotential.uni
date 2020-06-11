@@ -1,0 +1,30 @@
+USER DEFINED: ENABLED
+USE BASE SYSTEMS: DISABLED
+
+BEGIN TABLE
+length         : m , 100 cm, 1.0e+3 mm
+mass           : kg , 1.0e+3 g
+time           : s
+force          : N , kg*m/s^2
+energy         : J , N*m, kg*m^2/s^2
+pressure       : Pa , N/m^2 , Kg/m
+density        : kg/m^3
+temperature    : Kel
+power          : W , J/s , N*m/s , Kg*m^2/s^3
+Charge         : C
+Potential      : V , J/C
+Field_strength : N/C , V/m
+Charge_density : C/m^3
+END
+
+BEGIN SYSTEM (international)
+length         : m
+mass           : kg
+time           : s
+force          : N
+energy         : J
+pressure       : Pa
+density        : kg/m^3
+temperature    : Kel
+power          : W
+END

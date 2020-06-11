@@ -1,0 +1,93 @@
+<html>
+<head>
+<title>Read me</title>
+<style>
+th {text-align:left; vertical-align:text-top}
+td {vertical-align:text-top}
+</style>
+</head>
+<body>
+<h2>Directories</h2>
+<table>
+	<tr><th>/build</th><td>Files to build FEMT library, tools, GiD problemtypes and examples</td></tr>
+	<tr><th>&nbsp;</th><td>
+		<table>
+		<tr><th>/icc</th><td>For the Intel compiler</td></tr>
+		<tr><th>/gcc</th><td>For the GNU compiler collection (GCC)</td></tr>
+		<tr><th>/Visual Studio</th><td>For using with Visual C++ NMake (2008, 2010 and 2012 Professional)</td></tr>
+		<tr><th>/Visual Studio 2010</th><td>For Visual C++ 2010 (Professional)</td></tr>
+		</table
+	</td></tr>
+
+	<tr><th>/gid</th><td>Files needed to install problem types</td></tr>
+	<tr><th>&nbsp;</th><td>
+		<table>
+		<tr><th>/examples</th><td>Geometries and problems to be used with GiD</td></tr>
+		<tr><th>/problemtypes</th><td>Problem types. These must be installed into the GiD problemtypes directory</td></tr>
+		<tr><th>&nbsp;</th><td>
+			<table>
+			<tr><th>/Coloring.gid</th><td>Problem type for testing coloring algorithms</td></tr>
+			<tr><th>/ElectricPotential.gid</th><td>Solution of electrostatic and capacitance matrix problems</td></tr>
+			<tr><th>/Heat.gid</th><td>To solve heat difussion problems (stationary and dynamic)</td></tr>
+			<tr><th>/Partitioning.gid</th><td>For testing domain partitioning</td></tr>
+			<tr><th>/Solid.gid</th><td>Solution of linear solid deformations (stationary and dynamic)</td></tr>
+			</table
+		</td></tr>
+		<tr><th>/scripts</th><td>Sample scripts for running the problemtypes</td></tr>
+		</table
+	</td></tr>
+
+	<tr><th>/source</th><td>Source code for FEMT library, tools, GiD problemtypes and examples</td></tr>
+	<tr><th>&nbsp;</th><td>
+		<table>
+		<tr><th>/Basic</th><td>Classes for debugging, exceptions, memory allocation, logs, time</td></tr>
+		<tr><th>/Communication</th><td>MPI class for sending and receiving data</td></tr>
+		<tr><th>/Container</th><td>Containers for full and sparse matrices, vectors, lists, sets, vectors</td></tr>
+		<tr><th>/Examples</th><td>Containers for full and sparse matrices, vectors, lists, sets, vectors</td></tr>
+		<tr><th>&nbsp;</th><td>
+			<table>
+			<tr><th>/EqnSolverExample</th><td>Testing programs to call EqnSolver</td></tr>
+			<tr><th>/FEMSolverExample</th><td>Testing programs to call FEMSolver and FEMSolver.MPI</td></tr>
+			</table
+		</td></tr>
+		<tr><th>/File</th><td>Classes to handle files</td></tr>
+		<tr><th>/FiniteElement</th><td>Classes and routines to assemble systems, load geometries, calculate shape functions and integration rules</td></tr>
+		<tr><th>/GiDProblemTypes</th><td>Problem types to be used with GiD</td></tr>
+		<tr><th>&nbsp;</th><td>
+			<table>
+			<tr><th>/Coloring</th><td>Includes source code for Coloring problem type</td></tr>
+			<tr><th>/ElectricPotential</th><td>Source code for ElectricPotential problem type</td></tr>
+			<tr><th>/Heat</th><td>Includes source code for Heat problem type and Heat.MPI</td></tr>
+			<tr><th>/Partitioning</th><td>Source code for Partitioning problem type</td></tr>
+			<tr><th>/Solid</th><td>Includes source code for Solid problem type and Solid.MPI</td></tr>
+			</table
+		</td></tr>
+		<tr><th>/Math</th><td>Math classes (probability distributions and parser for formulas</td></tr>
+		<tr><th>/METIS</th><td>METIS library for partitioning and graph reordering</td></tr>
+		<tr><th>/Solver</th><td>Solver routines for full and sparse matrices: conjugate gradiente, biconjugate gradient, Cholesky, LU</td></tr>
+		<tr><th>/Tools</th><td>Source code of tools</td></tr>
+		<tr><th>&nbsp;</th><td>
+			<table>
+			<tr><th>/Diff</th><td>Program to calculate the difference between two postprocess files</td></tr>
+			<tr><th>/EqnSolver</th><td>Tool to solve sparse systems of equations, data is interchanged using pipes</td></tr>
+			<tr><th>/FEMSolver</th><td>Designed to solve finite element problems, data is interchanged using pipes</td></tr>
+			<tr><th>/MatSolver</th><td>This program loads MatLab-4 files with sparse systems of equations and solve them</td></tr>
+			</table
+		</td></tr>
+		</table
+	</td></tr>
+
+	<tr><th>/tools</th><td>All tools binaries are put here</td></tr>
+
+</table
+<hr>
+
+<h2>Log level</h2>
+<table>
+<tr><th>0</th><td>Only log fatal errors</td></tr>
+<tr><th>1</th><td>Step messages</td></tr>
+<tr><th>2</th><td>Iterations</td></tr>
+</table
+
+</body>
+</html>

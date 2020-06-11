@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Basic">
+      <UniqueIdentifier>{861e9bb0-3a93-4532-939b-4e465e44d432}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Container">
+      <UniqueIdentifier>{bb38ae95-bff3-48e9-8163-9ee611619d83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FiniteElement">
+      <UniqueIdentifier>{8bc4cd3c-b2d1-4af4-9b4e-c1985bd709af}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Solver">
+      <UniqueIdentifier>{a20ee813-e37e-4f1c-bfe8-62083dd093f0}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\source\Basic\Assert.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Basic\Complex.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Basic\Debug.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Basic\Exception.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Basic\Float.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Basic\Integer.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Basic\Log.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Basic\Macros.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Basic\Memory.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Basic\Time.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Container\Array.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Container\CSCMatrix.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Container\CSRMatrix.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Container\CSVector.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Container\KDTree.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Container\KDTreeB.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Container\List.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Container\Matrix.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Container\Queue.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Container\Set.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Container\Stack.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Container\TriangularMatrix.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Container\Vector.h">
+      <Filter>Container</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\FiniteElement\Adjacencies.h">
+      <Filter>FiniteElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\FiniteElement\Assembler.h">
+      <Filter>FiniteElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\FiniteElement\Mesh.h">
+      <Filter>FiniteElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\FiniteElement\Nodes.h">
+      <Filter>FiniteElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\FiniteElement\Shape.h">
+      <Filter>FiniteElement</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Solver\BiconjugateGradient.h">
+      <Filter>Solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Solver\Cholesky.h">
+      <Filter>Solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Solver\ConjugateGradient.h">
+      <Filter>Solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Solver\DiagonalSystem.h">
+      <Filter>Solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Solver\LU.h">
+      <Filter>Solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Solver\Solver.h">
+      <Filter>Solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Solver\SolverParameters.h">
+      <Filter>Solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Solver\SparseApproximateInverse.h">
+      <Filter>Solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Solver\TriangularSystem.h">
+      <Filter>Solver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\source\Basic\Format.h">
+      <Filter>Basic</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\source\Basic\Debug.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Basic\Float.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Basic\Integer.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Basic\Log.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Basic\Memory.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Basic\Time.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\FiniteElement\Assembler.cpp">
+      <Filter>FiniteElement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\FiniteElement\Mesh.cpp">
+      <Filter>FiniteElement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\FiniteElement\Shape.cpp">
+      <Filter>FiniteElement</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\Basic\Format.cpp">
+      <Filter>Basic</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\source\libFEMSolver\libFEMSolver.cpp" />
+  </ItemGroup>
+</Project>

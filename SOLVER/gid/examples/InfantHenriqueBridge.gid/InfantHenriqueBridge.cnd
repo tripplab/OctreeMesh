@@ -1,0 +1,173 @@
+NUMBER: 1 CONDITION: Displacement_Point
+CONDTYPE: over points
+CONDMESHTYPE: over nodes
+QUESTION: User_function_for_x:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that displacement is constant and taken from the Displacement_x field.
+QUESTION: Displacement_x:#UNITS#
+VALUE: 0m
+QUESTION: Fixed_x:#CB#(1,0)
+VALUE: 0
+QUESTION: User_function_for_y:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that displacement is constant and taken from the Displacement_y field.
+QUESTION: Displacement_y:#UNITS#
+VALUE: 0m
+QUESTION: Fixed_y:#CB#(1,0)
+VALUE: 0
+QUESTION: User_function_for_z:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that displacement is constant and taken from the Displacement_z field.
+QUESTION: Displacement_z:#UNITS#
+VALUE: 0m
+QUESTION: Fixed_z:#CB#(1,0)
+VALUE: 0
+END CONDITION
+NUMBER: 2 CONDITION: Displacement_Line
+CONDTYPE: over lines
+CONDMESHTYPE: over nodes
+QUESTION: User_function_for_x:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that displacement is constant and taken from the Displacement_x field.
+QUESTION: Displacement_x:#UNITS#
+VALUE: 0m
+QUESTION: Fixed_x:#CB#(1,0)
+VALUE: 0
+QUESTION: User_function_for_y:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that displacement is constant and taken from the Displacement_y field.
+QUESTION: Displacement_y:#UNITS#
+VALUE: 0m
+QUESTION: Fixed_y:#CB#(1,0)
+VALUE: 0
+QUESTION: User_function_for_z:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that displacement is constant and taken from the Displacement_z field.
+QUESTION: Displacement_z:#UNITS#
+VALUE: 0m
+QUESTION: Fixed_z:#CB#(1,0)
+VALUE: 0
+END CONDITION
+NUMBER: 3 CONDITION: Displacement_Surface
+CONDTYPE: over surfaces
+CONDMESHTYPE: over nodes
+QUESTION: User_function_for_x:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that displacement is constant and taken from the Displacement_x field.
+QUESTION: Displacement_x:#UNITS#
+VALUE: 0m
+QUESTION: Fixed_x:#CB#(1,0)
+VALUE: 0
+QUESTION: User_function_for_y:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that displacement is constant and taken from the Displacement_y field.
+QUESTION: Displacement_y:#UNITS#
+VALUE: 0m
+QUESTION: Fixed_y:#CB#(1,0)
+VALUE: 0
+QUESTION: User_function_for_z:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that displacement is constant and taken from the Displacement_z field.
+QUESTION: Displacement_z:#UNITS#
+VALUE: 0m
+QUESTION: Fixed_z:#CB#(1,0)
+VALUE: 0
+END CONDITION
+NUMBER: 4 CONDITION: Displacement_Volume
+CONDTYPE: over volumes
+CONDMESHTYPE: over nodes
+QUESTION: User_function_for_x:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that displacement is constant and taken from the Displacement_x field.
+QUESTION: Displacement_x:#UNITS#
+VALUE: 0m
+QUESTION: Fixed_x:#CB#(1,0)
+VALUE: 0
+QUESTION: User_function_for_y:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that displacement is constant and taken from the Displacement_y field.
+QUESTION: Displacement_y:#UNITS#
+VALUE: 0m
+QUESTION: Fixed_y:#CB#(1,0)
+VALUE: 0
+QUESTION: User_function_for_z:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that displacement is constant and taken from the Displacement_z field.
+QUESTION: Displacement_z:#UNITS#
+VALUE: 0m
+QUESTION: Fixed_z:#CB#(1,0)
+VALUE: 0
+END CONDITION
+NUMBER: 5 CONDITION: Nodal_Force_Point
+CONDTYPE: over points
+CONDMESHTYPE: over nodes
+QUESTION: User_function_for_x:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that force is constant and taken from the Force_x field.
+QUESTION: Force_x:#UNITS#
+VALUE: 0N
+QUESTION: User_function_for_y:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that force is constant and taken from the Force_y field.
+QUESTION: Force_y:#UNITS#
+VALUE: 0N
+QUESTION: User_function_for_z:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that force is constant and taken from the Force_z field.
+QUESTION: Force_z:#UNITS#
+VALUE: 0N
+END CONDITION
+NUMBER: 6 CONDITION: Nodal_Force_Line
+CONDTYPE: over lines
+CONDMESHTYPE: over nodes
+QUESTION: User_function_for_x:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that force is constant and taken from the Force_x field.
+QUESTION: Force_x:#UNITS#
+VALUE: 0N
+QUESTION: User_function_for_y:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that force is constant and taken from the Force_y field.
+QUESTION: Force_y:#UNITS#
+VALUE: 0N
+QUESTION: User_function_for_z:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that force is constant and taken from the Force_z field.
+QUESTION: Force_z:#UNITS#
+VALUE: 0N
+END CONDITION
+NUMBER: 7 CONDITION: Nodal_Force_Surface
+CONDTYPE: over surfaces
+CONDMESHTYPE: over nodes
+QUESTION: User_function_for_x:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that force is constant and taken from the Force_x field.
+QUESTION: Force_x:#UNITS#
+VALUE: 0N
+QUESTION: User_function_for_y:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that force is constant and taken from the Force_y field.
+QUESTION: Force_y:#UNITS#
+VALUE: 0N
+QUESTION: User_function_for_z:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that force is constant and taken from the Force_z field.
+QUESTION: Force_z:#UNITS#
+VALUE: 0N
+END CONDITION
+NUMBER: 8 CONDITION: Normal_Force_Line
+CONDTYPE: over lines
+QUESTION: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+QUESTION: Force:#UNITS#
+VALUE: 0N
+help: A zero value means that force is constant and taken from the Force field.
+END CONDITION
+NUMBER: 9 CONDITION: Normal_Force_Surface
+CONDTYPE: over surfaces
+QUESTION: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20)
+VALUE: 0
+help: A zero value means that force is constant and taken from the Force field.
+QUESTION: Force:#UNITS#
+VALUE: 0N
+END CONDITION

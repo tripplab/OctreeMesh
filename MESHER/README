@@ -1,0 +1,73 @@
+February 14, 2020
+
+This code takes a molecule represented by atoms and generates an approximate representation of it by
+using an hexahedral mesh suited to perform numerical simulations via Finite Element Method (FEM). 
+The program receives the molecule representation via the vdb format. The mesher performs a rotation 
+in order to align one fold with the Y axis, valid folds are 2,3 and 5. For each fold exists 12 valid
+rotations. This program also assign boundary conditions in order to perform a numerical simulation.
+
+
+IMPORTANT NOTE: 12 rotations from 5 fold are available but from fold 2 and 3 is only available the 
+                1 position. 
+
+12 positions for 5 fold
+
+0       0.000   77.316  125.100
+1       0.000  -77.316  125.100
+2     -77.316  125.101    0.000
+3      77.316  125.100    0.000
+4    -125.101    0.000   77.316
+5     125.100    0.000   77.316
+6     -77.316 -125.101    0.000
+7      77.316 -125.101    0.000
+8    -125.101    0.000  -77.316
+9       0.000   77.316 -125.100
+10      0.000  -77.316 -125.100
+11    125.100    0.000  -77.316
+
+12 positions for 3 fold
+
+0      41.100    0.0000 107.601
+1 
+2 
+3 
+4 
+5 
+6 
+7 
+8 
+9 
+10
+11
+
+12 positions for 2 fold
+
+0       0.000    0.0000 123.301
+1  
+2  
+3  
+4  
+5  
+6  
+7  
+8  
+9  
+10 
+11 
+
+
+The progrma receives 10 arguments
+	--The name of vdb file ( String )
+	--Kind of virus ( int )
+ 	--Kind of solution ( int: it can be 1 for VDW or 2 for SAS. Actually is only available option 1 )
+	--Mesh resolution in angstrom ( double )
+	--Fold id to align with Y axis ( int: 5,3,2 )
+	--Fold index to align with Y axis ( int: 0-11)
+	--Virus name to be meshes ( string: 1CWP , 4G93 , 3IZG , 3J4U )
+	--Cone amplitude to set boundary conditions ( double: in degrees )
+  --Variation in the proportion of loaded elements ( double: positive means more elements loades, 
+		negative means less elements loaded, zero means no variation in the amount of elemtns loaded ) 
+	--Young modulus for the simulation ( double: It must be tue young modulus/10000 ) 
+
+
+

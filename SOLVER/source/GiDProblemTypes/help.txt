@@ -1,0 +1,13 @@
+Examples:
+exp(-(t - 5)*(t - 5)/0.1)
+sqrt(x*x + y*y)
+
+Variables:
+x  y  z  t
+
+Functions:
+abs    acos  asin   atan
+atan2  ceil  cos    cosh
+tan    exp   floor  log
+log10  mod   pow    sin
+sinh   sqrt  tan    tanh

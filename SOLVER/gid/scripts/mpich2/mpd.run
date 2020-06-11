@@ -1,0 +1,1 @@
+mpiexec.hydra -machinefile mpd.mf -n 105 ./Heat.MPI Big

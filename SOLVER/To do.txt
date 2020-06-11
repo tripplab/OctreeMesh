@@ -1,0 +1,17 @@
+nnz() puede ser mayor que 2^31. canbiar a long
+
+Freely Available Software for Linear Algebra
+http://www.netlib.org/utk/people/JackDongarra/la-sw.html
+
+
+- Test differente buffer sizes for pipes in Windows.
+- Substructuring method for non symmetric matrices.
+- Implement EqnSolver for sparse matrices with Saad's format.
+- Use mkstemp instead of mktemp.
+
+
+Implement
+Y. Shapira
+Parallelizable approximate solvers for recursions arising in preconditioning
+Linear Algebra Applications. Vol. 274, pp. 211–237
+1998

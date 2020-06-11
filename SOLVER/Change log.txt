@@ -1,0 +1,663 @@
+--------------------
+Change log
+--------------------
+
+FEMT-beta36
+October 7, 2015
+- New functions Solid::GetElementSize and Solid::GetTotalSize, return the area or volume of all the geometry.
+
+FEMT-beta35
+September 22, 2015
+- CheckElements now returns unconnected groups of elements.
+
+FEMT-beta34
+September 18, 2015
+- FEMSolver and FEMSolver.Schur use CheckNodes and CheckElements
+- New functions Mesh::CheckNodes and Mesh::Check elements to find unconnected items.
+- Solid problem type can handle plain-stress and plain-strain problems.
+- New function Mesh::GetAdjacencies(Matrix<int>& adjacency) to obtain adjacencies by facet.
+- New macro FacetNode to obtain the (local) nodes of a facet.
+- Change in Formula class, now all variables defined are stored in the class. Also now it uses the operator () to evaluate.
+- New funcion MPI::Test.
+
+FEMT-beta33
+November 29, 2012, 01:17:37 a.m.
+- New functions TransposeStructure() in CSRMatrix.h to obtain the transpose of a sparse matrix but only its structure.
+- Some improvements in SparseApproximateInverse memory usage.
+- SparseApproximateInverse renamed to SparseApproximateInverseSymmetric.
+- New function SparseApproximateInverseUnsymmetric to calculate preconditioners for non symmetric matrices.
+- BiconjugateGradientSparseApproximateInverse now uses SparseApproximateInverseUnsymmetric to generate the preconditioner. This one is a lot faster and uses less memory.
+- new operator now accumulate Memory::current_usage using an atomic operation. This solve invalid memory leak messages.
+- Update to Makefiles.
+
+FEMT-beta32
+October 28, 2012, 02:29:43 a.m.
+- Improved adjacency calculation for dual graphs. Removed ElementAdjacency function from Partition.cpp. New function Mesh::GetAdjacencies.
+- Makefiles for Visual Studio's nmake. This allows building FEMT projects regardless Visual Studio version.
+- MatSover did not saved result file.
+- New function Mesh::ElementColoring to separate a elements in a mesh in groups without contact. Useful when parallelizing assembling of stiffness matrix.
+- New GiD problemtype: Coloring. To test coloring algorithms.
+- New routine for filling incomplete LDL' preconditioner using Munksgaard's algorithm to keep incomplete LDL' SPD. Thanks to Dr. Maria Luisa Sandoval Solis for her advice on this solver.
+- New solver EqnSolver.Schur. It is similar to FEMSolver.Schur but for systems of equations.
+- Renamed FEMSolver.MPI to FEMSolver.Schur.
+- Renamed Heat.MPI to Heat.Schur.
+- Renamed Solid.MPI to Solid.Schur.
+- Changed Partitioning.bas to support 3D surface meshes.
+
+FEMT-beta31
+June 20, 2012, 05:38:14 p.m.
+- Added support for building with Open-MPI for Windows (OMPI_IMPORTS define and use of libmpi.lib).
+- Error in GiD problemtypes with function input controls, GiD inserts #WIDTH# command into preprocess files (regression to beta29).
+- Cleanup of unused functions in SchurComplement.h.
+- Regression to METIS 4.0.1. Version 4.0.3 has memory allocation problems for large problems.
+- In Solver.MPI, Heat.MPI and FEMSolver.MPI, in generation of systems of equations, chaged solver_parameters.threads to solver_parameters.substructuring_threads.
+
+FEMT-beta30
+May 29, 2012, 04:31:57 a.m.
+- In Solid and Heat problem types, function input controls have a larger width.
+- FEMSolver, FEMSolver.MPI and EqnSolver pipe names no longer need prefix ('\\pipe\.\' or '/tmp/').
+- Bug in FEMSolver, FEMSolver.MPI and EqnSolver when only three parameters are given, it was reported as a invalid command line.
+
+FEMT-beta29
+May 27, 2012, 01:19:09 a.m.
+- Geometry template files now use nelems() function to count elements.
+- New class String to handle simple strings.
+- New fuction File::CreateTemp creates a temporal file, returns file name.
+- File::NamedPipe now returns the pipe name.
+- FEMSolver.MPI running (needs testing with larger problems).
+- RunFEMSolver.MPI.cmd and RunFEMSolver.MPI.sh are updated to handle Shur parameters.
+- Solid.MPI and Heat.MPI do not print solver parameters (these are not used).
+- "Read me.txt" replaced with "ReadMe.html"
+
+FEMT-beta28
+May 10, 2012, 07:28:49 a.m.
+- Some directory movements: examples -> gid/examples, problemtypes -> gid/problemtypes, source/problems, source/GiDProblemTypes.
+- New macros Throw and ReThrow to encapsulate DebugPosition and throw.
+- Assert.cpp removed, its functionality is now in Debug.cpp.
+- Iterative solvers stop iterations if a NaN appears.
+- Corrected syntax error in ElectricPotential (strengt -> strength).
+- New improved List and Set containers. Memory allocation is done by blocks, fewer calls to new and delete.
+- VERSION macro is now defined in BuildFlags.mk (GCC or Intel) or as a shared project property (Visual C++).
+
+FEMT-beta27
+April 18, 2012, 04:31:28 p.m.
+- Ooops! in LUSolver::LUSolver, missing section of code, it was accidentally removed in beta-23.
+
+FEMT-beta26
+April 13, 2012, 09:07:37 p.m.
+- Added <math.h> to ShapeFuncions.h (needed when compiling with gcc 4.7.0)
+- New examples: EqnSolverExample.py, FEMSolverExample.py.
+
+FEMT-beta25
+- Changed FFLAGS for Fortran examples (-mcmodel=large fails to build in Mac OS).
+- Incorrect sign when calculing fluxes in Heat problem.
+
+FEMT-beta24
+- License changed to GNU LESSER GENERAL PUBLIC LICENSE Version 3.
+- Now EqnSolver and FEMSolver can read solver parameters from a file.
+
+FEMT-beta23
+March 21, 2012, 12:29:11 p.m.
+- Typo error in ElectricPotential problem file template.
+- Rewrite new and delete operators in Memory.cpp, malloc_size (Mac OS X), _msize (Windows) and _malloc_usable_size (glibc) are used to retrive the amount of memory allocated.
+- Change EqnSolver to reorder b vector for direct methods before calling solver. It is needed when solver is called multiple times.
+- New method for distribute and multiply sparse matrices in SchurComplementMaster and SchurComplementSlave classes.
+- New examples: EqnSolverExample.for, EqnSolverExample.cpp, FEMSolverExample.for, FEMSolverExample.cpp.
+
+FEMT-beta22
+February 26, 2012, 04:50:11 a.m.
+- In Partitioning problem type, elimination of partition_method_name.
+- Flags to avoid subnormal-float-point problems in build/gcc/Buildflags.mk: -ffast-math -msse2 -mfpmath=sse.
+- Correction of Makefiles to build correctly Partition.cpp
+- Exception class no longer receives a message.
+- All exceptions are thrown as static member values.
+- New macro DebugPossition to show messages prior to throw exceptions.
+
+FEMT-beta21
+February 20, 2012, 05:53:14 a.m.
+- SchurComplement.h, Partition.h and Partition.cpp are now in the Substructuring directory.
+- Remove DomainDecomposition directory.
+- Partitioning now only partitions using StructurePartitioning method.
+- StructurePartitioning always reorders systems of equatiosn for Cholesky factorizations.
+- METIS updated to 4.0.3.
+- Fixed error on thickness in Solid::FillF for normal forces in 2D problems.
+- Solid, Heat and ElectricPotential problem types modified to support substructuring, prior domain decomposition methods have been eliminated.
+
+FEMT-beta20
+February 18, 2012, 06:32:04 a.m.
+- Now the SchurComplementMaster::MultiplyKBB works with non-blocking communication. It improves speed a lot!
+- PBMSave function in PBMFile was corrected, saved image was shifted by one column and one row.
+- Restructuration of SchurComplementMaster and SchurComplementSlave to apply fixed conditions internally.
+- Now Schur complement method works correctly with Neumann conditions.
+- CSRMatrix/CSCMatrix modified to allow rows/columns with zero entries.
+
+FEMT-beta19
+February 13, 2012, 19:08:07 p.m.
+- Complete redesign of SchurComplementMaster SchurComplementSlave classes. A new solver was implemented to solve (KBB - sum_i bar_KBBi)*uB = (fB - sum_i bar_FBi), now uses a distributed version of conjugate gradient with Jacobi preconditioner. This saves huge memory in master process.
+
+FEMT-beta18
+February 12, 2012, 10:04:58 a.m.
+- Compensation for fixed conditions now is done before calling SchurComplementMaster::SendSystemOfEquations. This reduces memory consuption on slave processes.
+- Reorganization of SchurComplementSlave, new methods ReceiveMatrix and ReceiveVector, Initialize now is simplified.
+- New DenseConjugateGradient and DenseConjugateGradientJacobi solvers.
+- SchurComplementSlave now always uses sparse CholeskySolver.
+- Solver parameters now defines the dense solver used to calculate the Schur complement. Available solvers are: DenseCholesky, DenseConjugateGradient and DenseConjugateGradientJacobi.
+
+FEMT-beta17
+February 11, 2012, 03:35:29 a.m.
+- New containers for triangular matrices, LowerTriangularMatrix and UpperTriangularMatrix.
+- Cholesky solver for full matrices.
+- New solvers for triangular matrices LowerTriangularSystem and UpperTriangularSystem.
+- buid/gcc and buid/icc Makefiles modified to read CPPFLAGS from BuildFlags.mk.
+- New class DenseSolver, similar to Solver but for dense matrices.
+- New class DenseCholeskySolver, simular to CholeskySolver but for dense matrices.
+- New method Assembler::AssembleAe for dense matrices.
+- StructurePartitioning method was created to partition a domain in substructures without overlapping.
+- Shur complement method is implemented in DomainDecomposition/SchurComplement.h.
+- Heat.MPI now uses Shur complement method.
+- Solid.MPI now uses Shur complement method.
+
+FEMT-beta16
+January 25, 2012, 05:59:55 a.m.
+- Bug in CSRMatrix.h file, function Convert(const CSRMatrix<T>& R, CSCMatrix<T>& C). Invalid number of columns for C.
+- Small type cast correction in MatFile::Store for full matrices.
+- For Visual Studio, new configurations "Debug (no MPI)" and "Release (no MPI)" to be able to build without MPI.
+
+FEMT-beta15
+November 18, 2011, 02:23:49 a.m.
+- Solid and Heat problems now allow functions up to 65535 characters long.
+- The Partitioning problemtype had wrongly defined the executable name.
+- Partitioning executable did not run in Windows, missing include <omp.h>.
+- ElectricPotential, critical sections removed due to inconsistency operation. Now problem data is duplicated.
+
+FEMT-beta14
+November 02, 2011, 01:49:01 a.m.
+- EqnSolver tool project is renamed to MatSolver.
+- New tool project created with the name EqnSolver, it uses named pipes (like FEMSolver) to read and solve a system of equations.
+- Bug in Vector::Sort, failed to sort with types different to integer.
+- Bug in File::NamedPipe, if unlink fails because the file does not exist an exception is thrown. Now the result of unlink is not verified.
+- FEMSolver.MPI is changed to use named pipes.
+
+October 21, 2011, 05:21:25 a.m.
+FEMT-beta13
+- Makefiles modified to detect if MPI is pressent, if so, build projects that uses it.
+- In ElectricPotential problems electrodes can be made of several segments.
+
+October 19, 2011, 10:05:47 a.m.
+FEMT-beta12
+- ElectricPotential problems now gives results of sensitivity on nodes (to plot surfaces).
+- Sensitivity area factor corrected.
+
+October 14, 2011, 03:55:40 p.m.
+FEMT-beta11
+- Now all solver related functions has a last parameter threads, to allow fine control of the number of threads assigned to each routine.
+- For ElectricPotential problem, sensitivity analysis is calculated in parallel.
+- Assembler::AssembleRow remade it did not work for reordered matrices.
+- In the tool FEMSolver, the command command_get_row_indexes now returns the correct indexes for a row.
+- FEMSolver now works with reordered matrices.
+
+October 12, 2011, 10:20:20 a.m.
+FEMT-beta10
+- New function ShapeFunctions::ElementDetJ to calculate element Jacobian determinant without calculating shape functions.
+- ElectricPotential now calculates capacitances and sensitivity analysis.
+
+October 10, 2011, 02:52:07 p.m.
+FEMT-beta9
+- FEMSolver now works with named pipes.
+- New tool FEMSolverExample to test FEMSolver
+- New tool EqnSolver, it reads a system of equations from a MAT-File 4 and solves it.
+- New routines for reordering before Choleksy factorization: FindingAnOrdering, Reorder (for matrices) and Reorder (for vectors).
+
+September 23, 2011, 07:54:20 p.m.
+FEMT-beta8
+- New problem type to calculate Electric Potentials.
+- New Float class that stores properties for float and double types.
+- List class have new AppendFirst and AppendLast to add a ListItem created alone.
+- New function Mesh::GetFacetNodes.
+- For all problems, now problem files are named "<prefix>.problem.dat".
+
+FEMT-beta7
+- Ops fixed in CSRMatrix::Resize.
+- File class now support creation of named pipes.
+- MatFile now saves sparse matrices ordering entries first by column and second by row (this is required by MatLab but not by Octave).
+
+July 07, 2011, 11:51:27 p.m.
+FEMT-beta6
+- Bug on SchwarzAlternating and ReactionAlternating methods MPI object must be passed by reference.
+- In SchwarzAlternatingSalve and ReactionAlternatingSlave solver initialization is before other tasks to improve speed.
+- FEMSolver.MPI, in main.mpi.cpp casted offsets using (off_t) in order to work with huge files.
+
+July 03, 2011, 09:01:07 p.m.
+FEMT-beta5
+- New domain decomposition method: ReactionAlternating.
+- New partition method: InterleavedPartitioning.
+- Now it is posible to select between SchwarzAlternating and ReactionAlternating methods.
+- UpdateFactor is now a property of the domain decomposition tab.
+
+June 12, 2011, 10:12:00 p.m.
+FEMT-beta4
+- In domain decomposition problems, the code to mark local links as fixed conditions now is inside DomainDecomposition::SchwarzAlternatingSlave.
+- Formula::ParseNumber bug with integer followed by a '+' or '-' signs.
+- File::ReadLine added.
+- Heat::Heat and Solid::Solid now read user functions using File::ReadLine.
+- Move Solver/DomainDecomposition.h to DomainDecomposition/DomainDecomposition.h
+- Split Schwarz alternating routines from DomainDecomposition to a sub class DomainDecomposition/SchwarzAlternating.h.
+
+June 04, 2011, 05:32:03 a.m.
+FEMT-beta3
+- New Solid problem example of a gelatin dynamics with self weight and two forces applied.
+- For Heat and Solid problems, non fixed conditions are stored first on problem file.
+- For Heat and Solid problems, fixed conditions are imposed with an 'or' operation.
+
+May 31, 2011, 05:02:57 p.m.
+FEMT-beta2
+- New problemtype called Partitioning, it only partitions a geometry given a number of partitions and overlapping.
+- Schwarz alternating method now uses a update factor to mix old and new solutions for each sub-domain.
+- FEMSolver.MPI now can save individual meshes (nodes coordinates must be in input file).
+
+May 28, 2011, 01:04:07 p.m.
+FEMT-beta1
+- New class Math/Formula to parse and evaluate formulas entered as text.
+- Now problem types (Solid and Heat) support definition of user functions to allow boundary conditions to depend of position or time.
+- FormatFloat change to allow selectio of type of float (fixed, exponential or automatic).
+
+May 24, 2011, 01:57:34 p.m.
+FEMT-alpha11
+- Revert changes to File.h to support off_t.
+- DomainDecompoisition::SchwarzAlternatingMaster now reports the number of iterations.
+- FEMSolver.MPI tested.
+
+May 23, 2011, 05:31:52 a.m.
+FEMT-alpha10
+- Heat problems now save flux results on gaussian points.
+- New option to calculate/save temperature and flux results.
+- Solid problems now save stain and stress results on gaussian points.
+- New option to calculate/save displacemenent, stain and stress results.
+
+May 20, 2011, 08:43:07 a.m.
+FEMT-alpha9
+- A version of FEMSolver that implements domain decomposition with MPI is created.
+- FEMSolver and FEMSolver.MPI read solver parameters from a file.
+- Fixed weird behaviour with Memory::current_usage and OpenMP atomic operation, changed to a critical section.
+- new and delete operators now allocate and free memory inside critical sections as an extra protection.
+
+May 17, 2011, 01:45:10 p.m.
+FEMT-alpha8
+- Bug in Solver::Solver generating b_adjust.
+
+May 14, 2011, 12:14:03 a.m.
+FEMT-alpha7
+- Small bug, Cholesky and LU solvers did not show advance.
+- New tool FEMSolver, it reads a geometry and elemental matrices then assembles the corresponding system of equations and solves it. Tested with CALSEF.
+
+May 06, 2011, 06:30:43 a.m.
+FEMT-alpha6
+- FiniteElement class is now splited to several classes to have a more flexible architecture. These classes are: Assembler, Geometry, ShapeFunctions.
+- Paritioning and reordering routines where moved to the class Mesh.
+- PrintInfo routines where moved to each class constructor.
+- Merged DomainDecompositionParameters into SolverParameters.
+- Memory class has two new static members peak_usage and current_usage.
+- new and delete operators now update Memory::peak_usage and Memory::current_usage these funcions are thread safe.
+- Programs now reports peak memory usage.
+- Programs now reports memory leaks.
+- Big Opps! Solver class destructor is now declared as virtual (tssss).
+- Reorganized DomainDecomposition class (old FiniteElement class is not needed).
+- Removed Solver::SetFixed, instead set b_i = u_i where i is a fixed condition.
+- Modified Solver::CompensateFixed, now have two methods to adjust fixed conditions, by matrix (needed for domain decomposition) or by vector (simpler and faster).
+- Solid, Solid.MPI, Heat and Heat.MPI programs where reorganized to use Assembler, Geometry and ShapeFunctions classes.
+- Log messages where reorganized. log_level=1 shows information messages, log_level=2 shows iteration steps.
+- Now in MPI programs slaves does not show log messages.
+
+Apr 25, 2011, 04:35:29 a.m.
+FEMT-alpha5
+- Dynamic structural mechanics problem is solved using finite difference method (alpha method) in time.
+- New example of a 2D bar moving.
+- Solid::PrintInfo now prints dynamic and mass forces parameters.
+
+Apr 19, 2011, 09:40:52 p.m.
+FEMT-alpha4
+- SolverParameters::PrintInfo now only prints only parameters used.
+- Thermal diffusivity formula was wrong.
+- Now dynamic heat diffusion problem is solved using finite difference method in time.
+- Added Temperature_Volume condition in Heat-1.bas.
+
+Apr 14, 2011, 04:34:07 a.m.
+FEMT-alpha3
+- Fixed oops in SymbolicCholeskyDecomposition parallelizing L generation.
+- Changed File::GoTo from int to long to be able to handle huge files.
+- Temperature conditions in Heat problem now have a fixed field (preparation for dynamic problems).
+- Modified Solid and Heat in preparation to handle dynamic problems.
+- FiniteElement::AssembleX and FiniteElement::AssembleFixed are merged into a single function.
+- FiniteElement::FillX and FiniteElement::FillFixed are merged into a single function.
+
+Apr 01, 2011, 06:03:08 p.m.
+FEMT-alpha2
+- Correction to Makefiles (mpic++ instead of g++ for MPI projects).
+- Added an option to save the system of equations in MatLab 4 format (checkbox in problem types).
+- Solver::Calculate does not call PreCalculate and PostCalculate, these funcions where replaced by CompensateFixed, CheckSolution and SetFixed.
+
+Mar 12, 2011, 01:44:10 p.m.
+FEMT-alpha1
+- Project renamed from ElementCrunching to FEMT (Finite Element Method Tools).
+- SchwarzAlternatingMaster modified, now partitioning is done outside this function.
+- FiniteElement::SaveMesh now is usable.
+- Add an option to save mesh.
+- Conditions for Heat problems now use Temperature and HeatFlow instead of Dirichlet and Neumann.
+- Now when a problem file is saved, it reports material names.
+- Save multiple works in domain decomposition.
+
+Feb 27, 2011, 04:21:40 a.m.
+ElementCrunching-1.4.0
+- Fixed facet integration for normal conditions on Heat and Solid problems.
+- Problems projects are divided in single process and multiple processes (MPI).
+- New problem Dynamic (in construction).
+
+Nov 27, 2010, 05:39:16 a.m.
+ElementCrunching-1.3.9
+- New Diff program to compare numerically two post.res files from the same problem.
+- New functions PrintInfo in SolverParameters, DomainDecompositionParameters and Finite element classes to display data.
+
+Nov 20, 2010, 01:02:34 p.m.
+ElementCrunching-1.3.8
+- Oops in SchwarzAlternatingSlave. Calling solver.MemoryUsed() after deleting Solver object.
+
+Nov 20, 2010, 04:44:11 a.m.
+ElementCrunching-1.3.7
+- Minor fix in METIS/proto.h (it gives a warning in Intel compiler, but if it is fixed METIS fails to work).
+
+Nov 19, 2010, 04:32:31 p.m.
+ElementCrunching-1.3.6
+- Modifications in CSRMatrix and CSCMatrix to work with Intel compiler (it is not necesary without -O3, broken compiler?)
+- Makefiles updated
+
+Nov 19, 2010, 04:27:50 a.m.
+ElementCrunching-1.3.5
+- Improved SymbolicCholeskyFactorization (like 50% less time).
+- Remake of Transpose and Convert functions for sparse matrices (now are faster without using more memory).
+- New functions SortByIndexes in CSRMatrix, CSCMatrix and CSVector.
+- Functions SortIndexes and SortByIndexes in CSRMatrix and CSCMatrix run in parallel.
+
+Nov 18, 2010, 04:50:14 p.m.
+ElementCrunching-1.3.4
+- Corrected a bug in FactorizedSparseApproximate inverse.
+- Convert functions for sparse matrices modified (now them use more memory but are a lot faster).
+- Vector, Matrix, CSVector, CSRMatrix and CSCMatrix now have a MemoryUsed function.
+- new and delete operators modified. Now memory usage is calculate unsing MemoryUsed functions on containers.
+
+Nov 16, 2010, 02:00:40 p.m.
+ElementCrunching-1.3.3
+- Improved Factorized sparse approximate inverse by avoiding memory allocation inside threads.
+- Transpose functions for sparse matrices modified (now them use more memory but are a lot faster).
+
+Nov 15, 2010, 02:05:45 a.m.
+ElementCrunching-1.3.2
+- Routines to save/load files with MatrixMarket format (untested).
+- Factorized sparse approximate inverse [Chow01]
+- Conjugate gradient using FSAI.
+- Problem types modified to support preconditiner_threshold parameter.
+- SolverParameters class now reads preconditiner_threshold parameter.
+
+Nov 10, 2010, 00:35:20 a.m.
+ElementCrunching-1.3.1
+- New class CSVector to handle sparse vectors.
+- CSCMatrix tested.
+- Functions to store/retrive CSCMatrix in MatLab format files.
+- Functions to save CSCMatrix to CSV and PBM files.
+- Functions to convert from CSCMatrix to CSRMatrix and vice versa.
+- Sparse approximate inverse preconditioner (via MR iteration)
+- Incomplete factorization preconditioners work better without reordering [Benz02].
+
+Oct 23, 2010, 04:34:02 a.m.
+ElementCrunching-1.3.0
+- Heat problem now supports source conditions.
+- Initial implementation of the eparse approximate inverse preconditioner added (not completed).
+
+Oct 2, 2010, 03:15:20 a.m.
+ElementCrunching-1.2.5
+- Improved Cholesky, Cholesky2 and LU factorizations algorithms (like 10% faster).
+- Now Chokesy and Cholesky2 could run in parallel.
+- Bug fixed on MatFile Retrive routines.
+- CSCMatrix class added (untested).
+
+Sep 7, 2010, 01:24:45 a.m.
+ElementCrunching-1.2.4
+- Added new CodeLite project files.
+- Updated Clean batch files for all build systems.
+- Corrected a bug in gaussian quadrature of 5 points, added quadratures up to 7 points.
+- Updated CSVFile routines to use the Format class.
+
+Sep 3, 2010, 04:08:48 a.m.
+ElementCrunching-1.2.3
+- Added makefiles to use Intel C++.
+- Reorganization of Interger.h.
+- Corrected Young module in solid materials (by a scale of 1000).
+
+Sep 3, 2010, 12:00:37 a.m.
+ElementCrunching-1.2.2
+- In SchwarzAlternatingMaster splited a big critical section into several small pieces to improve domain decomposition in parallel.
+- Added Exception messages in FiniteElement member functions.
+- Corrected a comment in Solid-1.bas
+
+Sep 2, 2010, 02:08:28 a.m.
+ElementCrunching-1.2.1
+- Removed the use of global N and dN storage in Solid and Heat. This was not thread safe!
+
+Sep 2, 2010, 12:09:44 a.m.
+ElementCrunching-1.2.0
+- Corrected use of mass forces for Solid.
+- Added gravity property for Solid
+- Corrected neumann conditions of Head problem.
+- Added a critical section in SchwarzAlternatingMaster when sending system of equations to slaves.
+- Simplification of Shape functions code (now there is a single function to calculate N and dN).
+
+Aug 31, 2010, 02:14:07 p.m.
+ElementCrunching-1.1.0
+- Corrected the use of thickness for 2D Solid.
+- Added mass forces to Solid (2D and 3D).
+
+Aug 31, 2010, 02:14:07 p.m.
+ElementCrunching-1.0.1
+- Reinserted threads inside MPI data i/o. Problem persist in GNU/Linux when using more than 1 thread in a multicore CPU. (May be it is a problem with OpenMPI).
+- Updated test script.
+
+Aug 31, 2010, 09:22:16 a.m.
+ElementCrunching-1.0.0
+- Program arguments modified, now only <problem_files_prefix> is needed.
+- Checked examples for Heat and Solid in 2 and 3 dimensions.
+- Run scripts modified.
+- Correct bug on differences statistics.
+- Remove threads inside MPI data i/o.
+- Remove -lcompat from Solid and Heat Makefiles.
+
+Aug 30, 2010, 11:53:50 a.m.
+ElementCrunching-rc3
+- Heat code recreated.
+- Heat problem_type remade.
+- Time functions created.
+- Log routines remade, now each log line shows a timestamp.
+- Log messages modified.
+
+Aug 29, 2010, 11:55:40 a.m.
+ElementCrunching-rc2
+- Corrected bug with Neumman conditions.
+- Folder reorganization, now build folder is outside source.
+- Created Arc2D and Arc3D problems as example for the Solid program.
+- Now problem executables are stored in problemtypes/<problem>.gid/<problem>.
+- Update Makefiles for GCC.
+
+Aug 28, 2010, 11:55:40 a.m.
+ElementCrunching-rc1
+- Reordering routines for direct solvers.
+- Partition routine moved to FiniteElement class.
+- Reordering routine moved to FiniteElement class.
+
+Aug 24, 2010, 03:07:14 a.m.
+ElementCrunching-beta6
+- Routines for 3D solids fixed.
+- Need to add and check permutation routines for direct solvers.
+
+Aug 22, 2010, 05:07:05 p.m.
+ElementCrunching-beta5
+- Solid for 3D geometries.
+- Integration rules for 2D and 3D problems.
+- Checked to work with conjugate gradient (not working with direct solvers).
+- Need to add and check permutation routines for direct solvers.
+
+Aug 17, 2010, 01:43:45 p.m.
+ElementCrunching-beta4
+- Corrected Makefiles.
+- Corrected CodeLite project files.
+- Addition of degrees_of_freedom to geometry file, it simplifies FiniteElement class.
+
+Aug 15, 2010, 00:04:19 a.m.
+ElementCrunching-beta3
+- Avoid sending zero-length messages among slaves.
+- Check for valid solution.
+
+Aug 14, 2010, 08:26:11 a.m.
+ElementCrunching-beta2
+- Better separation of data files (now: geometry, problem, solver, domain_decomposition).
+- Definition of number of threads for solver and for domain decompositioning.
+
+Aug 13, 2010, 06:05:16 p.m.
+ElementCrunching-beta1
+- Parition working for elements with mode nodes than vertex.
+- Schwartz alternating method working.
+- Solid problem in 2D type working with triangular elements.
+- MPI routines arranged in a class.
+- Memory allocation routines modified to collect information about of current and maximum memory allocated.
+- Log routines improved.
+- CodeLite project added.
+
+Jul 19, 2010, 04:19:05 a.m.
+ElementCrunching-alpha22
+- Assembling routines for Solid problem.
+- Integration points and weights for triangles and quadrilaterals.
+
+Jul 17, 2010, 01:31:55 a.m.
+ElementCrunching-alpha21
+- Shape functions for: tetrahedron (4 and 10 nodes), hexahedron (8, 20 and 27 nodes).
+
+Jul 14, 2010, 07:58:44 a.m.
+ElementCrunching-alpha20
+- Shape functions for: triangles (3 and 6 nodes), quadrilateral (4, 8 and 9 nodes), tetrahedron (4 nodes).
+
+Jul 12, 2010, 05:52:14 a.m.
+ElementCrunching-alpha19
+- Creation of FiniteElement class, it has routines to load greometry (mesh, nodes), calculate shape functions (currently only triangles of 3 and 6 nodes)
+
+Jul 10, 2010, 05:44:34 a.m.
+ElementCrunching-alpha18
+- New solver Cholesky2 (LDL')
+- File class redesign. New Format class
+- New DiagonalSystem routine
+- Heat problemtype definition
+- Basic MPI routines wrappers
+- Log routines
+- New OrderedList container
+
+Jun 28, 2010, 02:51:17 a.m.
+ElementCrunching-alpha17
+- Fix bug in FillLUDecomposition function (size_i not checked)
+- Performance improvement in FillLUDecomposition and FillCholeskyDecomposition
+
+Jun 18, 2010, 01:05:25 a.m.
+ElementCrunching-alpha16
+- Allow OpenMP parallelization in FillLUDecomposition function
+- New solver ConjugateGradientIncompleteLUSolver
+- Insertion of __restrict directive in all solvers
+
+Jun 17, 2010, 03:38:09 a.m.
+ElementCrunching-alpha15
+- Corrected bug in CSRMatrix, function CopyRow
+- Major improvement of FillLUDecomposition (making use of the known symetric structure to calculate U' instead of U)
+
+Jun 12, 2010, 04:20:09 a.m.
+ElementCrunching-alpha14
+- Implementation of MinimumDegree reordering algorithm to improve fill-in in Cholesky decomposition
+- Insertion of METIS routines for reordering and partitioning.
+- Geometry load routines checked.
+
+Jun 8, 2010, 04:12:07 a.m.
+ElementCrunching-alpha13
+- Corrected bugs in CSRMatrix: Fill routine and in the constructor called with a connectivity matrix.
+- Change Fill(T* data) to Copy(T* data) to avoid ambiguity in call.
+
+Jun 6, 2010, 03:09:44 a.m.
+ElementCrunching-alpha12
+- Solvers for symetric matrices tested (Cholesky, ConjugateGradient, ConjugateGradientJacobi, ConjugateGradientIncompleteCholesky).
+- Solvers for non-symetric matrices tested (LU, BiconjugateGradient, BiconjugateGradientJacobi, BiconjugateGradientIncompleteLU).
+- SymbolicCholeskyDecomposition now accepts a k parameter to have an imcomplete Cholesky decomposition.
+- DataFile, Nodes, Mesh and Geometry clases reincorporated to project (untested).
+- Corrected bug in CSRMatrix in Resize routine.
+
+Jun 5, 2010, 05:11:34 a.m.
+ElementCrunching-alpha11
+- Corrected Set and List classes for exception handling.
+- CholeskyFillIn now works with a single data array.
+- Routines for writing PBM files.
+- Implementation of LU solver for matrices with symetric structure and non-sumetric data.
+- Update of ConjugateGradient and ConjugateGradientJacobi solvers.
+- Correction of MatFile routines to handle data type better.
+
+Jun 4, 2010, 07:01:45 a.m.
+ElementCrunching-alpha10
+- CSRMatrix, Matrix and Vector containers restructurated to improve speed.
+- Routines for loading/saving Matlab .mat4 file data for CSRMatrix, Matrix and Vector containers.
+- Remake of routines for writting CSV files.
+- Now new[] doesn't throw an exception, this behaviour is passed to containers. It makes constructor initializations easier.
+
+Jun 1, 2010, 05:22:34 a.m.
+ElementCrunching-alpha9
+- Makefile updated
+- Compilation errors using GCC fixed. Template base class functions must be called using this->foo();
+
+May 31, 2010, 12:04:05 a.m.
+ElementCrunching-alpha8
+- Solvers BiconjugateGradient BiconjugateGradientJacobi and BiconjugateGradientIncompleteLU tested with non-symetic matrices. Stop criteria changed to norm(r) < tolerance
+
+May 30, 2010, 07:29:25 p.m.
+ElementCrunching-alpha7
+- New solvers BiconjugateGradientJacobi and BiconjugateGradientIncompleteLU (pending to test them with a non-symetic matrices)
+- IncompleteLU factorization (with k = 0)
+- FillLUDecomposition function
+
+May 29, 2010, 04:40:39 a.m.
+ElementCrunching-alpha6
+- New FillIn class used to create a bitmap of a CSRMatrix
+- ConjugateGradientIncompleteCholesky solver is working
+- New solver BiconjugateGradient (pending to test it with a non-symetic matrix)
+- Traspose function for a CSRMatrix
+
+May 28, 2010, 07:34:07 a.m.
+ElementCrunching-alpha5
+- Creation fo Solver base class
+- Inclution of solvers: Cholesky, UpperTriangular, LowerTriangular, ConjugateGradient, ConjugateGradientJacobi, ConjugateGradientIncompleteCholesky (not working)
+- Routines for loading and saving vectors, matrices and matrices shape
+- Function to test float and double values for +inf, -int and NaN.
+
+May 26, 2010, 04:44:50 a.m.
+ElementCrunching-alpha4
+- Revision and modification of Matrix, Vector, List, Set, CSRMatrix classes
+
+May 24, 2010, 06:43:28 a.m.
+ElementCrunching-alpha3
+- Project restructuration by directories
+- Template file modified to suppor normal conditions
+- Change to use a class for exception handling
+- Makefile for GCC
+
+May 22, 2010, 03:26:10 a.m.
+ElementCrunching-alpha2
+- Multiple ploblems with multiple solvers, materials and boundary conditions
+- Routines for reading Nodes, Meshes
+
+May 19, 2010, 04:04:07 a.m.
+ElementCrunching-alpha1
+- Improvement of problem type: handling different kinds of materials, count number of meshes
+- Basic routines for parsing and loading geometry data
+- Routines for exeption handling, asserts, debug messages, vectors, matrices
+
+May 12, 2010, 08:01:42 a.m.
+ElementCrunching-alpha0
+- Creation of generic problemtype for GiD. It accepts multiple meshes with different element types at the same time(linear, triangle, quadrilateral, tetrahedra, and hexahedra)

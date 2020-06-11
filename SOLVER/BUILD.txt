@@ -1,0 +1,22 @@
+----------------------------------------------------------------------
+Build instructions ---------------------------------------------------
+----------------------------------------------------------------------
+
+
+GNU/Linux, BSDs, Mac OS ----------------------------------------------
+
+Copy the file to you home/work directory, open a console on this
+directory. Execute:
+
+  tar xjf FEMT-<version>.tar.bz2
+  cd FEMT-<version>
+  make -C build/gcc
+
+
+Microsoft Visual Studio, Microsoft Windows SDK -----------------------
+
+Unpack the file FEMT-<version>.tar.bz2 (I suggest 7-Zip, http://www.7-zip.org) into a work directory.
+Open a command prompt from the Visual Studio or Windows SDK menu. Go to the work directory.
+
+  cd "FEMT-<version>\build\Visual Studio"
+  nmake

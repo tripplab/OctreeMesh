@@ -1,0 +1,60 @@
+number: 1 condition: Electric_potential_Point
+condtype: over points
+condmeshtype: over nodes
+question: Potential:#UNITS#
+value: 0.0V
+question: Electrode
+value: 0
+help: Use positive values to set an electrode number.
+end condition
+number: 2 condition: Electric_potential_Line
+condtype: over lines
+condmeshtype: over nodes
+question: Potential:#UNITS#
+value: 0.0V
+question: Electrode
+value: 0
+help: Use positive values to set an electrode number.
+end condition
+number: 3 condition: Electric_potential_Surface
+condtype: over surfaces
+condmeshtype: over nodes
+question: Potential:#UNITS#
+value: 0.0V
+question: Electrode
+value: 0
+help: Use positive values to set an electrode number.
+end condition
+number: 4 condition: Electric_potential_Volume
+condtype: over volumes
+condmeshtype: over nodes
+question: Potential:#UNITS#
+value: 0.0V
+question: Electrode
+value: 0
+help: Use positive values to set an electrode number.
+end condition
+number: 5 condition: Electric_field_Line
+condtype: over lines
+condmeshtype: over elems
+question: Field_strength:#UNITS#
+value: 0.0V/m
+end condition
+number: 6 condition: Electric_field_Surface
+condtype: over surfaces
+condmeshtype: over elems
+question: Field_strength:#UNITS#
+value: 0.0V/m
+end condition
+number: 7 condition: Charge_Surface
+condtype: over surfaces
+condmeshtype: over elems
+question: Charge_density:#UNITS#
+value: 0.0C/m^3
+end condition
+number: 8 condition: Charge_Volume
+condtype: over volumes
+condmeshtype: over elems
+question: Charge_density:#UNITS#
+value: 0.0C/m^3
+end condition

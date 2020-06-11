@@ -1,0 +1,20 @@
+USER DEFINED: ENABLED
+USE BASE SYSTEMS: DISABLED
+
+BEGIN TABLE
+length         : m , 100 cm, 1.0e+3 mm
+mass           : kg , 1.0e+3 g
+time           : s
+force          : N , kg*m/s^2
+pressure       : Pa , N/m^2 , Kg/m
+density        : kg/m^3
+END
+
+BEGIN SYSTEM (international)
+length         : m
+mass           : kg
+time           : s
+force          : N
+pressure       : Pa
+density        : kg/m^3
+END

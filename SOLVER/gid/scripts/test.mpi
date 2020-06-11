@@ -1,0 +1,12 @@
+exe D:\Work\FEMT\gid\problemtypes\Heat.gid\Heat.DCG.exe Heat3D
+n 5
+wdir "D:\Work\FEMT\gid\examples\Heat3D.gid"
+hosts 
+cfg 
+mpich1 
+env 
+map 
+channel sock
+extra 
+window no
+log no

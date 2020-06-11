@@ -1,0 +1,28 @@
+Environment Settings
+
+By default, hydra passes inherits environment variables from the shell on which mpiexec is launched, and passes it to the launched processes. However, each launcher disables the automatic propagation of some environment variables. For example, the SSH launcher disables the propagation of "DISPLAY", the SLURM launcher disables the propagation of "SLURM_*" variables, etc.
+
+Users can force an environment variable to be propagated using the -genv option.
+
+
+Environment variables can also be used to control several settings in Hydra:
+
+HYDRA_HOST_FILE: This variable points to the default host file to use, when the "-f" option is not provided to mpiexec.
+
+  For bash:
+    export HYDRA_HOST_FILE=<path_to_host_file>/hosts
+
+  For csh/tcsh:
+    setenv HYDRA_HOST_FILE <path_to_host_file>/hosts
+
+HYDRA_DEBUG: Setting this to "1" enables debug mode; set it to "0" to disable.
+
+HYDRA_ENV: Setting this to "all" will pass all of the launching node's environment to the application processes. By default, if nothing is set, the launching node's environment is passed to the executables, as long as it does not overwrite any of the environment variables that have been preset by the remote shell.
+
+HYDRA_LAUNCH_EXTRA_ARGS: The value of this environment variable is appended to the launcher. This can be used, for example, to pass the "-q" argument to the launcher by setting HYDRA_LAUNCH_EXTRA_ARGS=-q.
+
+MPIEXEC_TIMEOUT: The value of this environment variable is the maximum number of seconds this job will be permitted to run. When time is up, the job is aborted.
+
+MPIEXEC_PORT_RANGE: If this environment variable is defined then Hydra will restrict its usage of ports for connecting its various processes to ports in this range. If this variable is not assigned, but MPICH_PORT_RANGE is assigned, then it will use the range specified by MPICH_PORT_RANGE for its ports. Otherwise, it will use whatever ports are assigned to it by the system. Port ranges are given as a pair of integers separated by a colon.
+
+HYDRA_PROXY_RETRY_COUNT: The value of this environment variable determines the number of retries a proxy does to establish a connection to the main server. 

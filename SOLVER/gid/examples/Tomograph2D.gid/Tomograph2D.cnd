@@ -1,0 +1,57 @@
+NUMBER: 1 CONDITION: Electric_potential_Point
+CONDTYPE: over points
+CONDMESHTYPE: over nodes
+QUESTION: Potential:#UNITS#
+VALUE: 0.0V
+QUESTION: Electrode
+VALUE: 0
+help: Use positive values to set an electrode number.
+END CONDITION
+NUMBER: 2 CONDITION: Electric_potential_Line
+CONDTYPE: over lines
+CONDMESHTYPE: over nodes
+QUESTION: Potential:#UNITS#
+VALUE: 0.0V
+QUESTION: Electrode
+VALUE: 0
+help: Use positive values to set an electrode number.
+END CONDITION
+NUMBER: 3 CONDITION: Electric_potential_Surface
+CONDTYPE: over surfaces
+CONDMESHTYPE: over nodes
+QUESTION: Potential:#UNITS#
+VALUE: 0.0V
+QUESTION: Electrode
+VALUE: 0
+help: Use positive values to set an electrode number.
+END CONDITION
+NUMBER: 4 CONDITION: Electric_potential_Volume
+CONDTYPE: over volumes
+CONDMESHTYPE: over nodes
+QUESTION: Potential:#UNITS#
+VALUE: 0.0V
+QUESTION: Electrode
+VALUE: 0
+help: Use positive values to set an electrode number.
+END CONDITION
+NUMBER: 5 CONDITION: Electric_field_Line
+CONDTYPE: over lines
+QUESTION: Field_strengt:#UNITS#
+VALUE: 0.0V/m
+END CONDITION
+NUMBER: 6 CONDITION: Electric_field_Surface
+CONDTYPE: over surfaces
+QUESTION: Field_strengt:#UNITS#
+VALUE: 0.0V/m
+END CONDITION
+NUMBER: 7 CONDITION: Charge_Surface
+CONDTYPE: over surfaces
+QUESTION: Charge_density:#UNITS#
+VALUE: 0.0C/m^3
+END CONDITION
+NUMBER: 8 CONDITION: Charge_Volume
+CONDTYPE: over volumes
+CONDMESHTYPE: over body elements
+QUESTION: Charge_density:#UNITS#
+VALUE: 0.0C/m^3
+END CONDITION

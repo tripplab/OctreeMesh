@@ -1,0 +1,24 @@
+NUMBER: 1 MATERIAL: Aluminium
+QUESTION: Thermal_conductivity:#UNITS#
+VALUE: 237W/m/Kel
+QUESTION: Mass_density:#UNITS#
+VALUE: 2700kg/m^3
+QUESTION: Specific_heat_capacity:#UNITS#
+VALUE: 900J/kg/Kel
+END MATERIAL
+NUMBER: 2 MATERIAL: Copper
+QUESTION: Thermal_conductivity:#UNITS#
+VALUE: 401W/m/Kel
+QUESTION: Mass_density:#UNITS#
+VALUE: 8920kg/m^3
+QUESTION: Specific_heat_capacity:#UNITS#
+VALUE: 380J/kg/Kel
+END MATERIAL
+NUMBER: 3 MATERIAL: Iron
+QUESTION: Thermal_conductivity:#UNITS#
+VALUE: 80.2W/m/Kel
+QUESTION: Mass_density:#UNITS#
+VALUE: 7874kg/m^3
+QUESTION: Specific_heat_capacity:#UNITS#
+VALUE: 440J/kg/Kel
+END MATERIAL

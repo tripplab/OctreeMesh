@@ -1,0 +1,12 @@
+sync ; echo 1 > /proc/sys/vm/drop_caches ; sync
+sync ; echo 2 > /proc/sys/vm/drop_caches ; sync
+sync ; echo 3 > /proc/sys/vm/drop_caches ; sync
+for i in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo performance > $i ; done
+for i in /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor; do echo ondemand > $i ; done
+
+export MALLOC_MMAP_MAX_=0
+export MALLOC_TRIM_THRESHOLD_=-1
+
+numactl --membind=0 --cpunodebind=0 --localalloc ../FEMT/problemtypes/Solid.gid/Solid InfantHenriqueBridge > original.txt &
+
+numactl --preferred=node=0 --localalloc ../FEMT/problemtypes/Solid.gid/Solid InfantHenriqueBridge > original.txt &

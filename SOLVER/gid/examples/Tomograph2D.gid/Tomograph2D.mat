@@ -1,0 +1,174 @@
+NUMBER: 1 MATERIAL: Sensing_area
+QUESTION: Relative_permittivity:
+VALUE: 1
+QUESTION: Sensitivity_use
+VALUE: 1
+END MATERIAL
+NUMBER: 2 MATERIAL: Vacuum
+QUESTION: Relative_permittivity:
+VALUE: 1
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 3 MATERIAL: Air
+QUESTION: Relative_permittivity:
+VALUE: 1.00058986
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 4 MATERIAL: Polyethylene
+QUESTION: Relative_permittivity:
+VALUE: 2.25
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 5 MATERIAL: Polyimide
+QUESTION: Relative_permittivity:
+VALUE: 3.4
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 6 MATERIAL: Polypropylene
+QUESTION: Relative_permittivity:
+VALUE: 2.28
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 7 MATERIAL: Polystyrene
+QUESTION: Relative_permittivity:
+VALUE: 2.55
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 8 MATERIAL: Paper
+QUESTION: Relative_permittivity:
+VALUE: 3.85
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 9 MATERIAL: Silicon_dioxide
+QUESTION: Relative_permittivity:
+VALUE: 3.9
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 10 MATERIAL: Concrete
+QUESTION: Relative_permittivity:
+VALUE: 4.5
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 11 MATERIAL: Pyrex
+QUESTION: Relative_permittivity:
+VALUE: 4.7
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 12 MATERIAL: Rubber
+QUESTION: Relative_permittivity:
+VALUE: 7
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 13 MATERIAL: Diamond
+QUESTION: Relative_permittivity:
+VALUE: 7.75
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 14 MATERIAL: Salt
+QUESTION: Relative_permittivity:
+VALUE: 9
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 15 MATERIAL: Graphite
+QUESTION: Relative_permittivity:
+VALUE: 12.5
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 16 MATERIAL: Silicon
+QUESTION: Relative_permittivity:
+VALUE: 11.68
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 17 MATERIAL: Ammonia
+QUESTION: Relative_permittivity:
+VALUE: 17
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 18 MATERIAL: Methanol
+QUESTION: Relative_permittivity:
+VALUE: 30
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 19 MATERIAL: Ethylene_glycol
+QUESTION: Relative_permittivity:
+VALUE: 37
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 20 MATERIAL: Furfural
+QUESTION: Relative_permittivity:
+VALUE: 42
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 21 MATERIAL: Glycerol
+QUESTION: Relative_permittivity:
+VALUE: 47
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 22 MATERIAL: Water
+QUESTION: Relative_permittivity:
+VALUE: 80.1
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 23 MATERIAL: Formamide
+QUESTION: Relative_permittivity:
+VALUE: 84
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 24 MATERIAL: Sulfuric_acid
+QUESTION: Relative_permittivity:
+VALUE: 84
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 25 MATERIAL: Titanium_dioxide
+QUESTION: Relative_permittivity:
+VALUE: 129.5
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 26 MATERIAL: Strontium_titanate
+QUESTION: Relative_permittivity:
+VALUE: 310
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 27 MATERIAL: Barium_strontium_titanate
+QUESTION: Relative_permittivity:
+VALUE: 500
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 28 MATERIAL: Barium_titanate
+QUESTION: Relative_permittivity:
+VALUE: 1250
+QUESTION: Sensitivity_use
+VALUE: 0
+END MATERIAL
+NUMBER: 29 MATERIAL: Nylamid
+QUESTION: Relative_permittivity:
+VALUE: 3.7
+QUESTION: Sensitivity_use
+VALUE: 1
+END MATERIAL

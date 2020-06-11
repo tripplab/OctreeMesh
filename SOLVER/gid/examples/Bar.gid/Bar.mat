@@ -1,0 +1,66 @@
+NUMBER: 1 MATERIAL: Aluminium
+QUESTION: Poisson_ratio:
+VALUE: 0.35
+QUESTION: Young_modulus:#UNITS#
+VALUE: 6.9e+10Pa
+QUESTION: Density:#UNITS#
+VALUE: 2700kg/m^3
+QUESTION: Thickness:#UNITS#
+VALUE: 1m
+help: This value applies only on two dimensional problems
+END MATERIAL
+NUMBER: 2 MATERIAL: Copper
+QUESTION: Poisson_ratio:
+VALUE: 0.34
+QUESTION: Young_modulus:#UNITS#
+VALUE: 1.28e+11Pa
+QUESTION: Density:#UNITS#
+VALUE: 8920kg/m^3
+QUESTION: Thickness:#UNITS#
+VALUE: 1m
+help: This value applies only on two dimensional problems
+END MATERIAL
+NUMBER: 3 MATERIAL: Iron
+QUESTION: Poisson_ratio:
+VALUE: 0.29
+QUESTION: Young_modulus:#UNITS#
+VALUE: 2.11e+11Pa
+QUESTION: Density:#UNITS#
+VALUE: 7874kg/m^3
+QUESTION: Thickness:#UNITS#
+VALUE: 1m
+help: This value applies only on two dimensional problems
+END MATERIAL
+NUMBER: 4 MATERIAL: Playwood
+QUESTION: Poisson_ratio:
+VALUE: 0.26
+QUESTION: Young_modulus:#UNITS#
+VALUE: 1.89e+11Pa
+QUESTION: Density:#UNITS#
+VALUE: 7600kg/m^3
+QUESTION: Thickness:#UNITS#
+VALUE: 1m
+help: This value applies only on two dimensional problems
+END MATERIAL
+NUMBER: 5 MATERIAL: Concrete
+QUESTION: Poisson_ratio:
+VALUE: 0.2
+QUESTION: Young_modulus:#UNITS#
+VALUE: 3.0e+10Pa
+QUESTION: Density:#UNITS#
+VALUE: 7500kg/m^3
+QUESTION: Thickness:#UNITS#
+VALUE: 1m
+help: This value applies only on two dimensional problems
+END MATERIAL
+NUMBER: 6 MATERIAL: Gelatin
+QUESTION: Poisson_ratio:
+VALUE: 0.25
+QUESTION: Young_modulus:#UNITS#
+VALUE: 1.6726e+9Pa
+QUESTION: Density:#UNITS#
+VALUE: 1000kg/m^3
+QUESTION: Thickness:#UNITS#
+VALUE: 1m
+help: This value applies only on two dimensional problems
+END MATERIAL

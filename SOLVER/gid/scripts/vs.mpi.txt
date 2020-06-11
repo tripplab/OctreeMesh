@@ -1,0 +1,6 @@
+"C:\Applications\MPICH2\bin\mpiexec.exe"
+-n 4 -l
+"D:\Work\Papers\Acta Universitaria\ucea\ucea.gid"
+$(TargetPath)
+ucea.solucion ucea.desplaza ucea.solver
+"C:\Program Files\Microsoft Visual Studio 9.0\Common7\IDE\Remote Debugger\x64\mpishim.exe"

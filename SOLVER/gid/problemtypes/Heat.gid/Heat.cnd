@@ -1,0 +1,80 @@
+number: 1 condition: Temperature_Point
+condtype: over points
+condmeshtype: over nodes
+question: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+value: 0
+help: A zero value means that temperature is constant and taken from the Temperature field.
+question: Temperature:#UNITS#
+value: 0.0Kel
+question: Fixed:#CB#(1,0)
+value: 0
+end condition
+number: 2 condition: Temperature_Line
+condtype: over lines
+condmeshtype: over nodes
+question: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+value: 0
+help: A zero value means that temperature is constant and taken from the Temperature field.
+question: Temperature:#UNITS#
+value: 0.0Kel
+question: Fixed:#CB#(1,0)
+value: 0
+end condition
+number: 3 condition: Temperature_Surface
+condtype: over surfaces
+condmeshtype: over nodes
+question: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+value: 0
+help: A zero value means that temperature is constant and taken from the Temperature field.
+question: Temperature:#UNITS#
+value: 0.0Kel
+question: Fixed:#CB#(1,0)
+value: 0
+end condition
+number: 4 condition: Temperature_Volume
+condtype: over volumes
+condmeshtype: over nodes
+question: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+value: 0
+help: A zero value means that temperature is constant and taken from the Temperature field.
+question: Temperature:#UNITS#
+value: 0.0Kel
+question: Fixed:#CB#(1,0)
+value: 0
+end condition
+number: 5 condition: Heat_Flow_Line
+condtype: over lines
+condmeshtype: over elems
+question: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+value: 0
+help: A zero value means that flux is constant and taken from the Flux field.
+question: Flux:#UNITS#
+value: 0.0J
+end condition
+number: 6 condition: Heat_Flow_Surface
+condtype: over surfaces
+condmeshtype: over elems
+question: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+value: 0
+help: A zero value means that flux is constant and taken from the Flux field.
+question: Flux:#UNITS#
+value: 0.0J
+end condition
+number: 7 condition: Source_Surface
+condtype: over surfaces
+condmeshtype: over elems
+question: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+value: 0
+help: A zero value means that heat is constant and taken from the Heat field.
+question: Heat:#UNITS#
+value: 0.0J
+end condition
+number: 8 condition: Source_Volume
+condtype: over volumes
+condmeshtype: over elems
+question: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+value: 0
+help: A zero value means that heat is constant and taken from the Heat field.
+question: Heat:#UNITS#
+value: 0.0J
+end condition

@@ -1,0 +1,77 @@
+NUMBER: 1 CONDITION: Temperature_Point
+CONDTYPE: over points
+CONDMESHTYPE: over nodes
+QUESTION: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+VALUE: 0
+help: A zero value means that temperature is constant and taken from the Temperature field.
+QUESTION: Temperature:#UNITS#
+VALUE: 0.0Kel
+QUESTION: Fixed:#CB#(1,0)
+VALUE: 0
+END CONDITION
+NUMBER: 2 CONDITION: Temperature_Line
+CONDTYPE: over lines
+CONDMESHTYPE: over nodes
+QUESTION: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+VALUE: 0
+help: A zero value means that temperature is constant and taken from the Temperature field.
+QUESTION: Temperature:#UNITS#
+VALUE: 0.0Kel
+QUESTION: Fixed:#CB#(1,0)
+VALUE: 0
+END CONDITION
+NUMBER: 3 CONDITION: Temperature_Surface
+CONDTYPE: over surfaces
+CONDMESHTYPE: over nodes
+QUESTION: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+VALUE: 0
+help: A zero value means that temperature is constant and taken from the Temperature field.
+QUESTION: Temperature:#UNITS#
+VALUE: 0.0Kel
+QUESTION: Fixed:#CB#(1,0)
+VALUE: 0
+END CONDITION
+NUMBER: 4 CONDITION: Temperature_Volume
+CONDTYPE: over volumes
+CONDMESHTYPE: over nodes
+QUESTION: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+VALUE: 0
+help: A zero value means that temperature is constant and taken from the Temperature field.
+QUESTION: Temperature:#UNITS#
+VALUE: 0.0Kel
+QUESTION: Fixed:#CB#(1,0)
+VALUE: 0
+END CONDITION
+NUMBER: 5 CONDITION: Heat_Flow_Line
+CONDTYPE: over lines
+QUESTION: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+VALUE: 0
+help: A zero value means that flux is constant and taken from the Flux field.
+QUESTION: Flux:#UNITS#
+VALUE: 0.0J
+END CONDITION
+NUMBER: 6 CONDITION: Heat_Flow_Surface
+CONDTYPE: over surfaces
+QUESTION: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+VALUE: 0
+help: A zero value means that flux is constant and taken from the Flux field.
+QUESTION: Flux:#UNITS#
+VALUE: 0.0J
+END CONDITION
+NUMBER: 7 CONDITION: Source_Surface
+CONDTYPE: over surfaces
+QUESTION: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+VALUE: 0
+help: A zero value means that heat is constant and taken from the Heat field.
+QUESTION: Heat:#UNITS#
+VALUE: 0.0J
+END CONDITION
+NUMBER: 8 CONDITION: Source_Volume
+CONDTYPE: over volumes
+CONDMESHTYPE: over body elements
+QUESTION: User_function:#CB#(0,1,2,3,4,5,6,7,8,9,10)
+VALUE: 0
+help: A zero value means that heat is constant and taken from the Heat field.
+QUESTION: Heat:#UNITS#
+VALUE: 0.0J
+END CONDITION
