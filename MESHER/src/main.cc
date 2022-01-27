@@ -24,9 +24,9 @@ int main( int argc , char** argv ){
 	CheckParameters( argc );
 
 	double t_ini = clock();
-	std::cout << " *************** " << std::endl;
-	std::cout << " BIOMESH v260122 " << std::endl;
-	std::cout << " *************** " << std::endl;
+	std::cout << " ****************** " << std::endl;
+	std::cout << " OCTREEMESH v260122 " << std::endl;
+	std::cout << " ****************** " << std::endl;
 
 	std::cout << " 0/100 START MESHING " << std::endl;
 	Mesher* com = new Mesher( argc , argv );

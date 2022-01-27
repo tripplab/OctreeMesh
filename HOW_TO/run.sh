@@ -43,17 +43,17 @@ PDB_results=${name}_${Res}.pdb
 
   ## Extract all ATOM records from the VIPERdb capsid structure file (virus.vdb)
   inp="${VDB}.vdb ${VDB}_ATOMS.vdb"
-  echo "Runing cleanpdb $inp"
+  echo "Runing extract_ATOM $inp"
   ${BIN}/extract_ATOM ${inp}
 
   ## Generate the mesh and simulation config files
   inp="${VDB}_ATOMS.vdb ${T} ${VDW} ${Res} ${Fold} ${inx} ${PDB} ${cone} ${load_ele} ${Young}"
-  echo "Running biomesh $inp"
+  echo "Running octree_mesh $inp"
   ${BIN}/octree_mesh ${inp}
 
   ## If simulating a shearing force, the mnesh has to be rotated 90 deg on X
   ##inp="${GEOM} ${GEOM}"
-  ##echo "Running meshrotate $inp"
+  ##echo "Running shear_rotate $inp"
   ##${BIN}/shear_rotate ${inp}
 
   ## Run the simulation

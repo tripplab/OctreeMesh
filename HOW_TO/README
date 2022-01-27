@@ -4,11 +4,11 @@ run comand: ./run.sh
 
 Output should be similar to:
 
-Runing cleanpdb 1cwp_full.vdb 1cwp_full_clean.vdb
-Running biomesh 1cwp_full_clean.vdb 3 1 16.00 3 0 1CWP 15.00 0.00 0.020
- *************** 
- BIOMESH v260122 
- *************** 
+Runing extract_ATOM 1cwp_full.vdb 1cwp_full_clean.vdb
+Running octree_mesh 1cwp_full_clean.vdb 3 1 16.00 3 0 1CWP 15.00 0.00 0.020
+ ****************** 
+ OCTREEMESH v260122 
+ ****************** 
  0/100 START MESHING 
  Will try to read VDB file: 1cwp_full_clean.vdb 
  NOTE: this code version only allows the following capsids: 1CWP, 4G93, 3IZG, 3J4U 
