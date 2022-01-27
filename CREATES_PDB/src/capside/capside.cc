@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "capside.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -699,6 +700,7 @@ void Vdb::SetAtomOnCapside( char params[11][500] ){
 		//testing if is a valid aminoacid or not
 		if(  this->AminoacidIsValid( params[ 3 ] , &position )  ){
 			this->AddAtom( params , position );
+				//printf(" %s ", params[ 1 ]);
 
 		}else{//aminoacid not valid, printing message on warnings file
 			char aux[1000];
@@ -819,6 +821,7 @@ int Vdb::ReadLine( ){
 	FILE* fp = this->GetPointer();
 	char line[500];
 	fgets( line , 500 , fp );
+	//printf("%s\n", line);
 	//if is end of file does not do anyting
 	if(  feof( fp ) ){
 		return feof( fp );

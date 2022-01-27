@@ -24,13 +24,17 @@ int main( int argc , char** argv ){
 	CheckParameters( argc );
 
 	double t_ini = clock();
+	std::cout << " *************** " << std::endl;
+	std::cout << " BIOMESH v260122 " << std::endl;
+	std::cout << " *************** " << std::endl;
+
 	std::cout << " 0/100 START MESHING " << std::endl;
 	Mesher* com = new Mesher( argc , argv );
 	com->ReadVdbFile(  );
 	com->CalculateRefinementAndPercentage();
 	com->SaveVdbOnGiDMesh(  );
   com->ScaleCapside(  );
-	std::cout << " 20/100 VDB READED " << std::endl;
+	std::cout << " 20/100 VDB READ " << std::endl;
 	com->AssignAtomsOnLocalRoot( );
 	std::cout << " 40/100 ATOMS ASSIGNED " << std::endl;
 	com->RefineLocalRoot();

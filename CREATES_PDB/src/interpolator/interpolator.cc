@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "interpolator.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -28,6 +29,7 @@ Interpolator::Interpolator( int argc , char** argv ){
 
 	//Parameter one VdB mesh
 	input_ = argv[ 1 ];
+		printf("  %s %s \n", "Trying to read file: ", input_);
 	vdb_ = new Vdb( input_ );
 	this->ReadVdbFile(  );
   this->ScaleCapside(  );
@@ -277,7 +279,10 @@ void Interpolator::AssignAtomsOnLocalRoot( ){
  *Scaling the hexahedral mesh to the domain[0,1]
  */
 void Interpolator::ScaleHexahedralMesh(  ){
+	/* EDIT MCT 25-01-22
+	 * No entiendo por qué se hace esta rotación
 	hex_->Rotate( );
+	*/
 	hex_->ScaleMesh();
 }
 

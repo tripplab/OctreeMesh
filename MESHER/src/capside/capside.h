@@ -89,13 +89,7 @@ class Aminoacid{
 
 	int kind_;
 	std::vector<Atom*> atoms_;
-	char* valids_[ 20 ] = {  {"ALA"}/*Alanine*/ ,       {"ARG"}/*Arginine*/ ,      {"ASN"}/*Asparagine*/ , 
-															 {"ASP"}/*Aspartic acid*/ , {"CYS"}/*Cysteine*/ ,      {"GLU"}/*Glutamic acid*/ , 
-															 {"GLN"}/*Glutamine*/ ,     {"GLY"}/*Glycine*/ ,       {"HIS"}/*Histidine*/ , 
-															 {"ILE"}/*Isoleucine*/ ,    {"LEU"}/*Leucine*/ ,       {"LYS"}/*Lysine*/ , 
-															 {"MET"}/*Methionine*/ ,    {"PHE"}/*Phenylalanine*/ , {"PRO"}/*Proline*/ , 
-															 {"SER"}/*Serine*/ ,        {"THR"}/*Threonine*/ ,     {"TRP"}/*Tryptophan*/ , 
-															 {"TYR"}/*Tyrosine*/ ,      {"VAL"}/*Valine*/ };
+	char* valids_[ 20 ] = {  "ALA"/*Alanine*/, "ARG"/*Arginine*/, "ASN"/*Asparagine*/, "ASP"/*Aspartic acid*/, "CYS"/*Cysteine*/, "GLU"/*Glutamic acid*/, "GLN"/*Glutamine*/, "GLY"/*Glycine*/, "HIS"/*Histidine*/, "ILE"/*Isoleucine*/, "LEU"/*Leucine*/, "LYS"/*Lysine*/, "MET"/*Methionine*/, "PHE"/*Phenylalanine*/, "PRO"/*Proline*/, "SER"/*Serine*/, "THR"/*Threonine*/, "TRP"/*Tryptophan*/, "TYR"/*Tyrosine*/, "VAL"/*Valine*/ };
 	double radius_[ 6 ] = { 1.78/*Carbon*/ , 1.6/*Hydrogen*/ , 1.6/*Oxygen*/ , 1.8/*Nitrogen*/ ,1.83/*Phosphorus*/ , 1.2/*Sulfur*/ };
 
 	public:
@@ -141,14 +135,7 @@ class Protein{
 
 	char kind_;
 	std::vector<Aminoacid*> aminoacids_;
-	char* valids_[ 20 ] = {  {"ALA"}/*Alanine*/ ,       {"ARG"}/*Arginine*/ ,      {"ASN"}/*Asparagine*/ , 
-															 {"ASP"}/*Aspartic acid*/ , {"CYS"}/*Cysteine*/ ,      {"GLU"}/*Glutamic acid*/ , 
-															 {"GLN"}/*Glutamine*/ ,     {"GLY"}/*Glycine*/ ,       {"HIS"}/*Histidine*/ , 
-															 {"ILE"}/*Isoleucine*/ ,    {"LEU"}/*Leucine*/ ,       {"LYS"}/*Lysine*/ , 
-															 {"MET"}/*Methionine*/ ,    {"PHE"}/*Phenylalanine*/ , {"PRO"}/*Proline*/ , 
-															 {"SER"}/*Serine*/ ,        {"THR"}/*Threonine*/ ,     {"TRP"}/*Tryptophan*/ , 
-															 {"TYR"}/*Tyrosine*/ ,      {"VAL"}/*Valine*/ };
-
+	char* valids_[ 20 ] = {  "ALA"/*Alanine*/, "ARG"/*Arginine*/, "ASN"/*Asparagine*/, "ASP"/*Aspartic acid*/, "CYS"/*Cysteine*/, "GLU"/*Glutamic acid*/, "GLN"/*Glutamine*/, "GLY"/*Glycine*/, "HIS"/*Histidine*/, "ILE"/*Isoleucine*/, "LEU"/*Leucine*/, "LYS"/*Lysine*/, "MET"/*Methionine*/, "PHE"/*Phenylalanine*/, "PRO"/*Proline*/, "SER"/*Serine*/, "THR"/*Threonine*/, "TRP"/*Tryptophan*/, "TYR"/*Tyrosine*/, "VAL"/*Valine*/ };
 	public:
 		//CONSTRUCTOR AND DESTRUCTOR
 		Protein(  );
@@ -224,13 +211,15 @@ class Vdb : public File{
 	std::vector<Protein*> proteins_;
 	int virus_type_;
 	int solution_type_;
-	char* valids_[ 20 ] = {  {"ALA"}/*Alanine*/ ,       {"ARG"}/*Arginine*/ ,      {"ASN"}/*Asparagine*/ , 
-															 {"ASP"}/*Aspartic acid*/ , {"CYS"}/*Cysteine*/ ,      {"GLU"}/*Glutamic acid*/ , 
-															 {"GLN"}/*Glutamine*/ ,     {"GLY"}/*Glycine*/ ,       {"HIS"}/*Histidine*/ , 
-															 {"ILE"}/*Isoleucine*/ ,    {"LEU"}/*Leucine*/ ,       {"LYS"}/*Lysine*/ , 
-															 {"MET"}/*Methionine*/ ,    {"PHE"}/*Phenylalanine*/ , {"PRO"}/*Proline*/ , 
-															 {"SER"}/*Serine*/ ,        {"THR"}/*Threonine*/ ,     {"TRP"}/*Tryptophan*/ , 
-															 {"TYR"}/*Tyrosine*/ ,      {"VAL"}/*Valine*/ };
+ 	// char* valids_[ 20 ] = {  {"ALA"}/*Alanine*/ ,       {"ARG"}/*Arginine*/ ,      {"ASN"}/*Asparagine*/ , 
+															//  {"ASP"}/*Aspartic acid*/ , {"CYS"}/*Cysteine*/ ,      {"GLU"}/*Glutamic acid*/ , 
+															//  {"GLN"}/*Glutamine*/ ,     {"GLY"}/*Glycine*/ ,       {"HIS"}/*Histidine*/ , 
+															//  {"ILE"}/*Isoleucine*/ ,    {"LEU"}/*Leucine*/ ,       {"LYS"}/*Lysine*/ , 
+															//  {"MET"}/*Methionine*/ ,    {"PHE"}/*Phenylalanine*/ , {"PRO"}/*Proline*/ , 
+															//  {"SER"}/*Serine*/ ,        {"THR"}/*Threonine*/ ,     {"TRP"}/*Tryptophan*/ , 
+															//  {"TYR"}/*Tyrosine*/ ,      {"VAL"}/*Valine*/ };
+ 	
+    char* valids_[ 20 ] = {  "ALA"/*Alanine*/, "ARG"/*Arginine*/, "ASN"/*Asparagine*/, "ASP"/*Aspartic acid*/, "CYS"/*Cysteine*/, "GLU"/*Glutamic acid*/, "GLN"/*Glutamine*/, "GLY"/*Glycine*/, "HIS"/*Histidine*/, "ILE"/*Isoleucine*/, "LEU"/*Leucine*/, "LYS"/*Lysine*/, "MET"/*Methionine*/, "PHE"/*Phenylalanine*/, "PRO"/*Proline*/, "SER"/*Serine*/, "THR"/*Threonine*/, "TRP"/*Tryptophan*/, "TYR"/*Tyrosine*/, "VAL"/*Valine*/ };
 	public:
 
 		//CONSTRUCTOR AND DESTRUCTOR

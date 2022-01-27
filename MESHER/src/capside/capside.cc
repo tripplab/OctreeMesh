@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "capside.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1172,6 +1173,7 @@ Vdb::Vdb( char* name, int direction , int type , int virus_type , int solution_t
 	assert( ( type > 0 ) && ( type < 3 )  );
 	assert( ( solution_type == 1 ) || ( solution_type == 2 ) );
 
+        printf(" Will try to read VDB file: %s \n", name);
 
 	this->SetName( name );
 	this->SetDirection( direction ); 

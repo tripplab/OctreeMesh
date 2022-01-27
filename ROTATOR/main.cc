@@ -129,7 +129,7 @@ void RotateFold2Id0( double* coord ){
 
 }
 /**
- *Rotating coordinate to put id 0 from fold 2 aligned with Y axis
+ *MCT Edit: this is not true -> Rotating coordinate to put id 0 from fold 2 aligned with Y axis
  *The coordinate is rotated over the X axis 90 degrees (1.570796327 radians)
  */
 void RotateNodes( size_t n_nodes , double** nodes ){

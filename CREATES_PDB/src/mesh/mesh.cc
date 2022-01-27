@@ -1529,7 +1529,8 @@ Hexahedral::Hexahedral( char* name ){
 	FILE *fin = NULL;
 	fin = fopen( name , "r" );
 	if( !fin ){
-		std::cout << "Mesh file not opened " << std::endl;
+		std::cout << "I can't find the Mesh file, not opened " << std::endl;
+		printf(" %s \n", name);
 		assert( 0 ); 
 	}
 	while( !feof( fin ) ){

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "mesher.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -47,8 +48,10 @@ Mesher::Mesher( int argc , char** argv ){
 	assert(  ( fold_index_ >= 0 )  &&  ( fold_index_ < 12 )  );
 
 	//Checking for correct values on virus name and cone amplitude
+	printf("%s \n"," NOTE: this code version only allows the following capsids: 1CWP, 4G93, 3IZG, 3J4U");
 	assert( !strcmp( virus_ , "1CWP" ) || !strcmp( virus_ , "4G93" ) || 
 					!strcmp( virus_ , "3IZG" ) || !strcmp( virus_ , "3J4U" ) );
+	printf(" Will work on %s \n", virus_);
 	assert( ( cone_amplitude_ >= 0.0 ) && 
 					( cone_amplitude_ <= 3.14159265358979323846264338327950*0.5 ) );
 	//Creating octree
@@ -56,6 +59,11 @@ Mesher::Mesher( int argc , char** argv ){
 
 	local_root_ = octree_->GetRoot();
 
+	printf("--------------------------------------- \n");
+	printf(" Will look for structure in file: %s \n", input_);
+	printf(" Will generate a mesh with resolution of: %f nm \n", resolution_capside_);
+	printf(" Will configure nanoindentation on the %d-fold id %d \n", fold_, fold_index_);
+	printf("--------------------------------------- \n");
 }
 
 /**
@@ -130,6 +138,7 @@ void Mesher::GetConeDirection( double* dir ){
  *@param[out] dir Is the normalized vector indicating the cone direction
  */
 void Mesher::GetConeDirectionFold2( double* dir ){
+	printf("%s %d \n"," - getting cone direction for 2-fold id ", fold_index_);
 	switch( fold_index_ ){
 		case 0:
 			dir[ 0 ] = 0.000; dir[ 1 ] = 0.000; dir[ 2 ] = 123.301;
@@ -186,9 +195,10 @@ void Mesher::GetConeDirectionFold2( double* dir ){
  *@param[out] dir Is the normalized vector indicating the cone direction
  */
 void Mesher::GetConeDirectionFold3( double* dir ){
+	printf("%s %d \n"," - getting cone direction for 3-fold id ", fold_index_);
 	switch( fold_index_ ){
 		case 0:
-			dir[ 0 ] = 41.100; dir[ 1 ] = 0.000; dir[ 2 ] = 107.601;
+			dir[ 0 ] = 47.784; dir[ 1 ] = 0.000; dir[ 2 ] = 125.099998;
 			break;
 		case 1:
 			std::cout << "Fold " << fold_ << " index " << fold_index_ << " not known " << std::endl;
@@ -242,9 +252,10 @@ void Mesher::GetConeDirectionFold3( double* dir ){
  *@param[out] dir Is the normalized vector indicating the cone direction
  */
 void Mesher::GetConeDirectionFold5( double* dir ){
+	printf("%s %d \n"," - getting cone direction for 5-fold id ", fold_index_);
 	switch( fold_index_ ){
 		case 0:
-			dir[ 0 ] = 000.000; dir[ 1 ] =  77.316; dir[ 2 ] = 125.100;
+			dir[ 0 ] = 000.000; dir[ 1 ] =  77.316002; dir[ 2 ] = 125.100998;
 			break;
 		case 1:
 			dir[ 0 ] = 000.000; dir[ 1 ] = -77.316; dir[ 2 ] = 125.100;
@@ -287,6 +298,7 @@ void Mesher::GetConeDirectionFold5( double* dir ){
  *@return A size_t with the number of nodes in the final mesh
  */
 size_t Mesher::GetNNodesInFinalMesh(  ){
+	printf("%s %lu \n"," # nodes: ", n_final_nodes_);
 	return n_final_nodes_;
 }
 
@@ -306,6 +318,7 @@ size_t Mesher::GetNElementsInFinalMesh(  ){
 			index++;
 		}
 	}
+	printf("%s %lu \n"," # elements: ", index);
 	return index;
 }
 
@@ -580,6 +593,7 @@ bool Mesher::SetLoadedElements( double tot_vol , double prop_vol , double* verte
 
 	delete[] leaf_index;
 	delete[] v_dist;
+	printf("%s \n"," Loaded Elements have been set ");
 	return true;
 }
 
@@ -661,6 +675,7 @@ bool Mesher::SetFixedElements( double tot_vol , double prop_vol , double* vertex
 	}
 	delete[] leaf_index;
 	delete[] v_dist;
+	printf("%s \n"," Fixed Elements have been set ");
 	return true;		 
 }
 
@@ -670,6 +685,7 @@ bool Mesher::SetFixedElements( double tot_vol , double prop_vol , double* vertex
  *Method to read the information of the vdb file previusly opened
  */
 void Mesher::ReadVdbFile(  ){
+
 	vdb_->ReadCompleteFile( fold_  );
 }
 
@@ -1008,8 +1024,9 @@ void Mesher::RotateFold5( double* coord ){
 }
 
 /**
- *Rotating atom coordinate to put id 0 from fold 2 aligned with Y axis
- *The coordinate is rotated over the X axis -90 degrees (1.570796327 radians)
+ *Rotating atom coordinate to put id 0 from fold 2 aligned with Z axis
+ *The coordinate is rotated over the X axis 0 degrees (0 radians)
+ *the VIPERdb convention has the 2 fold id 0 already aligned with the Z axis, nothing to do
  */
 void Mesher::RotateFold2Id0( double* coord ){
 	double** matrix;
@@ -1018,7 +1035,8 @@ void Mesher::RotateFold2Id0( double* coord ){
 	matrix[ 1 ] = new double[ 3 ];
 	matrix[ 2 ] = new double[ 3 ];
 	double newcoord[ 3 ] , teta;
-	teta  = -1.570796327;
+	/* teta  = -1.570796327; */
+	teta  = 0.0;
 	matrix[ 0 ][ 0 ] = 1.0; matrix[ 0 ][ 1 ] = 0.0;         matrix[ 0 ][ 2 ] = 0.0; 
 	matrix[ 1 ][ 0 ] = 0.0; matrix[ 1 ][ 1 ] = cos( teta ); matrix[ 1 ][ 2 ] = -sin( teta );
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
@@ -1028,6 +1046,7 @@ void Mesher::RotateFold2Id0( double* coord ){
 	delete matrix[ 1 ];
 	delete matrix[ 2 ];
 	delete matrix;
+
 }
 
 /**
@@ -1119,9 +1138,9 @@ void Mesher::RotateFold2Id11( double* coord ){
 }
 
 /**
- *Rotating atom coordinate to put id 0 from fold 3 aligned with Y axis
- *The coordinate is rotated over the Y axis -20.905192903 degrees (0.364864447 radians)
- *The coordinate is rotated over the X axis -90 degrees (1.570796327 radians)
+ *Rotating atom coordinate to put id 0 from fold 3 aligned with Z axis
+ *The coordinate is rotated over the Y axis -20.905178533958676 degrees (0.3648641961339 radians)
+ *The coordinate is rotated over the X axis 0 degrees (0 radians)
  */
 void Mesher::RotateFold3Id0( double* coord ){
 	double** matrix;
@@ -1131,13 +1150,13 @@ void Mesher::RotateFold3Id0( double* coord ){
 	matrix[ 2 ] = new double[ 3 ];
 	//Y rotation
 	double newcoord[ 3 ] , teta;
-	teta  = -0.364864447;
+	teta  = -0.3648641961339;
 	matrix[ 0 ][ 0 ] = cos( teta );  matrix[ 0 ][ 1 ] = 0.0; matrix[ 0 ][ 2 ] = sin( teta ); 
 	matrix[ 1 ][ 0 ] = 0.0;          matrix[ 1 ][ 1 ] = 1.0; matrix[ 1 ][ 2 ] = 0.0;
 	matrix[ 2 ][ 0 ] = -sin( teta ); matrix[ 2 ][ 1 ] = 0.0; matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , coord , 3 , newcoord , 3 );
 	//X Rotation
-	teta  = -1.570796327;
+	teta  = 0.0;
 	matrix[ 0 ][ 0 ] = 1.0; matrix[ 0 ][ 1 ] = 0.0; matrix[ 0 ][ 2 ] = 0.0; 
 	matrix[ 1 ][ 0 ] = 0.0; matrix[ 1 ][ 1 ] = cos( teta ); matrix[ 1 ][ 2 ] = -sin( teta );
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
@@ -1146,6 +1165,7 @@ void Mesher::RotateFold3Id0( double* coord ){
 	delete matrix[ 1 ];
 	delete matrix[ 2 ];
 	delete matrix;
+
 }
 
 /**
@@ -1238,8 +1258,8 @@ void Mesher::RotateFold3Id11( double* coord ){
 
 
 /**
- *Rotating atom coordinate to put the fold 0 aligned with Y axis
- *The coordinate is rotated over the X axis 31.71745718-90 degrees (1.017222269 radians)
+ *Rotating atom coordinate to put the id 0 fold 5 aligned with Z axis
+ *The coordinate is rotated over the X axis -31.71725343044995 degrees (0.553570502049 radians)
  */
 void Mesher::RotateFold5Id0( double* coord ){
 	double** matrix;
@@ -1248,7 +1268,7 @@ void Mesher::RotateFold5Id0( double* coord ){
 	matrix[ 1 ] = new double[ 3 ];
 	matrix[ 2 ] = new double[ 3 ];
 	double newcoord[ 3 ] , teta;
-	teta  = -1.017222269;
+	teta  = -0.553570502049;
 	matrix[ 0 ][ 0 ] = 1.0; matrix[ 0 ][ 1 ] = 0.0;         matrix[ 0 ][ 2 ] = 0.0; 
 	matrix[ 1 ][ 0 ] = 0.0; matrix[ 1 ][ 1 ] = cos( teta ); matrix[ 1 ][ 2 ] = -sin( teta );
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
@@ -1258,6 +1278,7 @@ void Mesher::RotateFold5Id0( double* coord ){
 	delete matrix[ 1 ];
 	delete matrix[ 2 ];
 	delete matrix;
+
 }
 
 /**
@@ -1583,6 +1604,7 @@ double Mesher::CalculateOctreeMeshVolume(  double* cell_volume  ){
 	}
 	(*cell_volume) = cell_size * cell_size * cell_size;
 	tot_vol = counter * (*cell_volume);
+	printf(" Mesh Volume: %f \n", tot_vol);
 	return tot_vol;
 }
 
@@ -1638,6 +1660,7 @@ double Mesher::CalculateProportionLoaded(  ){
 			break;
 	}
 	vol_prop /= 100.000;
+	printf(" Volume Loaded: %f \n", vol_prop);
 	return vol_prop;
 }
 
