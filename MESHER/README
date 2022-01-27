@@ -1,18 +1,19 @@
 February 14, 2020
+Corrected on 26-01-22
 
-This code takes a molecule represented by atoms and generates an approximate representation of it by
+This code takes a capsid molecular structure represented by atoms and generates an approximate representation of it by
 using an hexahedral mesh suited to perform numerical simulations via Finite Element Method (FEM). 
-The program receives the molecule representation via the vdb format. The mesher performs a rotation 
-in order to align one fold with the Y axis, valid folds are 2,3 and 5. For each fold exists 12 valid
-rotations. This program also assign boundary conditions in order to perform a numerical simulation.
+The program receives the capsid structure on a VIPERdb file.vdb in PDB format. The mesher performs a rotation 
+in order to align the selected fold with the Z axis, valid folds are 2, 3 and 5. For each fold there is more than 1 position
+in the capsid. This program also assigns boundary conditions and config files in order to perform a numerical simulation.
 
 
-IMPORTANT NOTE: 12 rotations from 5 fold are available but from fold 2 and 3 is only available the 
-                1 position. 
+IMPORTANT NOTE: List of vectors available defining the position of the 5, 2 and 3-fold id positions to select from
 
-12 positions for 5 fold
+Positions for 5 fold
 
-0       0.000   77.316  125.100
+id       X       Y         Z
+0       0.000   77.316002  125.100998
 1       0.000  -77.316  125.100
 2     -77.316  125.101    0.000
 3      77.316  125.100    0.000
@@ -25,49 +26,51 @@ IMPORTANT NOTE: 12 rotations from 5 fold are available but from fold 2 and 3 is 
 10      0.000  -77.316 -125.100
 11    125.100    0.000  -77.316
 
-12 positions for 3 fold
+Positions for 3 fold
 
-0      41.100    0.0000 107.601
-1 
-2 
-3 
-4 
-5 
-6 
-7 
-8 
-9 
-10
-11
+id       X       Y         Z
+0      47.784    0.0000 125.099998
+1      not defined
+2      not defined
+3      not defined
+4      not defined
+5      not defined
+6      not defined
+7      not defined
+8      not defined
+9      not defined
+10     not defined
+11     not defined
 
-12 positions for 2 fold
+Positions for 2 fold
 
+id       X       Y         Z
 0       0.000    0.0000 123.301
-1  
-2  
-3  
-4  
-5  
-6  
-7  
-8  
-9  
-10 
-11 
+1       not defined
+2       not defined
+3       not defined
+4       not defined
+5       not defined
+6       not defined
+7       not defined
+8       not defined
+9       not defined
+10      not defined
+11      not defined
 
 
-The progrma receives 10 arguments
-	--The name of vdb file ( String )
-	--Kind of virus ( int )
- 	--Kind of solution ( int: it can be 1 for VDW or 2 for SAS. Actually is only available option 1 )
-	--Mesh resolution in angstrom ( double )
-	--Fold id to align with Y axis ( int: 5,3,2 )
-	--Fold index to align with Y axis ( int: 0-11)
-	--Virus name to be meshes ( string: 1CWP , 4G93 , 3IZG , 3J4U )
-	--Cone amplitude to set boundary conditions ( double: in degrees )
-  --Variation in the proportion of loaded elements ( double: positive means more elements loades, 
-		negative means less elements loaded, zero means no variation in the amount of elemtns loaded ) 
-	--Young modulus for the simulation ( double: It must be tue young modulus/10000 ) 
+The program takes 10 arguments
+--The name of vdb file from VIPERdb ( String )
+--Capsid T number ( int )
+--Type of surface ( int: it can be 1 for VDW or 2 for SAS. Only available option 1 )
+--Mesh resolution in angstrom ( double )
+--Fold axis to align with Z axis ( int: 5,3,2 )
+--Fold index to align with Z axis ( int: 0-11)
+--Virus label ( string: 1CWP , 4G93 , 3IZG , 3J4U )
+--Cone amplitude to set boundary conditions ( double: in degrees )
+--Variation in the proportion of loaded elements ( double: positive means more elements loades, 
+  negative means less elements loaded, zero means no variation in the amount of elemtns loaded ) 
+--Young modulus for the simulation ( double: It must be tue young modulus/10000 ) 
 
 
 
