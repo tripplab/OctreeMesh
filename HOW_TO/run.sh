@@ -41,23 +41,29 @@ POST=${name}.post.res
 MSH2=${name}.post.msh
 PDB_results=${name}_${Res}.pdb
 
-  inp="${VDB}.vdb ${VDB}_clean.vdb"
+  ## Extract all ATOM records from the VIPERdb capsid structure file (virus.vdb)
+  inp="${VDB}.vdb ${VDB}_ATOMS.vdb"
   echo "Runing cleanpdb $inp"
-  ${BIN}/cleanpdb ${inp}
+  ${BIN}/extract_ATOM ${inp}
 
-  inp="${VDB}_clean.vdb ${T} ${VDW} ${Res} ${Fold} ${inx} ${PDB} ${cone} ${load_ele} ${Young}"
+  ## Generate the mesh and simulation config files
+  inp="${VDB}_ATOMS.vdb ${T} ${VDW} ${Res} ${Fold} ${inx} ${PDB} ${cone} ${load_ele} ${Young}"
   echo "Running biomesh $inp"
-  ${BIN}/biomesh ${inp}
+  ${BIN}/octree_mesh ${inp}
 
-  ## No es necesario hacer esto para la nanoindentación
+  ## If simulating a shearing force, the mnesh has to be rotated 90 deg on X
   ##inp="${GEOM} ${GEOM}"
   ##echo "Running meshrotate $inp"
-  ##${BIN}/meshrotate ${inp}
+  ##${BIN}/shear_rotate ${inp}
 
+  ## Run the simulation
   inp="${name} $log_lev"
   echo "Running meshsolver $inp"
   ${BIN}/meshsolver ${inp} > ${OUTF}
 
+  ## Transpose the simulation results for the mesh into the capsid structure file (virus.pdb)
+  ## suplied as the first argument. Please note that this structure has to be rotated so the
+  ## correct axis-fold is aligned with Z to have the right orientation correspondence with the mesh
   inp="${CAPR} $MSH2 $POST ${PDB_results} ${ref_lev}"
   echo "Running mesh2pdb $inp"
   ${BIN}/mesh2pdb ${inp}
