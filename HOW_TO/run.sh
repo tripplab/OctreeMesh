@@ -12,7 +12,7 @@ VDB=1cwp_full ## VDB file with capsid structure from VIPERdb (atoms) [string]
 CAPR=1cwp_3F-Z.pdb ##1cwp_full.vdb  ##1cwp_5F-Z.pdb ## PDB file with capsid structure with selected fold aligned to Z (atoms) [string]
 Fold=3 ##2 ##5  ## fold to align with Z for nanoindentation (2|3|5) [int]
 Res=16.00  ## mesh resolution in ang [float]
-PDB=1CWP  ## capsid identifier [string]
+PDB=1CWP  ## capsid identifier. As of this version, the code only works with 1CWP, 4G93, 3IZG, 3J4U [string]
 
 T=3 ## 1|3 [int]
 VDW=1 ## use van der Waals radius for atoms [int]
