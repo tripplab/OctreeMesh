@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "mesher.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -17,6 +18,20 @@ Mesher::Mesher(){
 	local_root_ = NULL;
 	vdb_ = NULL;
 	msh_ = NULL;
+	align2Z_00 = 0;
+	align2Z_01 = 0;
+	align2Z_02 = 0;
+	align2Z_10 = 0;
+	align2Z_11 = 0;
+	align2Z_12 = 0;
+	align2Z_20 = 0;
+	align2Z_21 = 0;
+	align2Z_22 = 0;
+	Fx_ = 0.0;
+	Fy_ = 0.0;
+	Fz_ = 1.0;
+
+
 }
 
 /**
@@ -28,24 +43,30 @@ Mesher::Mesher(){
  */
 Mesher::Mesher( int argc , char** argv ){
 	
+	printf("%s \n"," - At MESHER constructor -");
+	
 	msh_ = NULL;
 	local_root_ = NULL;
 	input_ = argv[ 1 ];
 	vdb_ = new Vdb( input_ , 1 , 1 , atoi( argv[ 2 ] ) , atoi( argv[ 3 ] ) );
-	virus_ = argv[ 7 ];
+	resolution_capside_ = atof( argv[ 4 ] );
 	fold_ = atoi( argv[ 5 ] );
 	fold_index_ = atoi( argv[ 6 ] );
-	resolution_capside_ = atof( argv[ 4 ] );
+	Fx_ = atof( argv[ 7 ] );
+	Fy_ = atof( argv[ 8 ] );
+	Fz_ = atof( argv[ 9 ] );
+	virus_ = argv[ 10 ];
 	resolution_ = this->InterpolateCapsidResolution(  );
 
-	cone_amplitude_ = atof( argv[ 8 ] );
+	cone_amplitude_ = atof( argv[ 11 ] );
 	cone_amplitude_ = cone_amplitude_ * 3.14159265358979323846264338327950 /180.00;
-	prop_variation_ = atof( argv[ 9 ] );
-	young_modulus_ = atof( argv[ 10 ] );
+	prop_variation_ = atof( argv[ 12 ] );
+	young_modulus_ = atof( argv[ 13 ] );
+
 
 	//Checking if folds are correct values
-	assert(  ( fold_ == 5 )  ||  ( fold_ == 3 )  ||  ( fold_ == 2 )  );
-	assert(  ( fold_index_ >= 0 )  &&  ( fold_index_ < 12 )  );
+	//assert(  ( fold_ == 5 )  ||  ( fold_ == 3 )  ||  ( fold_ == 2 )  );
+	//assert(  ( fold_index_ >= 0 )  &&  ( fold_index_ < 12 )  );
 
 	//Checking for correct values on virus name and cone amplitude
 	printf("%s \n"," NOTE: this code version only allows the following capsids: 1CWP, 4G93, 3IZG, 3J4U");
@@ -56,14 +77,18 @@ Mesher::Mesher( int argc , char** argv ){
 					( cone_amplitude_ <= 3.14159265358979323846264338327950*0.5 ) );
 	//Creating octree
 	octree_ = new OctreeDriver();
-
 	local_root_ = octree_->GetRoot();
 
-	printf("--------------------------------------- \n");
+	SetAlign2Z( Fx_, Fy_, Fz_);
+
+	//printf("--------------------------------------- \n");
 	printf(" Will look for structure in file: %s \n", input_);
 	printf(" Will generate a mesh with resolution of: %f nm \n", resolution_capside_);
-	printf(" Will configure nanoindentation on the %d-fold id %d \n", fold_, fold_index_);
-	printf("--------------------------------------- \n");
+	printf(" Will align vector: %f %f %f to Z \n", Fx_, Fy_, Fz_);
+	printf(" Will configure nanoindentation on the aligned vector \n");
+	//printf(" Will configure nanoindentation on the %d-fold id %d \n", fold_, fold_index_);
+	printf("%s \n"," - Leaving constructor -");
+	//printf("--------------------------------------- \n");
 }
 
 /**
@@ -115,10 +140,12 @@ OctreeCell* Mesher::GetCellOnLocalOctree( key_type* keys ){
 
 /**
  *Getting cone direction normalized
- *Direction is given by the vector that indicates the fold to be aligned with the Y axis
+ *Direction is given by the vector that indicates the fold to be aligned with the Z axis
  *@param[out] dir Is the vector to store the normalized direction vector 
  */
 void Mesher::GetConeDirection( double* dir ){
+
+	/*
 	switch(  fold_  ){
 		case 2:
 			this->GetConeDirectionFold2( dir );
@@ -130,7 +157,12 @@ void Mesher::GetConeDirection( double* dir ){
 			this->GetConeDirectionFold5( dir );
 			break;
 	}
+	*/
+
+	printf("%s \n"," - getting normalized cone direction for loaded and fixed elements");
+	dir[ 0 ] = Fx_; dir[ 1 ] = Fy_; dir[ 2 ] = Fz_;
 	Normalize( dir );
+        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 }
 
 /**
@@ -141,11 +173,12 @@ void Mesher::GetConeDirectionFold2( double* dir ){
 	printf("%s %d \n"," - getting cone direction for 2-fold id ", fold_index_);
 	switch( fold_index_ ){
 		case 0:
-			dir[ 0 ] = 0.000; dir[ 1 ] = 0.000; dir[ 2 ] = 123.301;
+			dir[ 0 ] = 0.000; dir[ 1 ] = 0.000; dir[ 2 ] = 125.100;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 1:
-			std::cout << "Fold " << fold_ << " index " << fold_index_ << " not known " << std::endl;
-			assert( 0 );
+			dir[ 0 ] =23.892; dir[ 1 ] =38.658; dir[ 2 ] = 125.100;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 2:
 			std::cout << "Fold " << fold_ << " index " << fold_index_ << " not known " << std::endl;
@@ -198,11 +231,12 @@ void Mesher::GetConeDirectionFold3( double* dir ){
 	printf("%s %d \n"," - getting cone direction for 3-fold id ", fold_index_);
 	switch( fold_index_ ){
 		case 0:
-			dir[ 0 ] = 47.784; dir[ 1 ] = 0.000; dir[ 2 ] = 125.099998;
+			dir[ 0 ] = 47.784; dir[ 1 ] = 0.000; dir[ 2 ] = 125.100;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 1:
-			std::cout << "Fold " << fold_ << " index " << fold_index_ << " not known " << std::endl;
-			assert( 0 );
+			dir[ 0 ] =-47.784; dir[ 1 ] = 0.000; dir[ 2 ] = 125.100;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 2:
 			std::cout << "Fold " << fold_ << " index " << fold_index_ << " not known " << std::endl;
@@ -255,40 +289,52 @@ void Mesher::GetConeDirectionFold5( double* dir ){
 	printf("%s %d \n"," - getting cone direction for 5-fold id ", fold_index_);
 	switch( fold_index_ ){
 		case 0:
-			dir[ 0 ] = 000.000; dir[ 1 ] =  77.316002; dir[ 2 ] = 125.100998;
+			dir[ 0 ] = 000.000; dir[ 1 ] =  77.316; dir[ 2 ] = 125.100;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 1:
 			dir[ 0 ] = 000.000; dir[ 1 ] = -77.316; dir[ 2 ] = 125.100;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 2:
 			dir[ 0 ] = -77.316; dir[ 1 ] =  125.101; dir[ 2 ] = 000.000;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 3:
 			dir[ 0 ] =  77.316; dir[ 1 ] =  125.100; dir[ 2 ] = 000.000;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 4:
 			dir[ 0 ] =-125.101; dir[ 1 ] =  000.000; dir[ 2 ] =  77.316;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 5:
 			dir[ 0 ] = 125.100; dir[ 1 ] =  000.000; dir[ 2 ] =  77.316;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 6:
 			dir[ 0 ] = -77.316; dir[ 1 ] = -125.101; dir[ 2 ] = 000.000;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 7:
 			dir[ 0 ] =  77.316; dir[ 1 ] = -125.101; dir[ 2 ] = 000.000;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 8:
 			dir[ 0 ] =-125.101; dir[ 1 ] =  000.000; dir[ 2 ] = -77.316;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 9:
 			dir[ 0 ] = 000.000; dir[ 1 ] =   77.316; dir[ 2 ] =-125.100;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 10:
 			dir[ 0 ] = 000.000; dir[ 1 ] =  -77.316; dir[ 2 ] =-125.100;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 		case 11:
 			dir[ 0 ] = 125.100; dir[ 1 ] =  000.000; dir[ 2 ] = -77.316;
+                        printf(" - X: %6.3f, Y: %6.3f, Z: %6.3f \n",dir[ 0 ],dir[ 1 ],dir[ 2 ]);
 			break;
 	}
 }
@@ -609,7 +655,7 @@ bool Mesher::SetLoadedElements( double tot_vol , double prop_vol , double* verte
  *@param[in] cell_prop Is the proportion of volume added by each hexahedron
  */
 bool Mesher::SetFixedElements( double tot_vol , double prop_vol , double* vertex , 
-													 					double* direction , double cell_prop ){
+			double* direction , double cell_prop ){
 	/*First all cells intersecting the cone are marked as fixed and is calculated the 
 	  distance between its center and the cone vertex in order to determine which need to be
 	  removed from the selection                                                          */
@@ -679,6 +725,113 @@ bool Mesher::SetFixedElements( double tot_vol , double prop_vol , double* vertex
 	return true;		 
 }
 
+void Mesher::SetAlign2Z( double Fx, double Fy, double Fz){
+
+	//printf("%s \n","  entering SetAlign2Z ");
+
+	//Calculate the rotation matrix to align the selected fold to Z
+	double Z[ 3 ] , F[ 3 ], A[ 3 ];
+	double cosA, k;
+
+        Z[ 0 ] = 0.0;
+        Z[ 1 ] = 0.0;
+        Z[ 2 ] = 1.0;
+        F[ 0 ] = Fx; //23.892;
+        F[ 1 ] = Fy; //38.658;
+        F[ 2 ] = Fz; //125.10;
+        A[ 0 ] = 0.0;
+        A[ 1 ] = 0.0;
+        A[ 2 ] = 0.0;
+
+	Normalize( F );
+	printf(" - Normalized vector: %f, %f, %f \n", F[ 0 ], F[ 1 ], F[ 2 ]);
+	Cross( A, F, Z );
+	printf(" - Axis of rotation: %f, %f, %f \n", A[ 0 ], A[ 1 ], A[ 2 ]);
+
+        cosA = Dot( F, Z );
+	k = 1.0 / ( 1.0 + cosA );
+	//printf(" - cosA: %f, k: %f \n", cosA, k);
+
+	align2Z_00 = (A[ 0 ]*A[ 0 ]*k)+cosA;  
+	align2Z_01 = (A[ 1 ]*A[ 0 ]*k)-A[ 2 ];
+	align2Z_02 = (A[ 2 ]*A[ 0 ]*k)+A[ 1 ];
+
+	align2Z_10 = (A[ 0 ]*A[ 1 ]*k)+A[ 2 ];
+	align2Z_11 = (A[ 1 ]*A[ 1 ]*k)+cosA; 
+	align2Z_12 = (A[ 2 ]*A[ 1 ]*k)-A[ 0 ];
+
+	align2Z_20 = (A[ 0 ]*A[ 2 ]*k)-A[ 1 ]; 
+	align2Z_21 = (A[ 1 ]*A[ 2 ]*k)+A[ 0 ]; 
+	align2Z_22 = (A[ 2 ]*A[ 2 ]*k)+cosA;
+
+	//printf(" - Rotation matrix to align %d-fold id %d to Z: \n", fold_, fold_index_);
+	printf(" - Rotation matrix to align vector to Z: \n");
+	printf("  %6.3f %6.3f %6.3f \n", align2Z_00, align2Z_01, align2Z_02);
+	printf("  %6.3f %6.3f %6.3f \n", align2Z_10, align2Z_11, align2Z_12);
+	printf("  %6.3f %6.3f %6.3f \n", align2Z_20, align2Z_21, align2Z_22);
+
+
+	//Calculate the rotation matrix to go back to original orientation
+	
+        Z[ 0 ] = Fx;
+        Z[ 1 ] = Fy;
+        Z[ 2 ] = Fz;
+        F[ 0 ] = 0.0;
+        F[ 1 ] = 0.0;
+        F[ 2 ] = 1.0;
+        A[ 0 ] = 0.0;
+        A[ 1 ] = 0.0;
+        A[ 2 ] = 0.0;
+
+	Normalize( Z );
+	//printf(" - Normalized vector: %f, %f, %f \n", F[ 0 ], F[ 1 ], F[ 2 ]);
+	Cross( A, F, Z );
+	//printf(" - Axis of rotation: %f, %f, %f \n", A[ 0 ], A[ 1 ], A[ 2 ]);
+
+        cosA = Dot( F, Z );
+	k = 1.0 / ( 1.0 + cosA );
+	//printf(" - cosA: %f, k: %f \n", cosA, k);
+
+	double t_00 = (A[ 0 ]*A[ 0 ]*k)+cosA;  
+	double t_01 = (A[ 1 ]*A[ 0 ]*k)-A[ 2 ];
+	double t_02 = (A[ 2 ]*A[ 0 ]*k)+A[ 1 ];
+
+	double t_10 = (A[ 0 ]*A[ 1 ]*k)+A[ 2 ];
+	double t_11 = (A[ 1 ]*A[ 1 ]*k)+cosA; 
+	double t_12 = (A[ 2 ]*A[ 1 ]*k)-A[ 0 ];
+
+	double t_20 = (A[ 0 ]*A[ 2 ]*k)-A[ 1 ]; 
+	double t_21 = (A[ 1 ]*A[ 2 ]*k)+A[ 0 ]; 
+	double t_22 = (A[ 2 ]*A[ 2 ]*k)+cosA;
+
+	printf(" - Rotation matrix to go back to original orientation: \n");
+	printf("  %6.3f %6.3f %6.3f \n", t_00, t_01, t_02);
+	printf("  %6.3f %6.3f %6.3f \n", t_10, t_11, t_12);
+	printf("  %6.3f %6.3f %6.3f \n", t_20, t_21, t_22);
+
+	//printf("%s %d %d \n", virus_, fold_, fold_index_ );
+	//printf("%s \n","  leaving SetAlign2Z ");
+	
+	FILE* fr;
+	FILE* fo;
+	char frn[]="rotate_F2Z.mtx";
+	char fon[]="rotate_Z2F.mtx";
+	fr = fopen(frn, "w");
+	fo = fopen(fon, "w");
+	//printf(" - Rotation matrix to align vector to Z will be saved in: %s \n", frn);
+	fprintf(fr,"  %6.3f %6.3f %6.3f \n", align2Z_00, align2Z_01, align2Z_02);
+	fprintf(fr,"  %6.3f %6.3f %6.3f \n", align2Z_10, align2Z_11, align2Z_12);
+	fprintf(fr,"  %6.3f %6.3f %6.3f \n", align2Z_20, align2Z_21, align2Z_22);
+	//printf(" - Rotation matrix to go back to original orientation will be saved in: %s \n", fon);
+	fprintf(fo,"  %6.3f %6.3f %6.3f \n", t_00, t_01, t_02);
+	fprintf(fo,"  %6.3f %6.3f %6.3f \n", t_10, t_11, t_12);
+	fprintf(fo,"  %6.3f %6.3f %6.3f \n", t_20, t_21, t_22);
+	fclose(fr);
+	fclose(fo);
+	printf(" - Matrices saved in: %s, %s \n", frn, fon);
+
+}
+
 
 //UTILITIES
 /**
@@ -686,7 +839,7 @@ bool Mesher::SetFixedElements( double tot_vol , double prop_vol , double* vertex
  */
 void Mesher::ReadVdbFile(  ){
 
-	vdb_->ReadCompleteFile( fold_  );
+	vdb_->ReadCompleteFile( fold_, align2Z_00, align2Z_01, align2Z_02, align2Z_10, align2Z_11, align2Z_12, align2Z_20, align2Z_21, align2Z_22 );
 }
 
 /**
@@ -855,10 +1008,11 @@ void Mesher::CalculateRefinementAndPercentage(){
 }
 
 /**
- *Selecting fold_ to be aligned with Y axis
+ *Selecting fold_ to be aligned with Z axis
  *@param[out] coords is the coordinate to be rotated
  */
 void Mesher::RotateCoordianteToFold( double* coord ){
+	/*
 	switch( fold_ ){
 		case 5:
 			this->RotateFold5( coord );
@@ -870,10 +1024,57 @@ void Mesher::RotateCoordianteToFold( double* coord ){
 			this->RotateFold2( coord );
 			break;
 		default:
-			std::cout << " Fold is not valid, need to be 5,3 or 2  and you are using " << fold_ << std::endl;
+			std::cout << " Fold value is not valid, needs to be 5, 3 or 2  and you are using " << fold_ << std::endl;
 			assert( 0 );
 			break;
 	}
+	*/
+
+	//printf("%s \n","  entering RotateCoordianteToFold ");
+	/*
+	printf(" - Rotation matrix to align %d-fold id %d to Z: \n", fold_, fold_index_);
+	printf(" - %6.3f, %6.3f, %6.3f \n", align2Z_00, align2Z_01, align2Z_02);
+	printf(" - %6.3f, %6.3f, %6.3f \n", align2Z_10, align2Z_11, align2Z_12);
+	printf(" - %6.3f, %6.3f, %6.3f \n", align2Z_20, align2Z_21, align2Z_22);
+	*/
+
+	double** matrix;
+	matrix = new double*[ 3 ];
+	matrix[ 0 ] = new double[ 3 ];
+	matrix[ 1 ] = new double[ 3 ];
+	matrix[ 2 ] = new double[ 3 ];
+
+	matrix[ 0 ][ 0 ] = align2Z_00;
+	matrix[ 0 ][ 1 ] = align2Z_01;
+	matrix[ 0 ][ 2 ] = align2Z_02;
+
+	matrix[ 1 ][ 0 ] = align2Z_10;
+	matrix[ 1 ][ 1 ] = align2Z_11;
+	matrix[ 1 ][ 2 ] = align2Z_12;
+
+	matrix[ 2 ][ 0 ] = align2Z_20;
+	matrix[ 2 ][ 1 ] = align2Z_21;
+	matrix[ 2 ][ 2 ] = align2Z_22;
+
+	double newcoord[ 3 ];
+
+	//coord[ 0 ] = 23.892;	coord[ 1 ] = 38.658;	coord[ 2 ] = 125.10;
+	//coord[ 0 ] = 0;	coord[ 1 ] = 0;	coord[ 2 ] = 125;
+
+	MatrixVectorMultiplication( matrix , 3 , 3 , coord , 3 , newcoord , 3 );
+
+	//printf(" - Coord: %f, %f, %f \n", coord[ 0 ], coord[ 1 ], coord[ 2 ]);
+	coord[ 0 ] = newcoord[ 0 ];	coord[ 1 ] = newcoord[ 1 ];	coord[ 2 ] = newcoord[ 2 ];
+	//printf(" - New Coord: %f, %f, %f \n", coord[ 0 ], coord[ 1 ], coord[ 2 ]);
+
+	delete matrix[ 0 ];
+	delete matrix[ 1 ];
+	delete matrix[ 2 ];
+	delete matrix;
+
+	//printf("%s \n","  leaving RotateCoordianteToFold ");
+	//assert(0);
+
 }
 
 /**
@@ -919,7 +1120,7 @@ void Mesher::RotateFold2( double* coord ){
 			this->RotateFold2Id11( coord );
 			break;
 		default:
-			std::cout << " Fold id not valid " << std::endl;
+			std::cout << " Fold id not valid: " << fold_index_ << std::endl;
 			assert( 0 );
 			break;
 	}
@@ -1050,11 +1251,56 @@ void Mesher::RotateFold2Id0( double* coord ){
 }
 
 /**
- *Rotating atom coordinate to put id 1 from fold 2 aligned with Y axis
- *?????????????
+ *Rotating atom coordinate to put id 1 from fold 2 aligned with Z axis
+ *The coordinate is rotated over the Y axis -20.905178533958676 degrees (0.3648641961339 radians)
+ *The coordinate is rotated over the X axis 0 degrees (0 radians)
  */
 void Mesher::RotateFold2Id1( double* coord ){
-	assert( 0 );//NOT DEFINED YET
+
+	printf("%s \n","  entering RotateFold2Id1 ");
+	/*
+	printf(" - Rotation matrix to align %d-fold id %d to Z: \n", fold_, fold_index_);
+	printf(" - %6.3f, %6.3f, %6.3f \n", align2Z_00, align2Z_01, align2Z_02);
+	printf(" - %6.3f, %6.3f, %6.3f \n", align2Z_10, align2Z_11, align2Z_12);
+	printf(" - %6.3f, %6.3f, %6.3f \n", align2Z_20, align2Z_21, align2Z_22);
+	*/
+
+	double** matrix;
+	matrix = new double*[ 3 ];
+	matrix[ 0 ] = new double[ 3 ];
+	matrix[ 1 ] = new double[ 3 ];
+	matrix[ 2 ] = new double[ 3 ];
+
+	matrix[ 0 ][ 0 ] = align2Z_00;
+	matrix[ 0 ][ 1 ] = align2Z_01;
+	matrix[ 0 ][ 2 ] = align2Z_02;
+
+	matrix[ 1 ][ 0 ] = align2Z_10;
+	matrix[ 1 ][ 1 ] = align2Z_11;
+	matrix[ 1 ][ 2 ] = align2Z_12;
+
+	matrix[ 2 ][ 0 ] = align2Z_20;
+	matrix[ 2 ][ 1 ] = align2Z_21;
+	matrix[ 2 ][ 2 ] = align2Z_22;
+
+	double newcoord[ 3 ];
+
+	coord[ 0 ] = 23.892;	coord[ 1 ] = 38.658;	coord[ 2 ] = 125.10;
+
+	MatrixVectorMultiplication( matrix , 3 , 3 , coord , 3 , newcoord , 3 );
+
+	printf(" - Coord: %f, %f, %f \n", coord[ 0 ], coord[ 1 ], coord[ 2 ]);
+	coord[ 0 ] = newcoord[ 0 ];	coord[ 1 ] = newcoord[ 1 ];	coord[ 2 ] = newcoord[ 2 ];
+	printf(" - New Coord: %f, %f, %f \n", coord[ 0 ], coord[ 1 ], coord[ 2 ]);
+
+	delete matrix[ 0 ];
+	delete matrix[ 1 ];
+	delete matrix[ 2 ];
+	delete matrix;
+
+	printf("%s \n","  leaving RotateFold2Id1 ");
+	assert(0);
+
 }
 
 /**
@@ -1973,10 +2219,11 @@ double Mesher::InterpolateCapsidResolution3J4U(  ){
  *geometry.dat file: Contains the geometry information, number of nodes and elements
  */
 void Mesher::PrintDataFilesForFEMT(  ){
-	int vir_type = vdb_->GetVirusType(  ); 
-  std::string name = std::to_string( fold_ );
-	std::string aux = std::to_string( vir_type );
-	name = name + "_T" + aux + "_" + virus_ + ".";
+	//int vir_type = vdb_->GetVirusType(  ); 
+        //std::string name = std::to_string( fold_ );
+	//std::string aux = std::to_string( vir_type );
+	//name = name + "_T" + aux + "_" + virus_ + ".";
+	std::string name = "octreemesh.";
 	//Saving solver data file
 	char solver_name[ 10 ] = "CG";
 	this->PrintSolverDataFileForFEMT( solver_name , 1 , 1e-5 , 1000000 , 1 , name );
@@ -1995,8 +2242,8 @@ void Mesher::PrintDataFilesForFEMT(  ){
  *@param[in] name Is the name of the file to be saved
  */
 void Mesher::PrintSolverDataFileForFEMT( char* solver , int threads , double tol , 
-																		 					int max_steps , int preconditioner , 
-																							std::string name ){
+					int max_steps , int preconditioner , 
+					std::string name ){
 	name = name + "solver.dat";
 	ofstream fp( name );
 	fp << "; Solver file" << endl << endl;
@@ -2125,6 +2372,7 @@ void Mesher::PrintProblemDataFileForFEMT( std::string name ){
 
 /**
  *Method to save the geometry data file to solve with FEMT
+ *It also rotates the mesh to align the selected fold to Z
  *@param[in] name Is the name of the file to be saved
  */
 void Mesher::PrintGeometryDataFileForFEMT( std::string name ){

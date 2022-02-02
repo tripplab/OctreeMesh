@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "geometry.h"
 
 double min_rand[ 26 ][ 3 ] = { { -1.0 ,  0.0 ,  0.0 } ,//0
@@ -790,7 +791,7 @@ void ShellSortSizeTDouble( size_t* index , double* vec , size_t n ){
  *@param[in] res_dim Is the number of elements of the results vector
  */
 void MatrixVectorMultiplication( double** mat , int rows , int cols , double* vec , 
-																 int dim , double* res , int res_dim ){
+				 int dim , double* res , int res_dim ){
 	//Validating dimension
 	assert( rows == res_dim );
 	assert( cols == dim );

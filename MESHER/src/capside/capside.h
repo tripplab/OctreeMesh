@@ -240,8 +240,8 @@ class Vdb : public File{
 		//UTILITIES
 		void AddAtom( char params[ 11 ][ 500 ] , int aminocid_index );
 		bool AddProtein( char kind );
-		void ReadCompleteFile( int fold_id );
-		int ReadLine( );
+		void ReadCompleteFile( int fold_id, double align2Z_00, double align2Z_01, double align2Z_02, double align2Z_10, double align2Z_11, double align2Z_12, double align2Z_20, double align2Z_21, double align2Z_22  );
+		int ReadLine( char* rotated_file, double align2Z_00, double align2Z_01, double align2Z_02, double align2Z_10, double align2Z_11, double align2Z_12, double align2Z_20, double align2Z_21, double align2Z_22 );
 		bool AminoacidIsValid( char* kind , int* posiiton );
 		void FillSphericalMeshInformation( int fold_id );
 		void SaveGiDSphericalMesh(  );

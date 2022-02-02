@@ -59,6 +59,20 @@ class Mesher{
 	double young_modulus_;
 	size_t n_final_nodes_;
 
+         double align2Z_00;
+         double align2Z_01;
+         double align2Z_02;
+         double align2Z_10;
+         double align2Z_11;
+         double align2Z_12;
+         double align2Z_20;
+         double align2Z_21;
+         double align2Z_22;
+
+	 double Fx_;
+	 double Fy_;
+	 double Fz_;
+ 
 	public:
 		//CONSTRUCTOR AND DESTRUCTOR
 		Mesher();
@@ -86,14 +100,15 @@ class Mesher{
 		void SetFixedNodePrintedInCell( int node , OctreeCell* cell );
 		void SetLoadedAndFixedElements(  );
 		bool SetLoadedElements( double tot_vol , double prop_vol , double* vertex , 
-														double* direction , double cell_prop );
+					double* direction , double cell_prop );
 		bool SetFixedElements( double tot_vol , double prop_vol , double* vertex , 
-													 double* direction , double cell_prop );
+			               double* direction , double cell_prop );
+		void SetAlign2Z( double Fx, double Fy, double Fz);
 
 		//UTILITIES
 		void ReadVdbFile(  );
 		void SaveVdbOnGiDMesh(  );
-    void ScaleCapside(  );  
+                void ScaleCapside(  );  
 		void RefineLocalRoot();
 		void AssignAtomsOnLocalRoot( );
 		void CalculateRefinementAndPercentage();
@@ -149,8 +164,8 @@ class Mesher{
 		//SAVING ON FILE
 		void PrintDataFilesForFEMT(  );
 		void PrintSolverDataFileForFEMT( char* solver , int threads , double tol , 
-																		 int max_steps , int preconditioner , 
-																		 std::string name );
+						 int max_steps , int preconditioner , 
+						 std::string name );
 		void PrintProblemDataFileForFEMT( std::string name );
 		void PrintGeometryDataFileForFEMT( std::string name );
 };

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "capside.h"
 
 //////////////////////////////////////////////////////////////////////////////////////////
@@ -1124,6 +1125,11 @@ void Warnings::PrintTotals( size_t t_proteins , size_t t_aminoacids , size_t t_a
 	fprintf( fp , "Total proteins  : %ld\n" , t_proteins );
 	fprintf( fp , "Total aminoacids: %ld\n" , t_aminoacids );
 	fprintf( fp , "Total atoms     : %ld\n" , t_atoms );
+
+	printf( " - Found  : \n" );
+	printf( " - Total proteins  : %ld\n" , t_proteins );
+	printf( " - Total aminoacids: %ld\n" , t_aminoacids );
+	printf( " - Total atoms     : %ld\n" , t_atoms );
 }
 
 //CLEANERS
@@ -1280,7 +1286,7 @@ int Vdb::GetVirusType(  ){
  *the data added before or if data does not exist, then the classes are instanced
  *@param[in] params Is the set of parameters readed from file 
  */
-void Vdb::SetAtomOnCapside( char params[11][500] ){
+void Vdb::SetAtomOnCapside( char params[13][500] ){
 
 	if(  !strcmp( params[ 0 ] , "ATOM" )  ){
 		//In this case the information correcponds to an ATOM, but some of the aminoacids are 
@@ -1389,28 +1395,38 @@ bool Vdb::AddProtein( char kind ){
 }
 
 /**
- *Reading the complete vdb file
+ *Reading the complete vdb file in PDB format
  */
-void Vdb::ReadCompleteFile( int fold_id ){
+void Vdb::ReadCompleteFile( int fold_id, double align2Z_00, double align2Z_01, double align2Z_02, double align2Z_10, double align2Z_11, double align2Z_12, double align2Z_20, double align2Z_21, double align2Z_22 ){
 
 	FILE* fp = this->GetPointer();
 
+	char rotated_file[]="capsid_rotated.pdb";
+        FILE* fr;
+        fr = fopen(rotated_file, "w");
+	fclose(fr);
+
+	printf(" - Reading capsid structure \n");
+
 	while( !feof( fp ) ){
 		int read;
-		read = this->ReadLine( );
+		read = this->ReadLine(rotated_file,align2Z_00, align2Z_01, align2Z_02, align2Z_10, align2Z_11, align2Z_12, align2Z_20, align2Z_21, align2Z_22);
 		if( read == EOF ){
 			break;
 		}
 	}
+
+	printf(" - Capsid structure has been aligned with fold %d and saved in %s \n", fold_id, rotated_file);
+
 	this->FillSphericalMeshInformation( fold_id );
 
 }
 
 /**
- *Reading a line from file
+ *Reading a line from file in PDB format
  *This method adds the required information on the data structure
  */
-int Vdb::ReadLine( ){
+int Vdb::ReadLine( char* rotated_file, double align2Z_00, double align2Z_01, double align2Z_02, double align2Z_10, double align2Z_11, double align2Z_12, double align2Z_20, double align2Z_21, double align2Z_22 ){
 	char params[ 11 ][ 500 ];
 	FILE* fp = this->GetPointer();
 	char line[500];
@@ -1420,6 +1436,7 @@ int Vdb::ReadLine( ){
 		return feof( fp );
 	}
 	//reading column 1
+	//reading column 1 Record name ATOM 1-4
 	int position = 0;
 	for(  int i_char = 0  ;  i_char < 4  ;  i_char++  ){
 		params[ 0 ][ i_char ] = line[ position ];
@@ -1428,14 +1445,17 @@ int Vdb::ReadLine( ){
 	params[ 0 ][ 4 ] = 0;
 	
 	//reading column 2
+	//reading column 2 Atom serial number 7-11
 	position = 6;
 	for(  int i_char = 0  ;  i_char < 5  ;  i_char++  ){
-		params[ 1 ][ i_char ] = line[ position ];
+		  params[ 1 ][ i_char ] = line[ position ];
 		position++;
 	}
 	params[ 1 ][ 5 ] = 0;
+	int AtomSerialNumber = atoi(params[ 1 ]);
 
 	//reading column 3
+	//reading column 3 Atom name 13-16
 	position = 12;
 	for(  int i_char = 0  ;  i_char < 4  ;  i_char++  ){
 		params[ 2 ][ i_char ] = line[ position ];
@@ -1444,6 +1464,7 @@ int Vdb::ReadLine( ){
 	params[ 2 ][ 4 ] = 0;
  
 	//reading column 4
+	//reading column 4 Resiude name 18-20
 	position = 17;
 	for(  int i_char = 0  ;  i_char < 3  ;  i_char++  ){
 		params[ 3 ][ i_char ] = line[ position ];
@@ -1452,6 +1473,7 @@ int Vdb::ReadLine( ){
 	params[ 3 ][ 3 ] = 0;
 
 	//reading column 5
+	//reading column 5 Chain identifier 22
 	position = 21;
 	for(  int i_char = 0  ;  i_char < 1  ;  i_char++  ){
 		params[ 4 ][ i_char ] = line[ position ];
@@ -1460,6 +1482,7 @@ int Vdb::ReadLine( ){
 	params[ 4 ][ 1 ] = 0;
 
 	//reading column 6
+	//reading column 6 Residue sequence number 23-26
 	position = 22;
 	for(  int i_char = 0  ;  i_char < 4  ;  i_char++  ){
 		params[ 5 ][ i_char ] = line[ position ];
@@ -1468,30 +1491,37 @@ int Vdb::ReadLine( ){
 	params[ 5 ][ 4 ] = 0;
 
 	//reading column 7
+	//reading column 7 Orthogonal coordinates for X in Angstroms 31-38
 	position = 30;
 	for(  int i_char = 0  ;  i_char < 8  ;  i_char++  ){
 		params[ 6 ][ i_char ] = line[ position ];
 		position++;
 	}
 	params[ 6 ][ 8 ] = 0;
+	double coordX=strtod(params[ 6 ],NULL);
 
 	//reading column 8
+	//reading column 8 Orthogonal coordinates for Y in Angstroms 39-46
 	position = 38;
 	for(  int i_char = 0  ;  i_char < 8  ;  i_char++  ){
 		params[ 7 ][ i_char ] = line[ position ];
 		position++;
 	}
 	params[ 7 ][ 8 ] = 0;
+	double coordY=strtod(params[ 7 ],NULL);
 
 	//reading column 9
+	//reading column 9 Orthogonal coordinates for Z in Angstroms 47-54
 	position = 46;
 	for(  int i_char = 0  ;  i_char < 8  ;  i_char++  ){
 		params[ 8 ][ i_char ] = line[ position ];
 		position++;
 	}
 	params[ 8 ][ 8 ] = 0;
+	double coordZ=strtod(params[ 8 ],NULL);
 
 	//reading column 10
+	//reading column 10 Occupancy 55-60
 	position = 54;
 	for(  int i_char = 0  ;  i_char < 6  ;  i_char++  ){
 		params[ 9 ][ i_char ] = line[ position ];
@@ -1500,6 +1530,7 @@ int Vdb::ReadLine( ){
 	params[ 9 ][ 6 ] = 0;
 
 	//reading column 11
+	//reading column 11 Temperature factor 61-66
 	position = 60;
 	for(  int i_char = 0  ;  i_char < 6  ;  i_char++  ){
 		params[ 10 ][ i_char ] = line[ position ];
@@ -1507,9 +1538,49 @@ int Vdb::ReadLine( ){
 	}
 	params[ 10 ][ 6 ] = 0;
 
+	/*
+        printf(" - Rotation matrix to align vector to Z: \n");
+        printf(" - %6.3f, %6.3f, %6.3f \n", align2Z_00, align2Z_01, align2Z_02);
+        printf(" - %6.3f, %6.3f, %6.3f \n", align2Z_10, align2Z_11, align2Z_12);
+        printf(" - %6.3f, %6.3f, %6.3f \n", align2Z_20, align2Z_21, align2Z_22);
+	*/
+
+	FILE* fr;
+	fr = fopen(rotated_file, "a");
+
+	// Original coordinates
+	//fprintf(fr, "%4s%7d %4s %3s %s%s    %8.3f%8.3f%8.3f%6s%6s \n", params[ 0 ], AtomSerialNumber, params[ 2 ], params[ 3 ], params[ 4 ], params[ 5 ], coordX, coordY, coordZ, params[ 9 ], params[ 10 ]);
+
+        double coordXr=(align2Z_00*coordX)+(align2Z_01*coordY)+(align2Z_02*coordZ);
+        double coordYr=(align2Z_10*coordX)+(align2Z_11*coordY)+(align2Z_12*coordZ);
+        double coordZr=(align2Z_20*coordX)+(align2Z_21*coordY)+(align2Z_22*coordZ);
+
+	// Rotated coordinates
+	fprintf(fr, "%4s%7d %4s %3s %s%s    %8.3f%8.3f%8.3f%6s%6s \n", params[ 0 ], AtomSerialNumber, params[ 2 ], params[ 3 ], params[ 4 ], params[ 5 ], coordXr, coordYr, coordZr, params[ 9 ], params[ 10 ]);
+
+	fclose(fr);
+
 	this->SetAtomOnCapside( params );
 
 	return 1;
+
+	/*
+	//reading column 12 Element symbol, right-justified 77-78
+	position = 76;
+	for(  int i_char = 0  ;  i_char <= 1  ;  i_char++  ){
+		params[ 11 ][ i_char ] = line[ position ];
+		position++;
+	}
+	params[ 11 ][ 2 ] = 0;
+
+	//reading column 13 Charge on the atom 79-80
+	position = 78;
+	for(  int i_char = 0  ;  i_char <= 1  ;  i_char++  ){
+		params[ 12 ][ i_char ] = line[ position ];
+		position++;
+	}
+	params[ 12 ][ 2 ] = 0;
+	*/
 }
 
 /**
@@ -1561,10 +1632,10 @@ void Vdb::FillSphericalMeshInformation( int fold_id ){
 }
 
 /**
- *Saving the mesh of spheres representing the atoms
+ *Saving the set of spheres representing the atoms
  */
 void Vdb::SaveGiDSphericalMesh(  ){
-	mesh_->SaveMeshOnGiDFile( (char*)"capside_mesh.msh" );
+	mesh_->SaveMeshOnGiDFile( (char*)"capsid_atoms.msh" );
 }
 
 /**

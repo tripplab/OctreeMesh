@@ -13,7 +13,7 @@ IMPORTANT NOTE: List of vectors available defining the position of the 5, 2 and 
 Positions for 5 fold
 
 id       X       Y         Z
-0       0.000   77.316002  125.100998
+0       0.000   77.316  125.100
 1       0.000  -77.316  125.100
 2     -77.316  125.101    0.000
 3      77.316  125.100    0.000
@@ -29,8 +29,8 @@ id       X       Y         Z
 Positions for 3 fold
 
 id       X       Y         Z
-0      47.784    0.0000 125.099998
-1      not defined
+0      47.784    0.0000 125.100
+1     -47.784    0.0000 125.100
 2      not defined
 3      not defined
 4      not defined
@@ -45,8 +45,8 @@ id       X       Y         Z
 Positions for 2 fold
 
 id       X       Y         Z
-0       0.000    0.0000 123.301
-1       not defined
+0       0.000    0.000 125.100
+1      23.892   38.658 125.100
 2       not defined
 3       not defined
 4       not defined

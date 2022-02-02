@@ -25,7 +25,7 @@ int main( int argc , char** argv ){
 
 	double t_ini = clock();
 	std::cout << " ****************** " << std::endl;
-	std::cout << " OCTREEMESH v260122 " << std::endl;
+	std::cout << " OCTREEMESH v310122 " << std::endl;
 	std::cout << " ****************** " << std::endl;
 
 	std::cout << " 0/100 START MESHING " << std::endl;
@@ -33,7 +33,7 @@ int main( int argc , char** argv ){
 	com->ReadVdbFile(  );
 	com->CalculateRefinementAndPercentage();
 	com->SaveVdbOnGiDMesh(  );
-  com->ScaleCapside(  );
+        com->ScaleCapside(  );
 	std::cout << " 20/100 VDB READ " << std::endl;
 	com->AssignAtomsOnLocalRoot( );
 	std::cout << " 40/100 ATOMS ASSIGNED " << std::endl;
@@ -54,10 +54,9 @@ int main( int argc , char** argv ){
  *@param[in] argc Number of arguments in program
  */
 void CheckParameters( int argc ){
-	if(  argc != 11  ){
+	if(  argc != 14  ){
 		std::cout << "\n\n";
 		std::cout << "**************************************************************************************" << std::endl;
-		std::cout << "********************************MESH TO PDB APPLICATION*******************************" << std::endl;
 		std::cout << "Received wrong number of arguments " << std::endl; 
 		std::cout << "Arguments must be: " << std::endl;
 		std::cout << "  --[ 1][string][input ] Name of vdb file containing the atoms information" << std::endl;
@@ -66,11 +65,13 @@ void CheckParameters( int argc ){
 		std::cout << "  --[ 4][double][input ] Resolution of mesh in Amstrongs" << std::endl;
 		std::cout << "  --[ 5][int   ][input ] Number of fold to align with Y axis (valids are 2,3 and 5) " << std::endl;
 		std::cout << "  --[ 6][int   ][input ] Number of fold id to align with Y axis (0-11)" << std::endl;
-		std::cout << "  --[ 7][string][input ] Name of virus processed (valids are 1CWP,4G93,3IZG,3J4U)" << std::endl;
-		std::cout << "  --[ 8][double][input ] Cone amplitude in degrees" << std::endl;
-		std::cout << "  --[ 9][double][input ] Variation in the proportion of loaded volume (positive or negative)" << std::endl;
-		std::cout << "  --[10][double][input ] Young modulus divided by 10,000" << std::endl;
-		std::cout << "********************************MESH TO PDB APPLICATION*******************************" << std::endl;
+		std::cout << "  --[ 7][double][input ] x of vector to align with Z" << std::endl;
+		std::cout << "  --[ 8][double][input ] y of vector to align with Z" << std::endl;
+		std::cout << "  --[ 9][double][input ] z of vector to align with Z" << std::endl;
+		std::cout << "  --[10][string][input ] Name of virus processed (valids are 1CWP,4G93,3IZG,3J4U)" << std::endl;
+		std::cout << "  --[11][double][input ] Cone amplitude in degrees" << std::endl;
+		std::cout << "  --[12][double][input ] Variation in the proportion of loaded volume (positive or negative)" << std::endl;
+		std::cout << "  --[13][double][input ] Young modulus divided by 10,000" << std::endl;
 		std::cout << "**************************************************************************************" << std::endl;
 		std::cout << "\n\n";
 		assert( 0 );

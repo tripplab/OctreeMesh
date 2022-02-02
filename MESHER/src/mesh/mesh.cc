@@ -850,7 +850,7 @@ double Spheres::UnscaleCoordinate( int i_pos , double coord ){
 
 //SAVING MESH ON FILE
 /**
- *Saving mesh as a GiD mesh
+ *Saving set of atom positions as a GiD mesh
  *@param[in] output_ Is the name of the file to be printed
  */
 void Spheres::SaveMeshOnGiDFile( char* output_ ){
