@@ -35,7 +35,11 @@ clean:
 	rm -f *.msh
 	rm -f *.res
 	rm -f *.vdb
-	rm -f ./bin/*
+	rm -f ./bin/extract_ATOM
+	rm -f ./bin/octree_mesh
+	rm -f ./bin/shear_rotate
+	rm -f ./bin/meshsolver
+	rm -f ./bin/mesh2pdb
 	make -C ./CLEANER/ clean
 	make -C ./MESHER/ clean
 	make -C ./ROTATOR/ clean

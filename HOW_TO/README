@@ -4,48 +4,70 @@ run comand: ./run.sh
 
 Output should be similar to:
 
-Runing extract_ATOM 1cwp_full.vdb 1cwp_full_clean.vdb
-Running octree_mesh 1cwp_full_clean.vdb 3 1 16.00 3 0 1CWP 15.00 0.00 0.020
+Runing extract_ATOM 1cwp_full.vdb 1cwp_full_ATOMS.vdb
+ - Will extract aminoacid ATOMs from 1cwp_full.vdb and save then in 1cwp_full_ATOMS.vdb 
+Running octree_mesh 1cwp_full_ATOMS.vdb 3 1 16.00 3 3 23 -79 100 1CWP 15.00 0.00 0.020
  ****************** 
- OCTREEMESH v260122 
+ OCTREEMESH v310122 
  ****************** 
  0/100 START MESHING 
- Will try to read VDB file: 1cwp_full_clean.vdb 
+ - At MESHER constructor - 
+ Will try to read VDB file: 1cwp_full_ATOMS.vdb 
  NOTE: this code version only allows the following capsids: 1CWP, 4G93, 3IZG, 3J4U 
  Will work on 1CWP 
---------------------------------------- 
- Will look for structure in file: 1cwp_full_clean.vdb 
+ - Normalized vector: 0.177608, -0.610043, 0.772207 
+ - Axis of rotation: -0.610043, -0.177608, 0.000000 
+ - Rotation matrix to align vector to Z: 
+   0.982  0.061 -0.178 
+   0.061  0.790  0.610 
+   0.178 -0.610  0.772 
+ - Rotation matrix to go back to original orientation: 
+   0.982  0.061  0.178 
+   0.061  0.790 -0.610 
+  -0.178  0.610  0.772 
+ - Matrices saved in: rotate_F2Z.mtx, rotate_Z2F.mtx 
+ Will look for structure in file: 1cwp_full_ATOMS.vdb 
  Will generate a mesh with resolution of: 16.000000 nm 
- Will configure nanoindentation on the 3-fold id 0 
---------------------------------------- 
+ Will align vector: 23.000000 -79.000000 100.000000 to Z 
+ Will configure nanoindentation on the aligned vector 
+ - Leaving constructor - 
+ - Reading capsid structure 
+ - Capsid structure has been aligned with fold 3 and saved in capsid_rotated.pdb 
+ - Found  : 
+ - Total proteins  : 180
+ - Total aminoacids: 25980
+ - Total atoms     : 214440
  20/100 VDB READ 
  40/100 ATOMS ASSIGNED 
  60/100 OCTREE REFINED 
  Mesh Volume: 0.215210 
  Volume Loaded: 0.010245 
- - getting cone direction for 3-fold id  0 
+ - getting normalized cone direction for loaded and fixed elements 
+ - X:  0.178, Y: -0.610, Z:  0.772 
  Loaded Elements have been set  
  Fixed Elements have been set  
  80/100 BOUNDARY CONDITIONS SET  
  # nodes:  9696 
  # elements:  7052 
  100/100 PROBLEMA GUARDADO 
-  Time 5.14739
-Running meshsolver 3_T3_1CWP 2
-Running mesh2pdb 1cwp_3F-Z.pdb 3_T3_1CWP.post.msh 3_T3_1CWP.post.res 3_T3_1CWP_16.00.pdb 5
+  Time 15.517
+Running meshsolver octreemesh 2
+Running mesh2pdb capsid_rotated.pdb octreemesh.post.msh octreemesh.post.res 1CWP_3Fid3_16.00.pdb 5
  0/100 READING DATA 
-  Trying to read file:  1cwp_3F-Z.pdb 
+  Trying to read file:  capsid_rotated.pdb 
  17/100 TRANSLATING RESULTS TO NODES 
  34/100 ASSIGNING ATOMS ON LOCAL ROOT 
  51/100 ASSIGNING RESULTS ON LOCAL ROOT 
  68/100 REFINNNING LOCAL ROOT 
  85/100 INTERPOLATING RESULTS TO ATOMS 
  100/100 MESH SAVED 
-Results in 3_T3_1CWP_solver.out and 3_T3_1CWP_16.00.post.res to visualize with GID
-and mapped into 3_T3_1CWP_16.00.pdb to visualize with VMD
+Running apply-matrix.awk 1CWP_3Fid3_16.00.pdb rotate_Z2F.mtx > 1CWP_3Fid3_16.00_back.pdb
+
+#############################################################################################
+Results in octreemesh_solver.out and 1CWP_3Fid3_16.00.post.res to visualize with GID
+Capsid structure in the VIPERdb convention with nanoindentation results
+saved in 1CWP_3Fid3_16.00_back.pdb to visualize with VMD
+
 Job done
-
-
-
-
+#############################################################################################
 
