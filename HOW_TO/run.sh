@@ -88,7 +88,7 @@ PDB_back=${resn}_back.pdb
   ## Rotate capsid structure back to its original orientation (VIPERdb convention)
   inp="${PDB_results} rotate_Z2F.mtx > ${PDB_back}"
   echo "Running apply-matrix.awk $inp"
-  ./apply-matrix.awk ${PDB_results} rotate_Z2F.mtx > ${PDB_back}
+  ${BIN}/apply-matrix.awk ${PDB_results} rotate_Z2F.mtx > ${PDB_back}
 
   echo ""
   echo "#############################################################################################"

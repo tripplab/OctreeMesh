@@ -1,6 +1,9 @@
 #!/usr/bin/awk -f
 
+## by trippm@bmd [tripplab.com] 02/02/2022
 
+## Bash script to apply a rotation matrix to a set of atom coordinates in PDB format
+## ./apply-matrix.awk original.pdb rotation.mtx > rotated.pdb
 
 BEGIN{
 

@@ -116,6 +116,10 @@ SOLVER/tools/FEMSolver
 SOLVER/tools/FEMSolverExample_cpp
 SOLVER/tools/FEMSolverExample_for
 SOLVER/tools/MatSolver
-bin/
+bin/extract_ATOM
+bin/mesh2pdb
+bin/meshsolver
+bin/octree_mesh
+bin/shear_rotate
 
 
