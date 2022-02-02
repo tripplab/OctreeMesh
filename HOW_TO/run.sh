@@ -4,7 +4,7 @@
 ##               an example for CCMV                ##
 
 ## After the first time you can comment out this line
-##gunzip -v 1cwp*
+gunzip -v 1cwp*
 
 #--------------- User defined parameters -----------------------------------#
 
