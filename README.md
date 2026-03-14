@@ -3,6 +3,44 @@
 OCTREEMESH v310122
 Please take a look at documentation and examples in HOW_TO folder
 
+## Using `environment.yml` with micromamba
+
+From the repository root:
+
+```bash
+micromamba env create -f environment.yml
+micromamba activate octreemesh
+```
+
+Build the project in that environment:
+
+```bash
+make
+```
+
+If you update dependencies in `environment.yml`, recreate the env:
+
+```bash
+micromamba env remove -n octreemesh
+micromamba env create -f environment.yml
+micromamba activate octreemesh
+```
+
+Quick sanity checks after activation:
+
+```bash
+which g++
+which gfortran
+g++ --version
+```
+
+To verify OpenMP support from the activated environment:
+
+```bash
+echo '#include <omp.h>\n#include <stdio.h>\nint main(){printf("%d\\n", omp_get_max_threads());}' > /tmp/omp_test.c
+gcc -fopenmp /tmp/omp_test.c -o /tmp/omp_test && /tmp/omp_test
+```
+
 
 # High-level architecture
 
@@ -136,6 +174,5 @@ Practical recommendation
 Build normally with make (OpenMP already enabled). 
 For actual speedup, tune SOLVER_THREADS to your core count (start with physical cores, then benchmark). 
 If you want faster compilation, increase PARALLEL in SOLVER/build/gcc/Makefile or call make -j. 
-
 
 
