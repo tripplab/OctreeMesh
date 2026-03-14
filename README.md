@@ -99,6 +99,38 @@ Definitely parallelized: SOLVER core and tool internals (OpenMP loops in solver 
 Compiled with OpenMP but no explicit pragmas found in these modules: MESHER and CREATES_PDB.
 Not parallelized: CLEANER and ROTATOR.
 
+To compile this repo for multithreaded execution, you mainly need to ensure OpenMP is enabled at build time (it is, by default) and then set runtime thread counts for solver binaries.
+
+1) Compile with OpenMP (already configured)
+The relevant makefiles already include -fopenmp:
+MESHER uses -fopenmp in both compile and link flags. 
+CREATES_PDB uses -fopenmp in both compile and link flags. 
+SOLVER build flags include -fopenmp for C++ builds in debug/release. 
+So a normal build from repo root is enough:
+make
+Top-level make builds all subprojects and produces bin/* wrappers. 
+
+2) Build parallelism vs runtime parallelism
+There are two different “multithread” knobs:
+Build parallelism (how fast compilation runs): in SOLVER/build/gcc/Makefile, PARALLEL=4 and sub-builds use make -j $(PARALLEL). 
+Runtime parallelism (how many threads the solver uses while solving): controlled by environment variables like SOLVER_THREADS. 
+
+3) Set runtime solver threads
+For solver tools/scripts, increase threads by setting:
+export SOLVER_THREADS=<N>
+The provided runner defaults to 1, so change it there or export before execution. 
+Example:
+
+export SOLVER_THREADS=8
+./bin/meshsolver octreemesh 2
+
+4) Confirm solver code actually uses OpenMP
+Yes — solver kernels contain OpenMP loops with num_threads(threads), e.g. conjugate gradient.
+
+Practical recommendation
+Build normally with make (OpenMP already enabled). 
+For actual speedup, tune SOLVER_THREADS to your core count (start with physical cores, then benchmark). 
+If you want faster compilation, increase PARALLEL in SOLVER/build/gcc/Makefile or call make -j. 
 
 
 
