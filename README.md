@@ -151,12 +151,15 @@ Solver code also contains OpenMP pragmas (#pragma omp parallel for), so flags ma
 Practical checks you can run
 
 1) Show compile lines and confirm -fopenmp appears
+
 make V=1
 
 2) If a binary is built, confirm it links OpenMP runtime
+
 ldd ./bin/meshsolver | rg "gomp|omp"
 
 3) If unsure compiler supports OpenMP
+
 echo '#include <omp.h>
 #include <stdio.h>
 int main(){printf("%d\n", omp_get_max_threads());}' > /tmp/omp_test.c
@@ -182,7 +185,9 @@ micromamba create -n octreemesh -c conda-forge \
   gcc_linux-64 gxx_linux-64 gfortran_linux-64 \
   libgomp \
   awk gzip -y
+
 Then:
+
 micromamba activate octreemesh
 make clean
 make
@@ -190,6 +195,7 @@ make
 Option B: Use system compilers + env utilities only
 
 If you already have system gcc/g++/gfortran with OpenMP:
+
 micromamba create -n octreemesh -c conda-forge make awk gzip -y
 micromamba activate octreemesh
 make
