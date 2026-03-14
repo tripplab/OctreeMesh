@@ -1,0 +1,24 @@
+name: octreemesh
+channels:
+  - conda-forge
+dependencies:
+  # Build toolchain
+  - make
+  - pkg-config
+
+  # C/C++/Fortran compilers used by project makefiles
+  - gcc_linux-64
+  - gxx_linux-64
+  - gfortran_linux-64
+
+  # OpenMP runtime (libgomp)
+  - libgomp
+
+  # Script/runtime helpers used by HOW_TO pipeline
+  - gawk
+  - gzip
+  - coreutils
+
+  # Optional but handy for diagnostics/debugging build/link/runtime
+  - binutils
+  - patchelf
