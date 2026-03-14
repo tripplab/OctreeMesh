@@ -133,13 +133,14 @@ controlled by environment variables like SOLVER_THREADS.
 
 For solver tools/scripts, increase threads by setting:
 
-export SOLVER_THREADS=<N>
+export SOLVER_THREADS=N
 
 The provided runner defaults to 1, so change it there or export before execution. 
 
 Example:
 
 export SOLVER_THREADS=8
+
 ./bin/meshsolver octreemesh 2
 
 4) Solver code actually uses OpenMP
