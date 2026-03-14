@@ -137,5 +137,70 @@ Build normally with make (OpenMP already enabled).
 For actual speedup, tune SOLVER_THREADS to your core count (start with physical cores, then benchmark). 
 If you want faster compilation, increase PARALLEL in SOLVER/build/gcc/Makefile or call make -j. 
 
+You can verify OpenMP at three levels: build flags, source usage, and linked runtime.
+
+# 1) How to tell if OpenMP is enabled at build time
+
+For this repo specifically, it is configured in makefiles already:
+
+MESHER compiles and links with -fopenmp.
+CREATES_PDB compiles and links with -fopenmp.
+SOLVER C++ flags include -fopenmp (debug and release).
+Solver code also contains OpenMP pragmas (#pragma omp parallel for), so flags matter and are used.
+
+Practical checks you can run
+
+1) Show compile lines and confirm -fopenmp appears
+make V=1
+
+2) If a binary is built, confirm it links OpenMP runtime
+ldd ./bin/meshsolver | rg "gomp|omp"
+
+3) If unsure compiler supports OpenMP
+echo '#include <omp.h>
+#include <stdio.h>
+int main(){printf("%d\n", omp_get_max_threads());}' > /tmp/omp_test.c
+gcc -fopenmp /tmp/omp_test.c -o /tmp/omp_test && /tmp/omp_test
+
+If (1) includes -fopenmp and (2) shows libgomp (or equivalent), you’re good.
+
+# 2) If OpenMP is not available: micromamba env setup
+
+You can create a dedicated micromamba env (e.g., octreemesh) with all build deps.
+This project needs at least:
+
+g++/gcc
+gfortran (solver make flags explicitly set FC:=gfortran).
+make
+OpenMP runtime/dev libs (usually provided with gcc toolchain)
+optional: awk, gzip for pipeline scripts
+
+Option A (recommended): Linux toolchain from conda-forge
+
+micromamba create -n octreemesh -c conda-forge \
+  make cmake pkg-config \
+  gcc_linux-64 gxx_linux-64 gfortran_linux-64 \
+  libgomp \
+  awk gzip -y
+Then:
+micromamba activate octreemesh
+make clean
+make
+
+Option B: Use system compilers + env utilities only
+
+If you already have system gcc/g++/gfortran with OpenMP:
+micromamba create -n octreemesh -c conda-forge make awk gzip -y
+micromamba activate octreemesh
+make
+
+# 3) Extra tip: compile parallelism vs OpenMP runtime
+
+These are different:
+
+Compile parallelism (faster build): make -jN and solver submake PARALLEL=4.
+Runtime thread count (OpenMP execution): set env vars like SOLVER_THREADS when running solver tools/scripts.
+
+
 
 
