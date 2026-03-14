@@ -3,44 +3,6 @@
 OCTREEMESH v310122
 Please take a look at documentation and examples in HOW_TO folder
 
-## Using `environment.yml` with micromamba
-
-From the repository root:
-
-```bash
-micromamba env create -f environment.yml
-micromamba activate octreemesh
-```
-
-Build the project in that environment:
-
-```bash
-make
-```
-
-If you update dependencies in `environment.yml`, recreate the env:
-
-```bash
-micromamba env remove -n octreemesh
-micromamba env create -f environment.yml
-micromamba activate octreemesh
-```
-
-Quick sanity checks after activation:
-
-```bash
-which g++
-which gfortran
-g++ --version
-```
-
-To verify OpenMP support from the activated environment:
-
-```bash
-echo '#include <omp.h>\n#include <stdio.h>\nint main(){printf("%d\\n", omp_get_max_threads());}' > /tmp/omp_test.c
-gcc -fopenmp /tmp/omp_test.c -o /tmp/omp_test && /tmp/omp_test
-```
-
 
 # High-level architecture
 
@@ -207,36 +169,44 @@ If (1) includes -fopenmp and (2) shows libgomp (or equivalent), you’re good.
 
 # 2) If OpenMP is not available: micromamba env setup
 
-You can create a dedicated micromamba env (e.g., octreemesh) with all build deps.
-This project needs at least:
+## Using `environment.yml` with micromamba
 
-g++/gcc
-gfortran (solver make flags explicitly set FC:=gfortran).
-make
-OpenMP runtime/dev libs (usually provided with gcc toolchain)
-optional: awk, gzip for pipeline scripts
+From the repository root:
 
-Option A (recommended): Linux toolchain from conda-forge
-
-micromamba create -n octreemesh -c conda-forge \
-  make cmake pkg-config \
-  gcc_linux-64 gxx_linux-64 gfortran_linux-64 \
-  libgomp \
-  awk gzip -y
-
-Then:
-
+```bash
+micromamba env create -f environment.yml
 micromamba activate octreemesh
-make clean
+```
+
+Build the project in that environment:
+
+```bash
 make
+```
 
-Option B: Use system compilers + env utilities only
+If you update dependencies in `environment.yml`, recreate the env:
 
-If you already have system gcc/g++/gfortran with OpenMP:
-
-micromamba create -n octreemesh -c conda-forge make awk gzip -y
+```bash
+micromamba env remove -n octreemesh
+micromamba env create -f environment.yml
 micromamba activate octreemesh
-make
+```
+
+Quick sanity checks after activation:
+
+```bash
+which g++
+which gfortran
+g++ --version
+```
+
+To verify OpenMP support from the activated environment:
+
+```bash
+echo '#include <omp.h>\n#include <stdio.h>\nint main(){printf("%d\\n", omp_get_max_threads());}' > /tmp/omp_test.c
+gcc -fopenmp /tmp/omp_test.c -o /tmp/omp_test && /tmp/omp_test
+```
+
 
 # 3) Extra tip: compile parallelism vs OpenMP runtime
 
