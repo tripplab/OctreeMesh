@@ -35,7 +35,7 @@ class Atom{
 
 		//CONSTRUCTOR AND DESTRUCTOR
 		Atom(  );
-		Atom( char* kind , double radius , double* coords );
+		Atom( const char* kind , double radius , double* coords );
 		~Atom(  );
 
 		//GETS
@@ -47,7 +47,7 @@ class Atom{
 		size_t GetKey( int position );
 
 		//SETS
-		bool SetKind( char* kind );
+		bool SetKind( const char* kind );
 		bool SetCoordinate( double coord , int position );
 		bool SetCoordinates( double* coords );
 		void SetRadius( double radius );
@@ -76,7 +76,7 @@ class Aminoacid{
 
 	int kind_;
 	std::vector<Atom*> atoms_;
-    char* valids_[ 20 ] = {  "ALA"/*Alanine*/, "ARG"/*Arginine*/, "ASN"/*Asparagine*/, "ASP"/*Aspartic acid*/, "CYS"/*Cysteine*/, "GLU"/*Glutamic acid*/, "GLN"/*Glutamine*/, "GLY"/*Glycine*/, "HIS"/*Histidine*/, "ILE"/*Isoleucine*/, "LEU"/*Leucine*/, "LYS"/*Lysine*/, "MET"/*Methionine*/, "PHE"/*Phenylalanine*/, "PRO"/*Proline*/, "SER"/*Serine*/, "THR"/*Threonine*/, "TRP"/*Tryptophan*/, "TYR"/*Tyrosine*/, "VAL"/*Valine*/ };
+    const char* valids_[ 20 ] = {  "ALA"/*Alanine*/, "ARG"/*Arginine*/, "ASN"/*Asparagine*/, "ASP"/*Aspartic acid*/, "CYS"/*Cysteine*/, "GLU"/*Glutamic acid*/, "GLN"/*Glutamine*/, "GLY"/*Glycine*/, "HIS"/*Histidine*/, "ILE"/*Isoleucine*/, "LEU"/*Leucine*/, "LYS"/*Lysine*/, "MET"/*Methionine*/, "PHE"/*Phenylalanine*/, "PRO"/*Proline*/, "SER"/*Serine*/, "THR"/*Threonine*/, "TRP"/*Tryptophan*/, "TYR"/*Tyrosine*/, "VAL"/*Valine*/ };
 	double radius_[ 6 ] = { 1.78/*Carbon*/ , 1.6/*Hydrogen*/ , 1.6/*Oxygen*/ , 1.8/*Nitrogen*/ ,1.83/*Phosphorus*/ , 1.2/*Sulfur*/ };
 
 	public:
@@ -88,7 +88,7 @@ class Aminoacid{
 		//GETS
 		size_t GetNAtoms(  );
 		int GetKind(  );
-		double GetAtomRadius( char* kind );	
+		double GetAtomRadius( const char* kind );	
 		double GetAtomCoordinate( size_t index , int position );	
 		void GetAtomCoordinates( size_t index , double* coords );
 		Atom* GetAtom( size_t index );
@@ -99,8 +99,8 @@ class Aminoacid{
 		bool SetAtomCoordinates( size_t index , double* coords );
 
 		//UTILITIES
-		bool AddAtom( char* kind , double diameter , double* coords );
-		bool IsValid( char* kind , int* position );
+		bool AddAtom( const char* kind , double diameter , double* coords );
+		bool IsValid( const char* kind , int* position );
 		bool AreEqual( int index );
 
 		//CLEANERS
@@ -122,7 +122,7 @@ class Protein{
 
 	char kind_;
 	std::vector<Aminoacid*> aminoacids_;
-    char* valids_[ 20 ] = {  "ALA"/*Alanine*/, "ARG"/*Arginine*/, "ASN"/*Asparagine*/, "ASP"/*Aspartic acid*/, "CYS"/*Cysteine*/, "GLU"/*Glutamic acid*/, "GLN"/*Glutamine*/, "GLY"/*Glycine*/, "HIS"/*Histidine*/, "ILE"/*Isoleucine*/, "LEU"/*Leucine*/, "LYS"/*Lysine*/, "MET"/*Methionine*/, "PHE"/*Phenylalanine*/, "PRO"/*Proline*/, "SER"/*Serine*/, "THR"/*Threonine*/, "TRP"/*Tryptophan*/, "TYR"/*Tyrosine*/, "VAL"/*Valine*/ };
+    const char* valids_[ 20 ] = {  "ALA"/*Alanine*/, "ARG"/*Arginine*/, "ASN"/*Asparagine*/, "ASP"/*Aspartic acid*/, "CYS"/*Cysteine*/, "GLU"/*Glutamic acid*/, "GLN"/*Glutamine*/, "GLY"/*Glycine*/, "HIS"/*Histidine*/, "ILE"/*Isoleucine*/, "LEU"/*Leucine*/, "LYS"/*Lysine*/, "MET"/*Methionine*/, "PHE"/*Phenylalanine*/, "PRO"/*Proline*/, "SER"/*Serine*/, "THR"/*Threonine*/, "TRP"/*Tryptophan*/, "TYR"/*Tyrosine*/, "VAL"/*Valine*/ };
 
 	public:
 		//CONSTRUCTOR AND DESTRUCTOR
@@ -139,8 +139,8 @@ class Protein{
 		bool SetKind( char kind );
 
 		//UTILITIES
-		bool IsValid( char* kind , int* posiiton );
-		bool AddAminoacid( char* kind );
+		bool IsValid( const char* kind , int* posiiton );
+		bool AddAminoacid( const char* kind );
 
 		//CLEANERS
 		bool EmptyAminoacids(  );
@@ -163,7 +163,7 @@ class Vdb{
 	FILE* ptr_;
 	Spheres* mesh_;
 	std::vector<Protein*> proteins_;
-    char* valids_[ 20 ] = {  "ALA"/*Alanine*/, "ARG"/*Arginine*/, "ASN"/*Asparagine*/, "ASP"/*Aspartic acid*/, "CYS"/*Cysteine*/, "GLU"/*Glutamic acid*/, "GLN"/*Glutamine*/, "GLY"/*Glycine*/, "HIS"/*Histidine*/, "ILE"/*Isoleucine*/, "LEU"/*Leucine*/, "LYS"/*Lysine*/, "MET"/*Methionine*/, "PHE"/*Phenylalanine*/, "PRO"/*Proline*/, "SER"/*Serine*/, "THR"/*Threonine*/, "TRP"/*Tryptophan*/, "TYR"/*Tyrosine*/, "VAL"/*Valine*/ };
+    const char* valids_[ 20 ] = {  "ALA"/*Alanine*/, "ARG"/*Arginine*/, "ASN"/*Asparagine*/, "ASP"/*Aspartic acid*/, "CYS"/*Cysteine*/, "GLU"/*Glutamic acid*/, "GLN"/*Glutamine*/, "GLY"/*Glycine*/, "HIS"/*Histidine*/, "ILE"/*Isoleucine*/, "LEU"/*Leucine*/, "LYS"/*Lysine*/, "MET"/*Methionine*/, "PHE"/*Phenylalanine*/, "PRO"/*Proline*/, "SER"/*Serine*/, "THR"/*Threonine*/, "TRP"/*Tryptophan*/, "TYR"/*Tyrosine*/, "VAL"/*Valine*/ };
 	public:
 
 		//CONSTRUCTOR AND DESTRUCTOR
@@ -185,7 +185,7 @@ class Vdb{
 		bool AddProtein( char kind );
 		void ReadCompleteFile(  );
 		int ReadLine( );
-		bool AminoacidIsValid( char* kind , int* posiiton );
+		bool AminoacidIsValid( const char* kind , int* posiiton );
 		void FillSphericalMeshInformation(  );
 		void SaveGiDSphericalMesh(  );
     void ScaleSpheresMesh(  ); 
