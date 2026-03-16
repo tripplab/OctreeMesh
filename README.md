@@ -12,6 +12,10 @@ Some documentation and examples in HOW_TO folder
 
 git clone -b dev01 --single-branch https://github.com/tripplab/OctreeMesh.git
 
+or
+
+git pull origin dev01
+
 Prereqs:
 
 - make, g++
