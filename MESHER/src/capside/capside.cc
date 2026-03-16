@@ -25,7 +25,7 @@ Atom::Atom(  ){
  *@param[in] radius Is the radius of the atom
  *@param[in] coords Is the spacial position of the atom
  */
-Atom::Atom( char* kind , double radius , double* coords ){
+Atom::Atom( const char* kind , double radius , double* coords ){
 	strcpy( kind_ , kind );
 	radius_ = radius;
 	for(  int i_position = 0  ;  i_position < 3  ;  i_position++  ){
@@ -150,7 +150,7 @@ size_t Atom::GetKey( int position ){
  *@param[in] kind is the name of the atom that will be set
  *@return A bool value indicating if the name was set correctly
  */
-bool Atom::SetKind( char* kind ){
+bool Atom::SetKind( const char* kind ){
 	strcpy( kind_ , kind );
 	bool flag = false;
 	if(  !strcmp( kind_ , kind )  ){
@@ -639,7 +639,7 @@ int Aminoacid::GetKind(  ){
  *    6-S-Sulfur
  *@return A double value indicating the diameter of the atom.
  */
-double Aminoacid::GetAtomRadius( char* kind ){
+double Aminoacid::GetAtomRadius( const char* kind ){
 	char temp = kind[ 0 ];
 	if(  temp == ' '  ){
 		temp = kind[ 1 ];
@@ -769,7 +769,7 @@ bool Aminoacid::SetAtomCoordinates( size_t index , double* coords ){
  *@param[in] coords Is the array withe spacial coordinates of the atom
  *@return A bool value indicating if the atom was added or not
  */
-bool Aminoacid::AddAtom( char* kind , double diameter , double* coords ){
+bool Aminoacid::AddAtom( const char* kind , double diameter , double* coords ){
 	size_t num_atoms = atoms_.size();
 	Atom* new_atom = new Atom( kind , diameter , coords );
 	atoms_.push_back( new_atom );
@@ -783,7 +783,7 @@ bool Aminoacid::AddAtom( char* kind , double diameter , double* coords ){
  *@param[out] position Is the index of the kind of aminoacid
  *@return A bool value indicating if the aminoacid is valid or not  
  */
-bool Aminoacid::IsValid( char* kind , int*  position ){
+bool Aminoacid::IsValid( const char* kind , int*  position ){
 	bool flag = false;
 	(*position) = -1;
 	for(  int i_kind = 0  ;  i_kind < 20  ;  i_kind++  ){
@@ -909,7 +909,7 @@ bool Protein::SetKind( char kind ){
  *@param[out] position Is the index of the kind of aminoacid
  *@return A bool value indicating if the aminoacid is valid or not  
  */
-bool Protein::IsValid( char* kind , int*  position ){
+bool Protein::IsValid( const char* kind , int*  position ){
 	bool flag = false;
 	(*position) = -1;
 	for(  int i_kind = 0  ;  i_kind < 20  ;  i_kind++  ){
@@ -927,7 +927,7 @@ bool Protein::IsValid( char* kind , int*  position ){
  *@param[in] kind Is the string containing the kind of aminoacid to be added
  *@return A bool value indicating if the aminoacid was added correctly
  */
-bool Protein::AddAminoacid( char* kind ){
+bool Protein::AddAminoacid( const char* kind ){
 	int position;
 	bool flag = false;
 	if(  this->IsValid( kind , &position )  ){
@@ -1590,7 +1590,7 @@ int Vdb::ReadLine( char* rotated_file, double align2Z_00, double align2Z_01, dou
  *@param[out] position Is the index of the kind of aminoacid
  *@return A bool value indicating if the aminoacid is valid or not  
  */
-bool Vdb::AminoacidIsValid( char* kind , int*  position ){
+bool Vdb::AminoacidIsValid( const char* kind , int*  position ){
 	bool flag = false;
 	(*position) = -1;
 	for(  int i_kind = 0  ;  i_kind < 20  ;  i_kind++  ){
