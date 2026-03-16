@@ -105,9 +105,9 @@ record_step_timing() {
     local elapsed=$4
     local note=${5:-""}
 
-    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
-        "$RUN_ID" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$step_index" "$step_name" \
-        "$status" "$elapsed" "$SOLVER_THREADS" "$STEPS_SPEC" "$SHEAR_MODE" "$note" >> "$TIMING_FILE"
+    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
+        "$RUN_ID" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$PDB" "$Res" "$FOLD_TYPE" "$FOLD_INDEX" \
+        "$step_index" "$step_name" "$status" "$elapsed" "$SOLVER_THREADS" "$STEPS_SPEC" "$SHEAR_MODE" "$note" >> "$TIMING_FILE"
 
     STEP_SUMMARY+=("$step_index|$step_name|$status|$elapsed")
 }
@@ -293,10 +293,10 @@ PDB_back="${resn}_back.pdb"
 mkdir -p .checkpoints
 
 # Timing metadata output (kept across runs for comparisons)
-TIMING_FILE=".checkpoints/timings.tsv"
+TIMING_FILE=".checkpoints/timings.ts"
 RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
 if [[ ! -f "$TIMING_FILE" ]]; then
-    printf "run_id\tutc_timestamp\tstep_index\tstep_name\tstatus\telapsed_sec\tsolver_threads\tsteps_spec\tshear_mode\tnote\n" > "$TIMING_FILE"
+    printf "run_id\tutc_timestamp\tpdb\tres\tfold_type\tfold_index\tstep_index\tstep_name\tstatus\telapsed_sec\tsolver_threads\tsteps_spec\tshear_mode\tnote\n" > "$TIMING_FILE"
 fi
 STEP_SUMMARY=()
 PIPELINE_START="$(now_epoch)"
@@ -511,8 +511,8 @@ if $all_completed; then
         read -p "Clean up checkpoints? (y/n): " -n 1 -r
         echo ""
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            rm -rf .checkpoints
-            echo "Checkpoints cleaned up."
+            find .checkpoints -mindepth 1 -not -name "$(basename "$TIMING_FILE")" -delete
+            echo "Checkpoints cleaned up (timing history preserved in $TIMING_FILE)."
         fi
     fi
 else
