@@ -272,7 +272,7 @@ current_display_step=1
 if should_run 1; then
     echo "[Step $current_display_step/$TOTAL_STEPS] extract_ATOM..."
     if [[ ! -f ".checkpoints/step1_done" ]] || [[ ! -f "${VDB}_ATOMS.vdb" ]]; then
-        ${BIN}/extract_ATOM "${VDB}.vdb ${VDB}_ATOMS.vdb"
+        ${BIN}/extract_ATOM "${VDB}.vdb" "${VDB}_ATOMS.vdb"
         if [[ $? -eq 0 ]]; then
             touch .checkpoints/step1_done
             echo "  ✓ Step $current_display_step complete"
@@ -313,7 +313,7 @@ if [[ $SHEAR_MODE -eq 1 ]]; then
         echo "[Step $current_display_step/$TOTAL_STEPS] shear_rotate..."
         if [[ ! -f ".checkpoints/shear_done" ]]; then
             echo "  Applying shear rotation for shearing force simulation"
-            ${BIN}/shear_rotate "${GEOM} ${GEOM}"
+            ${BIN}/shear_rotate "${GEOM}" "${GEOM}"
             if [[ $? -eq 0 ]]; then
                 touch .checkpoints/shear_done
                 echo "  ✓ Step $current_display_step complete"
@@ -332,7 +332,7 @@ fi
 if should_run 3; then
     echo "[Step $current_display_step/$TOTAL_STEPS] meshsolver (using $SOLVER_THREADS threads)..."
     if [[ ! -f ".checkpoints/step3_done" ]] || [[ ! -f "$OUTF" ]]; then
-        ${BIN}/meshsolver "${name} ${log_lev}" > ${OUTF}
+        ${BIN}/meshsolver "${name}" "${log_lev}" > "${OUTF}"
         if [[ $? -eq 0 ]]; then
             touch .checkpoints/step3_done
             echo "  ✓ Step $current_display_step complete"
@@ -350,8 +350,8 @@ fi
 if should_run 4; then
     echo "[Step $current_display_step/$TOTAL_STEPS] mesh2pdb..."
     if [[ ! -f ".checkpoints/step4_done" ]] || [[ ! -f "$PDB_results" ]]; then
-        ${BIN}/mesh2pdb "${CAPR} ${MSH2} ${POST} ${PDB_results} ${ref_lev}"
-        rm -f ${CAPR}  # Clean up rotated file
+        ${BIN}/mesh2pdb "${CAPR}" "${MSH2}" "${POST}" "${PDB_results}" "${ref_lev}"
+        rm -f "${CAPR}"  # Clean up rotated file
         if [[ $? -eq 0 ]]; then
             touch .checkpoints/step4_done
             echo "  ✓ Step $current_display_step complete"
