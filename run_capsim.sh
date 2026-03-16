@@ -85,6 +85,33 @@ get_step_name() {
     esac
 }
 
+# Get epoch seconds with sub-second precision when available
+now_epoch() {
+    date +%s.%N
+}
+
+# Compute elapsed seconds between two epoch values
+elapsed_seconds() {
+    local start_time=$1
+    local end_time=$2
+    awk -v s="$start_time" -v e="$end_time" 'BEGIN { printf "%.3f", (e - s) }'
+}
+
+# Append timing metadata for cross-run comparisons
+record_step_timing() {
+    local step_index=$1
+    local step_name=$2
+    local status=$3
+    local elapsed=$4
+    local note=${5:-""}
+
+    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
+        "$RUN_ID" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$step_index" "$step_name" \
+        "$status" "$elapsed" "$SOLVER_THREADS" "$STEPS_SPEC" "$SHEAR_MODE" "$note" >> "$TIMING_FILE"
+
+    STEP_SUMMARY+=("$step_index|$step_name|$status|$elapsed")
+}
+
 # Set fold parameters based on type and index
 set_fold_parameters() {
     case $FOLD_TYPE in
@@ -265,6 +292,15 @@ PDB_back="${resn}_back.pdb"
 # Create checkpoints directory
 mkdir -p .checkpoints
 
+# Timing metadata output (kept across runs for comparisons)
+TIMING_FILE=".checkpoints/timings.tsv"
+RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
+if [[ ! -f "$TIMING_FILE" ]]; then
+    printf "run_id\tutc_timestamp\tstep_index\tstep_name\tstatus\telapsed_sec\tsolver_threads\tsteps_spec\tshear_mode\tnote\n" > "$TIMING_FILE"
+fi
+STEP_SUMMARY=()
+PIPELINE_START="$(now_epoch)"
+
 # Initialize step counter for display
 current_display_step=1
 
@@ -272,16 +308,23 @@ current_display_step=1
 if should_run 1; then
     echo "[Step $current_display_step/$TOTAL_STEPS] extract_ATOM..."
     if [[ ! -f ".checkpoints/step1_done" ]] || [[ ! -f "${VDB}_ATOMS.vdb" ]]; then
+        step_start="$(now_epoch)"
         ${BIN}/extract_ATOM "${VDB}.vdb" "${VDB}_ATOMS.vdb"
-        if [[ $? -eq 0 ]]; then
+        step_rc=$?
+        step_elapsed="$(elapsed_seconds "$step_start" "$(now_epoch)")"
+        if [[ $step_rc -eq 0 ]]; then
             touch .checkpoints/step1_done
+            echo "  Time ${step_elapsed}s"
             echo "  ✓ Step $current_display_step complete"
+            record_step_timing "1" "extract_ATOM" "done" "$step_elapsed"
         else
+            record_step_timing "1" "extract_ATOM" "failed" "$step_elapsed"
             echo "  ✗ Step $current_display_step failed!"
             exit 1
         fi
     else
         echo "  ↻ Step $current_display_step already completed (checkpoint found)"
+        record_step_timing "1" "extract_ATOM" "skipped" "0.000" "checkpoint"
     fi
     ((current_display_step++))
 fi
@@ -291,16 +334,23 @@ if should_run 2; then
     echo "[Step $current_display_step/$TOTAL_STEPS] octree_mesh..."
     if [[ ! -f ".checkpoints/step2_done" ]] || [[ ! -f "$GEOM" ]]; then
         inp="${VDB}_ATOMS.vdb ${T} ${VDW} ${Res} ${Fold} ${inx} ${Fx} ${Fy} ${Fz} ${PDB} ${cone} ${load_ele} ${Young}"
+        step_start="$(now_epoch)"
         ${BIN}/octree_mesh ${inp}
-        if [[ $? -eq 0 ]]; then
+        step_rc=$?
+        step_elapsed="$(elapsed_seconds "$step_start" "$(now_epoch)")"
+        if [[ $step_rc -eq 0 ]]; then
             touch .checkpoints/step2_done
+            echo "  Time ${step_elapsed}s"
             echo "  ✓ Step $current_display_step complete"
+            record_step_timing "2" "octree_mesh" "done" "$step_elapsed"
         else
+            record_step_timing "2" "octree_mesh" "failed" "$step_elapsed"
             echo "  ✗ Step $current_display_step failed!"
             exit 1
         fi
     else
         echo "  ↻ Step $current_display_step already completed (checkpoint found)"
+        record_step_timing "2" "octree_mesh" "skipped" "0.000" "checkpoint"
     fi
     ((current_display_step++))
 fi
@@ -313,16 +363,23 @@ if [[ $SHEAR_MODE -eq 1 ]]; then
         echo "[Step $current_display_step/$TOTAL_STEPS] shear_rotate..."
         if [[ ! -f ".checkpoints/shear_done" ]]; then
             echo "  Applying shear rotation for shearing force simulation"
+            step_start="$(now_epoch)"
             ${BIN}/shear_rotate "${GEOM}" "${GEOM}"
-            if [[ $? -eq 0 ]]; then
+            step_rc=$?
+            step_elapsed="$(elapsed_seconds "$step_start" "$(now_epoch)")"
+            if [[ $step_rc -eq 0 ]]; then
                 touch .checkpoints/shear_done
+                echo "  Time ${step_elapsed}s"
                 echo "  ✓ Step $current_display_step complete"
+                record_step_timing "s" "shear_rotate" "done" "$step_elapsed"
             else
+                record_step_timing "s" "shear_rotate" "failed" "$step_elapsed"
                 echo "  ✗ Step $current_display_step failed!"
                 exit 1
             fi
         else
             echo "  ↻ Step $current_display_step already completed (checkpoint found)"
+            record_step_timing "s" "shear_rotate" "skipped" "0.000" "checkpoint"
         fi
         ((current_display_step++))
     fi
@@ -332,16 +389,23 @@ fi
 if should_run 3; then
     echo "[Step $current_display_step/$TOTAL_STEPS] meshsolver (using $SOLVER_THREADS threads)..."
     if [[ ! -f ".checkpoints/step3_done" ]] || [[ ! -f "$OUTF" ]]; then
+        step_start="$(now_epoch)"
         ${BIN}/meshsolver "${name}" "${log_lev}" > "${OUTF}"
-        if [[ $? -eq 0 ]]; then
+        step_rc=$?
+        step_elapsed="$(elapsed_seconds "$step_start" "$(now_epoch)")"
+        if [[ $step_rc -eq 0 ]]; then
             touch .checkpoints/step3_done
+            echo "  Time ${step_elapsed}s"
             echo "  ✓ Step $current_display_step complete"
+            record_step_timing "3" "meshsolver" "done" "$step_elapsed"
         else
+            record_step_timing "3" "meshsolver" "failed" "$step_elapsed"
             echo "  ✗ Step $current_display_step failed!"
             exit 1
         fi
     else
         echo "  ↻ Step $current_display_step already completed (checkpoint found)"
+        record_step_timing "3" "meshsolver" "skipped" "0.000" "checkpoint"
     fi
     ((current_display_step++))
 fi
@@ -350,17 +414,24 @@ fi
 if should_run 4; then
     echo "[Step $current_display_step/$TOTAL_STEPS] mesh2pdb..."
     if [[ ! -f ".checkpoints/step4_done" ]] || [[ ! -f "$PDB_results" ]]; then
+        step_start="$(now_epoch)"
         ${BIN}/mesh2pdb "${CAPR}" "${MSH2}" "${POST}" "${PDB_results}" "${ref_lev}"
+        step_rc=$?
         rm -f "${CAPR}"  # Clean up rotated file
-        if [[ $? -eq 0 ]]; then
+        step_elapsed="$(elapsed_seconds "$step_start" "$(now_epoch)")"
+        if [[ $step_rc -eq 0 ]]; then
             touch .checkpoints/step4_done
+            echo "  Time ${step_elapsed}s"
             echo "  ✓ Step $current_display_step complete"
+            record_step_timing "4" "mesh2pdb" "done" "$step_elapsed"
         else
+            record_step_timing "4" "mesh2pdb" "failed" "$step_elapsed"
             echo "  ✗ Step $current_display_step failed!"
             exit 1
         fi
     else
         echo "  ↻ Step $current_display_step already completed (checkpoint found)"
+        record_step_timing "4" "mesh2pdb" "skipped" "0.000" "checkpoint"
     fi
     ((current_display_step++))
 fi
@@ -369,22 +440,44 @@ fi
 if should_run 5; then
     echo "[Step $current_display_step/$TOTAL_STEPS] rotate_back..."
     if [[ ! -f ".checkpoints/step5_done" ]] || [[ ! -f "$PDB_back" ]]; then
+        step_start="$(now_epoch)"
         ${BIN}/apply-matrix.awk ${PDB_results} rotate_Z2F.mtx > ${PDB_back}
-        if [[ $? -eq 0 ]]; then
+        step_rc=$?
+        step_elapsed="$(elapsed_seconds "$step_start" "$(now_epoch)")"
+        if [[ $step_rc -eq 0 ]]; then
             touch .checkpoints/step5_done
+            echo "  Time ${step_elapsed}s"
             echo "  ✓ Step $current_display_step complete"
+            record_step_timing "5" "rotate_back" "done" "$step_elapsed"
         else
+            record_step_timing "5" "rotate_back" "failed" "$step_elapsed"
             echo "  ✗ Step $current_display_step failed!"
             exit 1
         fi
     else
         echo "  ↻ Step $current_display_step already completed (checkpoint found)"
+        record_step_timing "5" "rotate_back" "skipped" "0.000" "checkpoint"
     fi
     ((current_display_step++))
 fi
 
 # Check if all requested steps completed
 all_completed=true
+
+PIPELINE_ELAPSED="$(elapsed_seconds "$PIPELINE_START" "$(now_epoch)")"
+echo ""
+echo "Step timing summary (run: $RUN_ID)"
+echo "--------------------------------------------------"
+printf "%-4s %-15s %-9s %s\n" "Step" "Name" "Status" "Elapsed"
+for step_row in "${STEP_SUMMARY[@]}"; do
+    IFS='|' read -r summary_step summary_name summary_status summary_elapsed <<< "$step_row"
+    printf "%-4s %-15s %-9s %ss\n" "$summary_step" "$summary_name" "$summary_status" "$summary_elapsed"
+done
+echo "--------------------------------------------------"
+echo "Total pipeline wall time: ${PIPELINE_ELAPSED}s"
+echo "Timing metadata saved to: $TIMING_FILE"
+echo ""
+
 for step in "${STEPS_TO_RUN[@]}"; do
     if [[ ! -f ".checkpoints/step${step}_done" ]]; then
         all_completed=false
