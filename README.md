@@ -45,9 +45,9 @@ View all options:
 ```
 
 **Preconfigured points:**
-- **2-fold:** Index 0 (vertical), Index 1 (angled)
-- **3-fold:** Index 0 (right), Index 1 (left)
-- **5-fold:** Index 0 (vertical)
+- **2-fold:** Index 0, Index 1
+- **3-fold:** Index 0, Index 1
+- **5-fold:** Index 0
 
 ### 3. Run the pipeline
 
