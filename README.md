@@ -10,7 +10,7 @@ Some documentation and examples in HOW_TO folder
 
 ## Installation / compile / run (practical)
 
-git clone -b dev01 --single-branch [repository_URL]
+git clone -b dev01 --single-branch https://github.com/tripplab/OctreeMesh.git
 
 Prereqs:
 
