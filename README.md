@@ -6,9 +6,9 @@ Some documentation and examples in HOW_TO folder
 
 # OctreeMesh Pipeline - User Guide
 
-## Quick Start
+# Quick Start
 
-# Installation / compile / run (practical)
+## Installation / compile / run (practical)
 
 Prereqs:
 
