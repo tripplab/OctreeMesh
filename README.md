@@ -43,6 +43,7 @@ Run:
 Preferred method is editing capsim_config.sh and running 
 
 chmod u+x run_capsim.sh
+
 ./run_capsim.sh
 
 
