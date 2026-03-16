@@ -389,6 +389,41 @@ fi
 if should_run 3; then
     echo "[Step $current_display_step/$TOTAL_STEPS] meshsolver (using $SOLVER_THREADS threads)..."
     if [[ ! -f ".checkpoints/step3_done" ]] || [[ ! -f "$OUTF" ]]; then
+        if [[ ! -f "$SOLV" ]]; then
+            echo "  ✗ Step $current_display_step failed: solver configuration file '$SOLV' not found"
+            echo "    Run step 2 (octree_mesh) first to generate solver/problem/geometry files."
+            exit 1
+        fi
+
+        solver_file_threads=$(awk '
+            BEGIN { in_solver = 0; values = 0 }
+            /^\{Solver\}/ { in_solver = 1; next }
+            in_solver {
+                line = $0
+                sub(/;.*/, "", line)
+                gsub(/^[ \t]+|[ \t]+$/, "", line)
+                if (line == "") next
+                values++
+                if (values == 2) {
+                    print line
+                    exit
+                }
+            }
+        ' "$SOLV")
+
+        if [[ -z "$solver_file_threads" ]]; then
+            echo "  ✗ Step $current_display_step failed: could not read thread count from '$SOLV'"
+            echo "    Expected a {Solver} section with a 'Threads' value as the second numeric entry."
+            exit 1
+        fi
+
+        if [[ "$solver_file_threads" -ne "$SOLVER_THREADS" ]]; then
+            echo "  ✗ Step $current_display_step failed: thread mismatch detected"
+            echo "    Requested SOLVER_THREADS=$SOLVER_THREADS, but '$SOLV' has Threads=$solver_file_threads"
+            echo "    Re-run step 2 with the desired thread count or update '$SOLV' to match."
+            exit 1
+        fi
+
         step_start="$(now_epoch)"
         ${BIN}/meshsolver "${name}" "${log_lev}" > "${OUTF}"
         step_rc=$?

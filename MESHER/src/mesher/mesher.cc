@@ -2224,9 +2224,17 @@ void Mesher::PrintDataFilesForFEMT(  ){
 	//std::string aux = std::to_string( vir_type );
 	//name = name + "_T" + aux + "_" + virus_ + ".";
 	std::string name = "octreemesh.";
+	int solver_threads = 1;
+	char* solver_threads_env = getenv("SOLVER_THREADS");
+	if(  solver_threads_env != NULL  ){
+		int parsed_threads = atoi( solver_threads_env );
+		if(  parsed_threads > 0  ){
+			solver_threads = parsed_threads;
+		}
+	}
 	//Saving solver data file
 	char solver_name[ 10 ] = "CG";
-	this->PrintSolverDataFileForFEMT( solver_name , 1 , 1e-5 , 1000000 , 1 , name );
+	this->PrintSolverDataFileForFEMT( solver_name , solver_threads , 1e-5 , 1000000 , 1 , name );
 	this->PrintProblemDataFileForFEMT( name );
 	this->PrintGeometryDataFileForFEMT( name );
 }
