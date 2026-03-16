@@ -1,11 +1,51 @@
 # OctreeMesh suite
 
-OCTREEMESH PIPELINE v160326
+OCTREEMESH PIPELINE v160326 by trippm@tripplab.com
+
 Some documentation and examples in HOW_TO folder
 
 # OctreeMesh Pipeline - User Guide
 
 ## Quick Start
+
+# Installation / compile / run (practical)
+
+Prereqs:
+
+- make, g++
+
+- gfortran (required by solver build flags)
+
+- OpenMP-capable compiler/runtime (-fopenmp)
+
+shell tools in script path: gunzip, awk
+
+Compile everything
+
+From repo root:
+
+make
+
+This builds each module and copies user-facing binaries into ./bin:
+
+- extract_ATOM
+
+- octree_mesh
+
+- shear_rotate
+
+- meshsolver
+
+- mesh2pdb
+
+Run:
+
+Preferred method is editing capsim_config.sh and running 
+
+chmod u+x run_capsim.sh
+./run_capsim.sh
+
+
 
 ### 1. Configure your simulation
 
@@ -266,43 +306,6 @@ mesh2pdb output: ${PDB_results}
 apply-matrix.awk output: ${PDB_back}
 
 Final renamed outputs for visualization: ${resn}.post.res, ${resn}.post.msh, ${resn}_back.pdb.
-
-# Installation / compile / run (practical)
-
-Prereqs
-
-make, g++
-
-gfortran (required by solver build flags)
-
-OpenMP-capable compiler/runtime (-fopenmp)
-
-shell tools in script path: gunzip, awk
-
-Compile everything
-
-From repo root:
-
-make
-
-This builds each module and copies user-facing binaries into ./bin:
-
-extract_ATOM
-
-octree_mesh
-
-shear_rotate
-
-meshsolver
-
-mesh2pdb
-
-Run
-
-Preferred method is editing capsim_config.sh and running 
-
-chmod u+x run_capsim.sh
-./run_capsim.sh
 
 
 
