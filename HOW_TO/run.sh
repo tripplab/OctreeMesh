@@ -37,6 +37,9 @@ ref_lev=5  ##  to use in the octree searching of elemnts per atom to interpolate
 ## Set absolute path to executables
 BIN=/path/to/OctreeMesh/bin
 
+## Multithreads ready for FEMT
+export SOLVER_THREADS=1
+
 #----- No need to modify below this line unless you know what you're doing -------#
 
 ##name=${label}_T${T}_${PDB}
