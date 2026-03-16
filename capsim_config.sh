@@ -6,6 +6,9 @@ PDB=1CWP  ## capsid identifier
 VDB=1cwp_full ## VDB file.vdb with capsid structure from VIPERdb (atoms)
 Res=16.00  ## mesh resolution in ang [float]
 
+## Optional output basename prefix (used by run_capsim.sh; default: octreemesh)
+#name=octreemesh
+
 ## Select indentation point by type and index:
 FOLD_TYPE=2    # Fold symmetry: 2, 3, or 5
 FOLD_INDEX=0   # Index: 0 or 1 (where applicable)
