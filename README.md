@@ -1,7 +1,149 @@
 # OctreeMesh
 
-OCTREEMESH v310122
-Please take a look at documentation and examples in HOW_TO folder
+OCTREEMESH PIPELINE v160326
+Some documentation and examples in HOW_TO folder
+
+# OctreeMesh Pipeline - User Guide
+
+## Quick Start
+
+### 1. Configure your simulation
+
+Edit `capsim_config.sh`:
+
+```bash
+# Basic settings
+PDB=1CWP                 # Capsid identifier
+VDB=1cwp_full            # VDB file name (without .vdb)
+Res=16.00                # Mesh resolution in angstroms
+
+# Select indentation point (fold type and index)
+FOLD_TYPE=2              # Options: 2, 3, 5, or custom
+FOLD_INDEX=0             # Index: 0 or 1 (where applicable)
+
+# For custom indentation (if FOLD_TYPE=custom):
+#CUSTOM_FX=10.0
+#CUSTOM_FY=20.0
+#CUSTOM_FZ=30.0
+
+# Other parameters
+T=3                      # T-number (1 or 3)
+VDW=1                    # Use van der Waals radius (1=yes, 0=no)
+cone=15.00               # Boundary condition cone angle
+Young=0.020              # Young modulus
+SOLVER_THREADS=1         # Number of threads for FEM solver
+
+# Path to executables
+BIN=/path/to/OctreeMesh/bin
+```
+
+### 2. Available indentation points
+
+View all options:
+```bash
+./run_capsim.sh --list
+```
+
+**Preconfigured points:**
+- **2-fold:** Index 0 (vertical), Index 1 (angled)
+- **3-fold:** Index 0 (right), Index 1 (left)
+- **5-fold:** Index 0 (vertical)
+
+### 3. Run the pipeline
+
+```bash
+# Run complete pipeline
+./run_capsim.sh
+
+# Run with shear force enabled
+./run_capsim.sh --shear
+
+# Run specific steps only
+./run_capsim.sh --steps=2-4        # Steps 2,3,4
+./run_capsim.sh --steps=1,3,5      # Steps 1,3,5 only
+
+# Use more threads
+./run_capsim.sh --threads=4
+
+# Combine options
+./run_capsim.sh --shear --threads=8 --steps=2-5
+
+# Use a different config file
+./run_capsim.sh --config=my_experiment.conf
+```
+
+### 4. Pipeline Steps
+
+| Step | Name | Description |
+|------|------|-------------|
+| 1 | `extract_ATOM` | Extract ATOM records from VDB file |
+| 2 | `octree_mesh` | Generate mesh and configuration files |
+| 3 | `meshsolver` | Run FEM simulation |
+| 4 | `mesh2pdb` | Map results back to PDB structure |
+| 5 | `rotate_back` | Rotate back to original orientation |
+
+*With `--shear`: Adds shear rotation step between steps 2 and 3*
+
+### 5. Output Files
+
+After successful completion:
+- `*.solver.out` - Solver output log
+- `*.post.res` - Results for GID visualization
+- `*.post.msh` - Mesh for GID visualization
+- `*_back.pdb` - PDB file with results (for VMD)
+
+### 6. Resuming Interrupted Runs
+
+The pipeline creates checkpoints automatically. To resume:
+
+```bash
+# Resume from where it left off
+./run_capsim.sh --steps=3-5
+
+# Or with same options as original run
+./run_capsim.sh --shear --steps=3-5
+```
+
+### 7. Command Reference
+
+| Option | Description |
+|--------|-------------|
+| `-c, --config FILE` | Use custom config file |
+| `-s, --steps STEPS` | Steps to run (e.g., 1-5, 2,3,4) |
+| `--shear` | Enable shear force simulation |
+| `-t, --threads N` | Set number of FEM threads |
+| `-l, --list` | List available indentation points |
+| `-h, --help` | Show help message |
+
+## Example Workflows
+
+**Basic indentation test:**
+```bash
+# Edit config: FOLD_TYPE=2, FOLD_INDEX=0
+./run_capsim.sh
+```
+
+**Shear force simulation with high resolution:**
+```bash
+# Edit config: Res=10.0
+./run_capsim.sh --shear --threads=8
+```
+
+**Quick mesh generation only:**
+```bash
+./run_capsim.sh --steps=1-2
+```
+
+**Post-process existing results:**
+```bash
+./run_capsim.sh --steps=4-5
+```
+
+## Troubleshooting
+
+- **"Command not found"**: Check `BIN` path in config file
+- **"Invalid index"**: Run `./run_capsim.sh --list` to see valid options
+- **Checkpoints not working**: Check write permissions in current directory
 
 
 # High-level architecture
