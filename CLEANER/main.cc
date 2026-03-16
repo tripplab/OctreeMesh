@@ -7,6 +7,9 @@
 #include <vector>
 #include <iostream>
 #include <cstdio>
+#include <cstdlib>
+#include <string>
+
 /**
  *This program takes a vdb file and proccess its information in order to eliminate the 
  *rows that contain irrelevant information to generate FEM meshes
