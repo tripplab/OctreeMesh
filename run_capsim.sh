@@ -90,6 +90,13 @@ now_epoch() {
     date +%s.%N
 }
 
+# Build deterministic run tag with UTC timestamp suffix
+build_run_tag() {
+    local ts
+    ts="$(date -u +%Y%m%dT%H%M%SZ)"
+    echo "${PDB}_F${Fold}id${inx}_R${Res}_S${SHEAR_MODE}_${ts}"
+}
+
 # Compute elapsed seconds between two epoch values
 elapsed_seconds() {
     local start_time=$1
@@ -105,9 +112,8 @@ record_step_timing() {
     local elapsed=$4
     local note=${5:-""}
 
-    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
-        "$RUN_ID" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$PDB" "$Res" "$FOLD_TYPE" "$FOLD_INDEX" \
-        "$step_index" "$step_name" "$status" "$elapsed" "$SOLVER_THREADS" "$STEPS_SPEC" "$SHEAR_MODE" "$note" >> "$TIMING_FILE"
+    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
+        "$RUN_DIR" "$RUN_TAG" "$step_name" "$status" "$elapsed" "$SOLVER_THREADS" "$SHEAR_MODE" "$note" >> "$TIMING_FILE"
 
     STEP_SUMMARY+=("$step_index|$step_name|$status|$elapsed")
 }
@@ -232,6 +238,8 @@ if [[ -n "$CLI_THREADS" ]]; then
     SOLVER_THREADS=$CLI_THREADS
 fi
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
 # Export threads for FEM solver
 export SOLVER_THREADS
 
@@ -271,32 +279,95 @@ echo "  Vector: ($Fx, $Fy, $Fz)"
 echo "=================================================="
 echo ""
 
-# Setup filenames
-name="octreemesh"
+# Setup run-scoped paths and filenames
+name="${name:-octreemesh}"
 label="F${Fold}id${inx}"
 resn="${PDB}_${label}_${Res}"
-CAPR="capsid_rotated.pdb"
+RUN_TAG="${RUN_TAG:-$(build_run_tag)}"
+RUN_DIR="runs/${RUN_TAG}"
+CHECKPOINT_DIR=".checkpoints/${RUN_TAG}"
 
-GEOM="${name}.geometry.dat"
-PROB="${name}.problem.dat"
-SOLV="${name}.solver.dat"
-MSH1="capside_atoms.msh"
-WARN="warnings.log"
+mkdir -p "$RUN_DIR" "$CHECKPOINT_DIR" .checkpoints
 
-OUTF="${name}_solver.out"
-POST="${name}.post.res"
-MSH2="${name}.post.msh"
-PDB_results="${resn}.pdb"
-PDB_back="${resn}_back.pdb"
+GEOM="${RUN_DIR}/${name}.geometry.dat"
+PROB="${RUN_DIR}/${name}.problem.dat"
+SOLV="${RUN_DIR}/${name}.solver.dat"
+MSH1="${RUN_DIR}/capside_atoms.msh"
+WARN="${RUN_DIR}/warnings.log"
 
-# Create checkpoints directory
-mkdir -p .checkpoints
+OUTF="${RUN_DIR}/${name}_solver.out"
+POST="${RUN_DIR}/${name}.post.res"
+MSH2="${RUN_DIR}/${name}.post.msh"
+CAPR="${RUN_DIR}/capsid_rotated.pdb"
+PDB_results="${RUN_DIR}/${resn}.pdb"
+PDB_back="${RUN_DIR}/${resn}_back.pdb"
+ATOMS_VDB="${RUN_DIR}/${VDB}_ATOMS.vdb"
+
+RUN_MANIFEST="${RUN_DIR}/manifest.json"
+RUN_TAG_VAL="$RUN_TAG" \
+RUN_DIR_VAL="$RUN_DIR" \
+CONFIG_FILE_VAL="$CONFIG_FILE" \
+NAME_VAL="$name" \
+PDB_VAL="$PDB" \
+RES_VAL="$Res" \
+FOLD_TYPE_VAL="$FOLD_TYPE" \
+FOLD_INDEX_VAL="$FOLD_INDEX" \
+FX_VAL="$Fx" \
+FY_VAL="$Fy" \
+FZ_VAL="$Fz" \
+SOLVER_THREADS_VAL="$SOLVER_THREADS" \
+STEPS_SPEC_VAL="$STEPS_SPEC" \
+SHEAR_MODE_VAL="$SHEAR_MODE" \
+ATOMS_VDB_VAL="$ATOMS_VDB" \
+GEOM_VAL="$GEOM" \
+PROB_VAL="$PROB" \
+SOLV_VAL="$SOLV" \
+OUTF_VAL="$OUTF" \
+POST_VAL="$POST" \
+MSH2_VAL="$MSH2" \
+PDB_RESULTS_VAL="$PDB_results" \
+PDB_BACK_VAL="$PDB_back" \
+python - "$RUN_MANIFEST" <<'PYJSON'
+import json
+import os
+import sys
+
+manifest_path = sys.argv[1]
+manifest = {
+    "run_tag": os.environ["RUN_TAG_VAL"],
+    "run_dir": os.environ["RUN_DIR_VAL"],
+    "config_file": os.environ["CONFIG_FILE_VAL"],
+    "name": os.environ["NAME_VAL"],
+    "pdb": os.environ["PDB_VAL"],
+    "resolution": os.environ["RES_VAL"],
+    "fold_type": os.environ["FOLD_TYPE_VAL"],
+    "fold_index": os.environ["FOLD_INDEX_VAL"],
+    "fold_vector": [os.environ["FX_VAL"], os.environ["FY_VAL"], os.environ["FZ_VAL"]],
+    "solver_threads": os.environ["SOLVER_THREADS_VAL"],
+    "steps_spec": os.environ["STEPS_SPEC_VAL"],
+    "shear_mode": os.environ["SHEAR_MODE_VAL"],
+    "atoms_vdb": os.environ["ATOMS_VDB_VAL"],
+    "geometry": os.environ["GEOM_VAL"],
+    "problem": os.environ["PROB_VAL"],
+    "solver": os.environ["SOLV_VAL"],
+    "solver_output": os.environ["OUTF_VAL"],
+    "post_res": os.environ["POST_VAL"],
+    "post_msh": os.environ["MSH2_VAL"],
+    "pdb_results": os.environ["PDB_RESULTS_VAL"],
+    "pdb_back": os.environ["PDB_BACK_VAL"],
+}
+
+with open(manifest_path, "w", encoding="utf-8") as f:
+    json.dump(manifest, f, indent=2)
+    f.write("\n")
+PYJSON
+echo "Run tag: $RUN_TAG"
+echo "Run directory: $RUN_DIR"
 
 # Timing metadata output (kept across runs for comparisons)
 TIMING_FILE=".checkpoints/timings.ts"
-RUN_ID="$(date -u +%Y%m%dT%H%M%SZ)"
 if [[ ! -f "$TIMING_FILE" ]]; then
-    printf "run_id\tutc_timestamp\tpdb\tres\tfold_type\tfold_index\tstep_index\tstep_name\tstatus\telapsed_sec\tsolver_threads\tsteps_spec\tshear_mode\tnote\n" > "$TIMING_FILE"
+    printf "run_dir\trun_tag\tstep_name\tstatus\telapsed_sec\tsolver_threads\tshear_mode\tnote\n" > "$TIMING_FILE"
 fi
 STEP_SUMMARY=()
 PIPELINE_START="$(now_epoch)"
@@ -307,13 +378,13 @@ current_display_step=1
 # Step 1: Extract ATOM records
 if should_run 1; then
     echo "[Step $current_display_step/$TOTAL_STEPS] extract_ATOM..."
-    if [[ ! -f ".checkpoints/step1_done" ]] || [[ ! -f "${VDB}_ATOMS.vdb" ]]; then
+    if [[ ! -f "${CHECKPOINT_DIR}/step1_done" ]] || [[ ! -f "${ATOMS_VDB}" ]]; then
         step_start="$(now_epoch)"
-        ${BIN}/extract_ATOM "${VDB}.vdb" "${VDB}_ATOMS.vdb"
+        ${BIN}/extract_ATOM "${VDB}.vdb" "${ATOMS_VDB}"
         step_rc=$?
         step_elapsed="$(elapsed_seconds "$step_start" "$(now_epoch)")"
         if [[ $step_rc -eq 0 ]]; then
-            touch .checkpoints/step1_done
+            touch "${CHECKPOINT_DIR}/step1_done"
             echo "  Time ${step_elapsed}s"
             echo "  ✓ Step $current_display_step complete"
             record_step_timing "1" "extract_ATOM" "done" "$step_elapsed"
@@ -332,14 +403,16 @@ fi
 # Step 2: Generate mesh and config files
 if should_run 2; then
     echo "[Step $current_display_step/$TOTAL_STEPS] octree_mesh..."
-    if [[ ! -f ".checkpoints/step2_done" ]] || [[ ! -f "$GEOM" ]]; then
-        inp="${VDB}_ATOMS.vdb ${T} ${VDW} ${Res} ${Fold} ${inx} ${Fx} ${Fy} ${Fz} ${PDB} ${cone} ${load_ele} ${Young}"
+    if [[ ! -f "${CHECKPOINT_DIR}/step2_done" ]] || [[ ! -f "$GEOM" ]]; then
         step_start="$(now_epoch)"
-        ${BIN}/octree_mesh ${inp}
+        (
+            cd "$RUN_DIR" || exit 1
+            "${BIN}/octree_mesh" "$(basename "$ATOMS_VDB")" "$T" "$VDW" "$Res" "$Fold" "$inx" "$Fx" "$Fy" "$Fz" "$PDB" "$cone" "$load_ele" "$Young"
+        )
         step_rc=$?
         step_elapsed="$(elapsed_seconds "$step_start" "$(now_epoch)")"
         if [[ $step_rc -eq 0 ]]; then
-            touch .checkpoints/step2_done
+            touch "${CHECKPOINT_DIR}/step2_done"
             echo "  Time ${step_elapsed}s"
             echo "  ✓ Step $current_display_step complete"
             record_step_timing "2" "octree_mesh" "done" "$step_elapsed"
@@ -359,16 +432,19 @@ fi
 if [[ $SHEAR_MODE -eq 1 ]]; then
     # Only run shear if we're going to run solver (step 3) or if explicitly in steps?
     # For simplicity, we run it if shear mode is enabled and step 2 is complete
-    if [[ -f ".checkpoints/step2_done" ]] || should_run 2; then
+    if [[ -f "${CHECKPOINT_DIR}/step2_done" ]] || should_run 2; then
         echo "[Step $current_display_step/$TOTAL_STEPS] shear_rotate..."
-        if [[ ! -f ".checkpoints/shear_done" ]]; then
+        if [[ ! -f "${CHECKPOINT_DIR}/shear_done" ]]; then
             echo "  Applying shear rotation for shearing force simulation"
             step_start="$(now_epoch)"
-            ${BIN}/shear_rotate "${GEOM}" "${GEOM}"
+            (
+                cd "$RUN_DIR" || exit 1
+                "${BIN}/shear_rotate" "$(basename "$GEOM")" "$(basename "$GEOM")"
+            )
             step_rc=$?
             step_elapsed="$(elapsed_seconds "$step_start" "$(now_epoch)")"
             if [[ $step_rc -eq 0 ]]; then
-                touch .checkpoints/shear_done
+                touch "${CHECKPOINT_DIR}/shear_done"
                 echo "  Time ${step_elapsed}s"
                 echo "  ✓ Step $current_display_step complete"
                 record_step_timing "s" "shear_rotate" "done" "$step_elapsed"
@@ -388,7 +464,7 @@ fi
 # Step 3: Run simulation
 if should_run 3; then
     echo "[Step $current_display_step/$TOTAL_STEPS] meshsolver (using $SOLVER_THREADS threads)..."
-    if [[ ! -f ".checkpoints/step3_done" ]] || [[ ! -f "$OUTF" ]]; then
+    if [[ ! -f "${CHECKPOINT_DIR}/step3_done" ]] || [[ ! -f "$OUTF" ]]; then
         if [[ ! -f "$SOLV" ]]; then
             echo "  ✗ Step $current_display_step failed: solver configuration file '$SOLV' not found"
             echo "    Run step 2 (octree_mesh) first to generate solver/problem/geometry files."
@@ -425,11 +501,14 @@ if should_run 3; then
         fi
 
         step_start="$(now_epoch)"
-        ${BIN}/meshsolver "${name}" "${log_lev}" > "${OUTF}"
+        (
+            cd "$RUN_DIR" || exit 1
+            "${BIN}/meshsolver" "${name}" "${log_lev}" > "$(basename "$OUTF")"
+        )
         step_rc=$?
         step_elapsed="$(elapsed_seconds "$step_start" "$(now_epoch)")"
         if [[ $step_rc -eq 0 ]]; then
-            touch .checkpoints/step3_done
+            touch "${CHECKPOINT_DIR}/step3_done"
             echo "  Time ${step_elapsed}s"
             echo "  ✓ Step $current_display_step complete"
             record_step_timing "3" "meshsolver" "done" "$step_elapsed"
@@ -448,14 +527,17 @@ fi
 # Step 4: Map results to PDB
 if should_run 4; then
     echo "[Step $current_display_step/$TOTAL_STEPS] mesh2pdb..."
-    if [[ ! -f ".checkpoints/step4_done" ]] || [[ ! -f "$PDB_results" ]]; then
+    if [[ ! -f "${CHECKPOINT_DIR}/step4_done" ]] || [[ ! -f "$PDB_results" ]]; then
         step_start="$(now_epoch)"
-        ${BIN}/mesh2pdb "${CAPR}" "${MSH2}" "${POST}" "${PDB_results}" "${ref_lev}"
+        (
+            cd "$RUN_DIR" || exit 1
+            "${BIN}/mesh2pdb" "$(basename "$CAPR")" "$(basename "$MSH2")" "$(basename "$POST")" "$(basename "$PDB_results")" "${ref_lev}"
+        )
         step_rc=$?
         rm -f "${CAPR}"  # Clean up rotated file
         step_elapsed="$(elapsed_seconds "$step_start" "$(now_epoch)")"
         if [[ $step_rc -eq 0 ]]; then
-            touch .checkpoints/step4_done
+            touch "${CHECKPOINT_DIR}/step4_done"
             echo "  Time ${step_elapsed}s"
             echo "  ✓ Step $current_display_step complete"
             record_step_timing "4" "mesh2pdb" "done" "$step_elapsed"
@@ -474,13 +556,13 @@ fi
 # Step 5: Rotate back to original orientation
 if should_run 5; then
     echo "[Step $current_display_step/$TOTAL_STEPS] rotate_back..."
-    if [[ ! -f ".checkpoints/step5_done" ]] || [[ ! -f "$PDB_back" ]]; then
+    if [[ ! -f "${CHECKPOINT_DIR}/step5_done" ]] || [[ ! -f "$PDB_back" ]]; then
         step_start="$(now_epoch)"
-        ${BIN}/apply-matrix.awk ${PDB_results} rotate_Z2F.mtx > ${PDB_back}
+        "${BIN}/apply-matrix.awk" "${PDB_results}" "${SCRIPT_DIR}/rotate_Z2F.mtx" > "${PDB_back}"
         step_rc=$?
         step_elapsed="$(elapsed_seconds "$step_start" "$(now_epoch)")"
         if [[ $step_rc -eq 0 ]]; then
-            touch .checkpoints/step5_done
+            touch "${CHECKPOINT_DIR}/step5_done"
             echo "  Time ${step_elapsed}s"
             echo "  ✓ Step $current_display_step complete"
             record_step_timing "5" "rotate_back" "done" "$step_elapsed"
@@ -501,7 +583,7 @@ all_completed=true
 
 PIPELINE_ELAPSED="$(elapsed_seconds "$PIPELINE_START" "$(now_epoch)")"
 echo ""
-echo "Step timing summary (run: $RUN_ID)"
+echo "Step timing summary (run tag: $RUN_TAG)"
 echo "--------------------------------------------------"
 printf "%-4s %-15s %-9s %s\n" "Step" "Name" "Status" "Elapsed"
 for step_row in "${STEP_SUMMARY[@]}"; do
@@ -514,14 +596,14 @@ echo "Timing metadata saved to: $TIMING_FILE"
 echo ""
 
 for step in "${STEPS_TO_RUN[@]}"; do
-    if [[ ! -f ".checkpoints/step${step}_done" ]]; then
+    if [[ ! -f "${CHECKPOINT_DIR}/step${step}_done" ]]; then
         all_completed=false
         break
     fi
 done
 
 # Also check shear checkpoint if in shear mode
-if [[ $SHEAR_MODE -eq 1 ]] && [[ ! -f ".checkpoints/shear_done" ]]; then
+if [[ $SHEAR_MODE -eq 1 ]] && [[ ! -f "${CHECKPOINT_DIR}/shear_done" ]]; then
     all_completed=false
 fi
 
@@ -535,9 +617,11 @@ if $all_completed; then
     if should_run 5 && [[ -f "$PDB_back" ]]; then
         echo "Results in:"
         echo "  - $OUTF (solver output)"
-        echo "  - ${resn}.post.res (GID results)"
-        echo "  - ${resn}.post.msh (GID mesh)"
+        echo "  - $POST (GID results)"
+        echo "  - $MSH2 (GID mesh)"
+        echo "  - $PDB_results (PDB mapped results)"
         echo "  - $PDB_back (PDB with results for VMD)"
+        echo "  - $RUN_MANIFEST (run manifest)"
     fi
     
     # Ask about checkpoint cleanup if all steps in full pipeline were run
@@ -546,7 +630,7 @@ if $all_completed; then
         read -p "Clean up checkpoints? (y/n): " -n 1 -r
         echo ""
         if [[ $REPLY =~ ^[Yy]$ ]]; then
-            find .checkpoints -mindepth 1 -not -name "$(basename "$TIMING_FILE")" -delete
+            find "$CHECKPOINT_DIR" -mindepth 1 -delete
             echo "Checkpoints cleaned up (timing history preserved in $TIMING_FILE)."
         fi
     fi
@@ -554,6 +638,6 @@ else
     echo ""
     echo "=================================================="
     echo "Partial completion. Checkpoints preserved."
-    echo "To resume, run with: $0 --steps=${STEPS_SPEC} $([ $SHEAR_MODE -eq 1 ] && echo "--shear")"
+    echo "To resume this exact run, use: RUN_TAG=${RUN_TAG} $0 --steps=${STEPS_SPEC} $([ $SHEAR_MODE -eq 1 ] && echo "--shear")"
     echo "=================================================="
 fi
