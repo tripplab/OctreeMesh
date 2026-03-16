@@ -245,13 +245,19 @@ Diff: subtracts two .post.res files and writes diff results.
 
 # Inputs/outputs across the full OctreeMesh pipeline
 
-Using HOW_TO/run.sh and top-level makefile naming:
-
 Input structural file: ${VDB}.vdb
 
 extract_ATOM output: ${VDB}_ATOMS.vdb
 
-octree_mesh outputs include ${name}.geometry.dat, ${name}.problem.dat, ${name}.solver.dat, ${name}.post.msh/intermediates
+octree_mesh outputs include
+
+${name}.geometry.dat
+
+${name}.problem.dat
+
+${name}.solver.dat
+
+${name}.post.msh/intermediates
 
 meshsolver output: ${name}.post.res + solver log redirection
 
@@ -293,15 +299,12 @@ mesh2pdb
 
 Run
 
-Preferred method is editing and running HOW_TO/run.sh:
+Preferred method is editing capsim_config.sh and running 
 
-Set parameters (virus ID, fold vector, resolution, BIN path).
+chmod u+x run_capsim.sh
+./run_capsim.sh
 
-chmod u+x run.sh
 
-./run.sh
-
-The sample output in HOW_TO/README documents expected stage-by-stage progress and resulting files. 
 
 # Parallelization summary
 
