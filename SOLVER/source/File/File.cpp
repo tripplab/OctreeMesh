@@ -133,19 +133,33 @@ String File::CreateTemp(const char* file_name_prefix) throw(ExceptionCreate)
 		char file_name_template[MAX_PATH];
 		_snprintf(file_name_template, MAX_PATH - 1, "%s\\%s.tmp.XXXXXX", getenv("TEMP"), file_name_prefix);
 		char* file_name = _mktemp(file_name_template);
+		file_stream = fopen(file_name, "wb");
 	#else
 		char file_name_template[PATH_MAX];
 		snprintf(file_name_template, PATH_MAX - 1, "/tmp/%s.tmp.XXXXXX", file_name_prefix);
-		char* file_name = mktemp(file_name_template);
+		int file_descriptor = mkstemp(file_name_template);
+		if (file_descriptor == -1)
+		{
+			Throw(File::exception_create);
+		}
+		file_stream = fdopen(file_descriptor, "wb");
+		if (!file_stream)
+		{
+			close(file_descriptor);
+			Throw(File::exception_create);
+		}
 	#endif
 
-	file_stream = fopen(file_name, "wb");
 	if (!file_stream)
 	{
 		Throw(File::exception_create);
 	}
 
-	return String(file_name);
+	#ifdef WIN32
+		return String(file_name);
+	#else
+		return String(file_name_template);
+	#endif
 }
 
 
