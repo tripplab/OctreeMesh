@@ -1,4 +1,4 @@
-# OctreeMesh
+# OctreeMesh suite
 
 OCTREEMESH PIPELINE v160326
 Some documentation and examples in HOW_TO folder
