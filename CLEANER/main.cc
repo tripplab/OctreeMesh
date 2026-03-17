@@ -57,7 +57,6 @@ int main( int argc , char** argv ){
 		position++;
 	}
 	params[ 1 ][ 5 ] = 0;
-	int AtomSerialNumber = atoi(params[ 1 ]);
 
 	//reading column 3
 	//reading column 3 Atom name 13-16
@@ -103,7 +102,6 @@ int main( int argc , char** argv ){
 		position++;
 	}
 	params[ 6 ][ 8 ] = 0;
-	double coordX=strtod(params[ 6 ],NULL);
 
 	//reading column 8
 	//reading column 8 Orthogonal coordinates for Y in Angstroms 39-46
@@ -113,7 +111,6 @@ int main( int argc , char** argv ){
 		position++;
 	}
 	params[ 7 ][ 8 ] = 0;
-	double coordY=strtod(params[ 7 ],NULL);
 
 	//reading column 9
 	//reading column 9 Orthogonal coordinates for Z in Angstroms 47-54
@@ -123,7 +120,6 @@ int main( int argc , char** argv ){
 		position++;
 	}
 	params[ 8 ][ 8 ] = 0;
-	double coordZ=strtod(params[ 8 ],NULL);
 
 	//reading column 10
 	//reading column 10 Occupancy 55-60
