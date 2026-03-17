@@ -332,7 +332,6 @@ PDB_BACK_VAL="$PDB_back" \
 import json
 import os
 import sys
-from io import open
 
 manifest_path = sys.argv[1]
 manifest = {
@@ -359,9 +358,16 @@ manifest = {
     "pdb_back": os.environ["PDB_BACK_VAL"],
 }
 
-with open(manifest_path, "w", encoding="utf-8") as f:
-    json.dump(manifest, f, indent=2)
-    f.write("\n")
+manifest_json = json.dumps(manifest, indent=2, ensure_ascii=False)
+
+if sys.version_info[0] < 3:
+    with open(manifest_path, "wb") as f:
+        f.write(manifest_json)
+        f.write("\n")
+else:
+    with open(manifest_path, "w", encoding="utf-8") as f:
+        f.write(manifest_json)
+        f.write("\n")
 PYJSON
 echo "Run tag: $RUN_TAG"
 echo "Run directory: $RUN_DIR"
