@@ -112,8 +112,8 @@ record_step_timing() {
     local elapsed=$4
     local note=${5:-""}
 
-    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
-        "$RUN_DIR" "$RUN_TAG" "$step_name" "$status" "$elapsed" "$SOLVER_THREADS" "$SHEAR_MODE" "$note" >> "$TIMING_FILE"
+    printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
+        "$RUN_DIR" "$step_name" "$status" "$elapsed" "$SOLVER_THREADS" "$SHEAR_MODE" "$note" >> "$TIMING_FILE"
 
     STEP_SUMMARY+=("$step_index|$step_name|$status|$elapsed")
 }
@@ -327,10 +327,12 @@ POST_VAL="$POST" \
 MSH2_VAL="$MSH2" \
 PDB_RESULTS_VAL="$PDB_results" \
 PDB_BACK_VAL="$PDB_back" \
-python - "$RUN_MANIFEST" <<'PYJSON'
+PYTHON_BIN="$(command -v python3 || command -v python)"
+"$PYTHON_BIN" - "$RUN_MANIFEST" <<'PYJSON'
 import json
 import os
 import sys
+from io import open
 
 manifest_path = sys.argv[1]
 manifest = {
@@ -367,7 +369,7 @@ echo "Run directory: $RUN_DIR"
 # Timing metadata output (kept across runs for comparisons)
 TIMING_FILE=".checkpoints/timings.ts"
 if [[ ! -f "$TIMING_FILE" ]]; then
-    printf "run_dir\trun_tag\tstep_name\tstatus\telapsed_sec\tsolver_threads\tshear_mode\tnote\n" > "$TIMING_FILE"
+    printf "run_dir\tstep_name\tstatus\telapsed_sec\tsolver_threads\tshear_mode\tnote\n" > "$TIMING_FILE"
 fi
 STEP_SUMMARY=()
 PIPELINE_START="$(now_epoch)"
