@@ -43,7 +43,7 @@ void FillLUDecomposition(const CSRMatrix<T>& A, CSRMatrix<T>& L, CSRMatrix<T>& U
 
 			int* __restrict Ut_index_i = Ut.index[i];
 			int* __restrict L_index_i = L.index[i];
-			for (register int k = 1; k <= count_i; ++k)
+			for (int k = 1; k <= count_i; ++k)
 			{
 				Ut_index_i[k] = L_index_i[k];
 			}
@@ -59,7 +59,7 @@ void FillLUDecomposition(const CSRMatrix<T>& A, CSRMatrix<T>& L, CSRMatrix<T>& U
 
 			T U_jj = A(j, j);
 			int L_count_j = L.Count(j);
-			for (register int q = 1; q < L_count_j; ++q)
+			for (int q = 1; q < L_count_j; ++q)
 			{
 				U_jj -= L_entry_j[q]*Ut_entry_j[q];
 			}
@@ -79,13 +79,13 @@ void FillLUDecomposition(const CSRMatrix<T>& A, CSRMatrix<T>& L, CSRMatrix<T>& U
 				T L_ij = A(i, j);
 				T U_ji = A(j, i);
 
-				const register int* __restrict L_index_j = L.index[j];
-				const register int* __restrict L_index_i = L.index[i];
+				const int* __restrict L_index_j = L.index[j];
+				const int* __restrict L_index_i = L.index[i];
 
-				register int qi = 1;
-				register int qj = 1;
-				register int ki = L_index_i[qi];
-				register int kj = L_index_j[qj];
+				int qi = 1;
+				int qj = 1;
+				int ki = L_index_i[qi];
+				int kj = L_index_j[qj];
 				for (bool next = true; next; )
 				{
 					while (ki < kj)

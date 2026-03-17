@@ -326,7 +326,7 @@ int main(int argc, char** argv)
 
 			double sum = 0;
 			int k_max = A.Count(i);
-			for (register int k = 1; k <= k_max; ++k)
+			for (int k = 1; k <= k_max; ++k)
 			{
 				sum += A.entry[i][k]*x.entry[A.index[i][k]];
 			}

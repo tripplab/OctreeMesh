@@ -72,10 +72,10 @@ void PowerPreconditionerPattern(const CSRMatrix<T>& A, CSRMatrix<T>& M, T thresh
 			thrA.entry[i].Resize(N);
 			thrA.entry[i].Allocate(connectivity.size);
 			int c = 0;
-			for (register ListItem<int>* conection = connectivity.first; conection; conection = conection->next)
+			for (ListItem<int>* conection = connectivity.first; conection; conection = conection->next)
 			{
 				++c;
-				register int j = conection->value;
+				int j = conection->value;
 				thrA.entry[i].entry[c] = j;
 			}
 			nnz_thrA += connectivity.size;
@@ -114,9 +114,9 @@ void PowerPreconditionerPattern(const CSRMatrix<T>& A, CSRMatrix<T>& M, T thresh
 				{
 					int j = index.entry[b];
 					int thrA_count = thrA.entry[j].count;
-					for (register int c = 1; c <= thrA_count; ++c)
+					for (int c = 1; c <= thrA_count; ++c)
 					{
-						register int k = thrA.entry[j].entry[c];
+						int k = thrA.entry[j].entry[c];
 						if (!used.entry[k])
 						{
 							++new_index_count;
@@ -134,7 +134,7 @@ void PowerPreconditionerPattern(const CSRMatrix<T>& A, CSRMatrix<T>& M, T thresh
 			if (factorized)
 			{
 				int M_count_i = 0;
-				for (register int b = 1; b <= index_count; ++b)
+				for (int b = 1; b <= index_count; ++b)
 				{
 					int j = index.entry[b];
 					used.entry[j] = false;
@@ -144,7 +144,7 @@ void PowerPreconditionerPattern(const CSRMatrix<T>& A, CSRMatrix<T>& M, T thresh
 					}
 				}
 				M.AllocateRow(i, M_count_i);
-				for (register int b = 1, c = 0; b <= index_count; ++b)
+				for (int b = 1, c = 0; b <= index_count; ++b)
 				{
 					if (index.entry[b] <= i)
 					{
@@ -156,7 +156,7 @@ void PowerPreconditionerPattern(const CSRMatrix<T>& A, CSRMatrix<T>& M, T thresh
 			else
 			{
 				M.AllocateRow(i, index_count);
-				for (register int b = 1; b <= index_count; ++b)
+				for (int b = 1; b <= index_count; ++b)
 				{
 					int j = index.entry[b];
 					used.entry[j] = false;
@@ -194,7 +194,7 @@ void SparseApproximateInverseSymmetric(const CSRMatrix<T>& A, CSRMatrix<T>& G, C
 		Vector<Vector<T> > thread_x(threads);
 		{
 			int N_max = G.Count(1);
-			for (register int s = 2; s <= G.rows; ++s)
+			for (int s = 2; s <= G.rows; ++s)
 			{
 				if (N_max < G.Count(s))
 				{
@@ -203,7 +203,7 @@ void SparseApproximateInverseSymmetric(const CSRMatrix<T>& A, CSRMatrix<T>& G, C
 			}
 
 			int triangular_size_max = (N_max*(N_max + 1)) >> 1;
-			for (register int t = 1; t <= threads; ++t)
+			for (int t = 1; t <= threads; ++t)
 			{
 				thread_L.entry[t].Resize(triangular_size_max);
 				thread_z.entry[t].Resize(triangular_size_max);
@@ -218,24 +218,24 @@ void SparseApproximateInverseSymmetric(const CSRMatrix<T>& A, CSRMatrix<T>& G, C
 			int N = G.Count(s);
 			if (N == 1)
 			{
-				register int i = G.index[s][1];
+				int i = G.index[s][1];
 				G.entry[s][1] = 1/A(i, i);
 			}
 			else if (N == 2)
 			{
-				register int i1 = G.index[s][1];
-				register int i2 = G.index[s][2];
-				register T a = A(i1, i1);
-				register T b = A(i1, i2), c = A(i2, i2);
-				register T det = a*c - b*b;
+				int i1 = G.index[s][1];
+				int i2 = G.index[s][2];
+				T a = A(i1, i1);
+				T b = A(i1, i2), c = A(i2, i2);
+				T det = a*c - b*b;
 				G.entry[s][1] = -b/det;
 				G.entry[s][2] = a/det;
 			}
 			else if (N == 3)
 			{
-				register int i1 = G.index[s][1];
-				register int i2 = G.index[s][2];
-				register int i3 = G.index[s][3];
+				int i1 = G.index[s][1];
+				int i2 = G.index[s][2];
+				int i3 = G.index[s][3];
 				T a = A(i1, i1);
 				T b = A(i2, i1), c = A(i2, i2);
 				T d = A(i3, i1), e = A(i3, i2), f = A(i3, i3);
@@ -255,15 +255,15 @@ void SparseApproximateInverseSymmetric(const CSRMatrix<T>& A, CSRMatrix<T>& G, C
 				Vector<T>& x = thread_x.entry[thread];
 
 				// Cholesky factorization
-				for (register int i = 1; i <= N; ++i)
+				for (int i = 1; i <= N; ++i)
 				{
-					register int ii = (i*(i - 1)) >> 1;
+					int ii = (i*(i - 1)) >> 1;
 					T Lii = A(G.index[s][i], G.index[s][i]);
-					for (register int j = 1; j < i; ++j)
+					for (int j = 1; j < i; ++j)
 					{
-						register int jj = (j*(j - 1)) >> 1;
+						int jj = (j*(j - 1)) >> 1;
 						T Lij = A(G.index[s][i], G.index[s][j]);
-						for (register int k = 1; k < j; ++k)
+						for (int k = 1; k < j; ++k)
 						{
 							Lij -= L.entry[ii + k]*L.entry[jj + k];
 						}
@@ -274,29 +274,29 @@ void SparseApproximateInverseSymmetric(const CSRMatrix<T>& A, CSRMatrix<T>& G, C
 					L.entry[ii + i] = sqrt(Lii);
 				}
 				// Forward sustitution
-				for (register int i = 1; i <= N; ++i)
+				for (int i = 1; i <= N; ++i)
 				{
-					register int ii = (i*(i - 1)) >> 1;
-					register T zi = (i == N) ? 1.0 : 0.0;
-					for (register int k = 1; k < i; ++k)
+					int ii = (i*(i - 1)) >> 1;
+					T zi = (i == N) ? 1.0 : 0.0;
+					for (int k = 1; k < i; ++k)
 					{
 						zi -= L.entry[ii + k]*z.entry[k];
 					}
 					z.entry[i] = zi/L.entry[ii + i];
 				}
 				// Backward sustitution
-				for (register int i = N; i; --i)
+				for (int i = N; i; --i)
 				{
-					register int ii = (i*(i - 1)) >> 1;
-					register T xi = z.entry[i];
-					for (register int k = i + 1; k <= N; ++k)
+					int ii = (i*(i - 1)) >> 1;
+					T xi = z.entry[i];
+					for (int k = i + 1; k <= N; ++k)
 					{
-						register int kk = (k*(k - 1)) >> 1;
+						int kk = (k*(k - 1)) >> 1;
 						xi -= L.entry[kk + i]*x.entry[k];
 					}
 					x.entry[i] = xi/L.entry[ii + i];
 				}
-				for (register int i = 1; i <= N; ++i)
+				for (int i = 1; i <= N; ++i)
 				{
 					G.entry[s][i] = x.entry[i];
 				}
@@ -309,7 +309,7 @@ void SparseApproximateInverseSymmetric(const CSRMatrix<T>& A, CSRMatrix<T>& G, C
 		{
 			int count = G.Count(i);
 			T Dii = 1/sqrt(G.entry[i][count]);
-			for (register int c = 1; c <= count; ++c)
+			for (int c = 1; c <= count; ++c)
 			{
 				G.entry[i][c] *= Dii;
 			}
@@ -346,7 +346,7 @@ void SparseApproximateInverseUnsymmetric(const CSRMatrix<T>& A, CSRMatrix<T>& G,
 		Vector<Vector<T> > thread_x(threads);
 		{
 			int N_max = G.Count(1);
-			for (register int s = 2; s <= G.rows; ++s)
+			for (int s = 2; s <= G.rows; ++s)
 			{
 				if (N_max < G.Count(s))
 				{
@@ -355,7 +355,7 @@ void SparseApproximateInverseUnsymmetric(const CSRMatrix<T>& A, CSRMatrix<T>& G,
 			}
 
 			int triangular_size_max = (N_max*(N_max + 1)) >> 1;
-			for (register int t = 1; t <= threads; ++t)
+			for (int t = 1; t <= threads; ++t)
 			{
 				thread_L.entry[t].Resize(triangular_size_max);
 				thread_Ut.entry[t].Resize(triangular_size_max);
@@ -371,35 +371,35 @@ void SparseApproximateInverseUnsymmetric(const CSRMatrix<T>& A, CSRMatrix<T>& G,
 			int N = G.Count(s);
 			if (N == 1)
 			{
-				register int i = G.index[s][1];
+				int i = G.index[s][1];
 				G.entry[s][1] = 1/A(i, i);
 			}
 			else if (N == 2)
 			{
-				register int i1 = G.index[s][1];
-				register int i2 = G.index[s][2];
-				register T a = A(i1, i1);
-				register T b = A(i1, i2);
-				register T c = A(i2, i1);
-				register T d = A(i2, i2);
-				register T det = a*d - b*c;
+				int i1 = G.index[s][1];
+				int i2 = G.index[s][2];
+				T a = A(i1, i1);
+				T b = A(i1, i2);
+				T c = A(i2, i1);
+				T d = A(i2, i2);
+				T det = a*d - b*c;
 				G.entry[s][1] = -b/det;
 				G.entry[s][2] = a/det;
 			}
 			else if (N == 3)
 			{
-				register int i1 = G.index[s][1];
-				register int i2 = G.index[s][2];
-				register int i3 = G.index[s][3];
-				register T a = A(i1, i1);
-				register T b = A(i1, i2);
-				register T c = A(i1, i3);
-				register T d = A(i2, i1);
-				register T e = A(i2, i2);
-				register T f = A(i2, i3);
-				register T g = A(i3, i1);
-				register T h = A(i3, i2);
-				register T k = A(i3, i3);
+				int i1 = G.index[s][1];
+				int i2 = G.index[s][2];
+				int i3 = G.index[s][3];
+				T a = A(i1, i1);
+				T b = A(i1, i2);
+				T c = A(i1, i3);
+				T d = A(i2, i1);
+				T e = A(i2, i2);
+				T f = A(i2, i3);
+				T g = A(i3, i1);
+				T h = A(i3, i2);
+				T k = A(i3, i3);
 				T det = a*(e*k - f*h) - b*(k*d - f*g) + c*(d*h - e*g);
 				G.entry[s][1] = (b*f - c*e)/det;
 				G.entry[s][2] = (c*d - a*f)/det;
@@ -418,14 +418,14 @@ void SparseApproximateInverseUnsymmetric(const CSRMatrix<T>& A, CSRMatrix<T>& G,
 				{
 					int ii = (i*(i - 1)) >> 1;
 
-					register T Utii = A(G.index[s][i], G.index[s][i]);
-					for (register int j = 1; j < i; ++j)
+					T Utii = A(G.index[s][i], G.index[s][i]);
+					for (int j = 1; j < i; ++j)
 					{
-						register int jj = (j*(j - 1)) >> 1;
+						int jj = (j*(j - 1)) >> 1;
 
-						register T Lij = A(G.index[s][i], G.index[s][j]);
-						register T Utij = A(G.index[s][j], G.index[s][i]);
-						for (register int k = 1; k < j; ++k)
+						T Lij = A(G.index[s][i], G.index[s][j]);
+						T Utij = A(G.index[s][j], G.index[s][i]);
+						for (int k = 1; k < j; ++k)
 						{
 							Lij -= L.entry[ii + k]*Ut.entry[jj + k];
 							Utij -= L.entry[jj + k]*Ut.entry[ii + k];
@@ -440,29 +440,29 @@ void SparseApproximateInverseUnsymmetric(const CSRMatrix<T>& A, CSRMatrix<T>& G,
 				}
 
 				// Forward sustitution
-				for (register int i = 1; i <= N; ++i)
+				for (int i = 1; i <= N; ++i)
 				{
-					register int ii = (i*(i - 1)) >> 1;
-					register T zi = (i == N) ? 1.0 : 0.0;
-					for (register int k = 1; k < i; ++k)
+					int ii = (i*(i - 1)) >> 1;
+					T zi = (i == N) ? 1.0 : 0.0;
+					for (int k = 1; k < i; ++k)
 					{
 						zi -= L.entry[ii + k]*z.entry[k];
 					}
 					z.entry[i] = zi/L.entry[ii + i];
 				}
 				// Backward sustitution
-				for (register int i = N; i; --i)
+				for (int i = N; i; --i)
 				{
-					register int ii = (i*(i - 1)) >> 1;
-					register T xi = z.entry[i];
-					for (register int k = i + 1; k <= N; ++k)
+					int ii = (i*(i - 1)) >> 1;
+					T xi = z.entry[i];
+					for (int k = i + 1; k <= N; ++k)
 					{
-						register int kk = (k*(k - 1)) >> 1;
+						int kk = (k*(k - 1)) >> 1;
 						xi -= Ut.entry[kk + i]*x.entry[k];
 					}
 					x.entry[i] = xi/Ut.entry[ii + i];
 				}
-				for (register int i = 1; i <= N; ++i)
+				for (int i = 1; i <= N; ++i)
 				{
 					G.entry[s][i] = x.entry[i];
 				}
@@ -475,7 +475,7 @@ void SparseApproximateInverseUnsymmetric(const CSRMatrix<T>& A, CSRMatrix<T>& G,
 		{
 			int count = G.Count(i);
 			T Dii = 1/sqrt(G.entry[i][count]);
-			for (register int c = 1; c <= count; ++c)
+			for (int c = 1; c <= count; ++c)
 			{
 				G.entry[i][c] *= Dii;
 			}

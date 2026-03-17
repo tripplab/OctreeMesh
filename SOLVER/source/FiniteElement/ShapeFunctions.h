@@ -248,9 +248,9 @@ class ShapeFunctions
 
 		T Triangle6DetJ(int element_id, const Vector<T>& point) const throw()
 		{
-			register T rho = point.entry[1];
-			register T eta = point.entry[2];
-			register T xi = 1 - rho - eta;
+			T rho = point.entry[1];
+			T eta = point.entry[2];
+			T xi = 1 - rho - eta;
 
 			int node1 = mesh.connectivity.entry[element_id][1];
 			int node2 = mesh.connectivity.entry[element_id][2];
@@ -284,8 +284,8 @@ class ShapeFunctions
 		
 		T Quadrilateral4DetJ(int element_id, const Vector<T>& point) const throw()
 		{
-			register T rho = point.entry[1];
-			register T eta = point.entry[2];
+			T rho = point.entry[1];
+			T eta = point.entry[2];
 
 			int node1 = mesh.connectivity.entry[element_id][1];
 			int node2 = mesh.connectivity.entry[element_id][2];
@@ -313,8 +313,8 @@ class ShapeFunctions
 
 		T Quadrilateral8DetJ(int element_id, const Vector<T>& point) const throw()
 		{
-			register T rho = point.entry[1];
-			register T eta = point.entry[2];
+			T rho = point.entry[1];
+			T eta = point.entry[2];
 
 			int node1 = mesh.connectivity.entry[element_id][1];
 			int node2 = mesh.connectivity.entry[element_id][2];
@@ -354,8 +354,8 @@ class ShapeFunctions
 
 		T Quadrilateral9DetJ(int element_id, const Vector<T>& point) const throw()
 		{
-			register T rho = point.entry[1];
-			register T eta = point.entry[2];
+			T rho = point.entry[1];
+			T eta = point.entry[2];
 
 			int node1 = mesh.connectivity.entry[element_id][1];
 			int node2 = mesh.connectivity.entry[element_id][2];
@@ -433,9 +433,9 @@ class ShapeFunctions
 
 		T Tetrahedron10DetJ(int element_id, const Vector<T>& point) const throw()
 		{
-			register T rho  = point.entry[1];
-			register T eta  = point.entry[2];
-			register T zeta = point.entry[3];
+			T rho  = point.entry[1];
+			T eta  = point.entry[2];
+			T zeta = point.entry[3];
 
 			int node1  = mesh.connectivity.entry[element_id][1];
 			int node2  = mesh.connectivity.entry[element_id][2];
@@ -496,9 +496,9 @@ class ShapeFunctions
 
 		T Hexahedron8DetJ(int element_id, const Vector<T>& point) const throw()
 		{
-			register T rho  = point.entry[1];
-			register T eta  = point.entry[2];
-			register T zeta = point.entry[3];
+			T rho  = point.entry[1];
+			T eta  = point.entry[2];
+			T zeta = point.entry[3];
 
 			int node1  = mesh.connectivity.entry[element_id][1];
 			int node2  = mesh.connectivity.entry[element_id][2];
@@ -551,9 +551,9 @@ class ShapeFunctions
 
 		T Hexahedron20DetJ(int element_id, const Vector<T>& point) const throw()
 		{
-			register T rho  = point.entry[1];
-			register T eta  = point.entry[2];
-			register T zeta = point.entry[3];
+			T rho  = point.entry[1];
+			T eta  = point.entry[2];
+			T zeta = point.entry[3];
 
 			int node1  = mesh.connectivity.entry[element_id][1];
 			int node2  = mesh.connectivity.entry[element_id][2];
@@ -654,9 +654,9 @@ class ShapeFunctions
 
 		T Hexahedron27DetJ(int element_id, const Vector<T>& point) const throw()
 		{
-			register T rho  = point.entry[1];
-			register T eta  = point.entry[2];
-			register T zeta = point.entry[3];
+			T rho  = point.entry[1];
+			T eta  = point.entry[2];
+			T zeta = point.entry[3];
 
 			int node1  = mesh.connectivity.entry[element_id][1];
 			int node2  = mesh.connectivity.entry[element_id][2];
@@ -785,8 +785,8 @@ class ShapeFunctions
 
 		void Triangle3(int element_id, const Vector<T>& point, Vector<T>& N, Matrix<T>& dN, T& det_J) const throw()
 		{
-			register T rho = point.entry[1];
-			register T eta = point.entry[2];
+			T rho = point.entry[1];
+			T eta = point.entry[2];
 
 			// Shape functions
 			N.entry[1] = 1 - rho - eta;
@@ -831,9 +831,9 @@ class ShapeFunctions
 
 		void Triangle6(int element_id, const Vector<T>& point, Vector<T>& N, Matrix<T>& dN, T& det_J) const throw()
 		{
-			register T rho = point.entry[1];
-			register T eta = point.entry[2];
-			register T xi = 1 - rho - eta;
+			T rho = point.entry[1];
+			T eta = point.entry[2];
+			T xi = 1 - rho - eta;
 
 			// Shape functions
 			N.entry[1] = (2*xi - 1)*xi;;
@@ -902,8 +902,8 @@ class ShapeFunctions
 
 		void Quadrilateral4(int element_id, const Vector<T>& point, Vector<T>& N, Matrix<T>& dN, T& det_J) const throw()
 		{
-			register T rho = point.entry[1];
-			register T eta = point.entry[2];
+			T rho = point.entry[1];
+			T eta = point.entry[2];
 
 			// Shape functions
 			N.entry[1] = T(0.25)*(1 - rho)*(1 - eta);
@@ -956,8 +956,8 @@ class ShapeFunctions
 
 		void Quadrilateral8(int element_id, const Vector<T>& point, Vector<T>& N, Matrix<T>& dN, T& det_J) const throw()
 		{
-			register T rho = point.entry[1];
-			register T eta = point.entry[2];
+			T rho = point.entry[1];
+			T eta = point.entry[2];
 
 			// Shape functions
 			N.entry[1] = T(0.25)*(1 - rho)*(1 - eta)*(-1 - rho - eta);
@@ -1042,8 +1042,8 @@ class ShapeFunctions
 
 		void Quadrilateral9(int element_id, const Vector<T>& point, Vector<T>& N, Matrix<T>& dN, T& det_J) const throw()
 		{
-			register T rho = point.entry[1];
-			register T eta = point.entry[2];
+			T rho = point.entry[1];
+			T eta = point.entry[2];
 
 			// Shape functions
 			N.entry[1] = T( 0.25)*(1 - rho)*rho*(1 - eta)*eta;
@@ -1138,9 +1138,9 @@ class ShapeFunctions
 
 		void Tetrahedron4(int element_id, const Vector<T>& point, Vector<T>& N, Matrix<T>& dN, T& det_J) const throw()
 		{
-			register T rho  = point.entry[1];
-			register T eta  = point.entry[2];
-			register T zeta = point.entry[3];
+			T rho  = point.entry[1];
+			T eta  = point.entry[2];
+			T zeta = point.entry[3];
 
 			// Shape functions
 			N.entry[1] = 1 - rho - eta - zeta;
@@ -1221,9 +1221,9 @@ class ShapeFunctions
 
 		void Tetrahedron10(int element_id, const Vector<T>& point, Vector<T>& N, Matrix<T>& dN, T& det_J) const throw()
 		{
-			register T rho  = point.entry[1];
-			register T eta  = point.entry[2];
-			register T zeta = point.entry[3];
+			T rho  = point.entry[1];
+			T eta  = point.entry[2];
+			T zeta = point.entry[3];
 
 			// Shape functions
 			N.entry[1]  = (1 - rho - eta - zeta)*(1 - 2*rho - 2*eta - 2*zeta);
@@ -1370,9 +1370,9 @@ class ShapeFunctions
 
 		void Hexahedron8(int element_id, const Vector<T>& point, Vector<T>& N, Matrix<T>& dN, T& det_J) const throw()
 		{
-			register T rho  = point.entry[1];
-			register T eta  = point.entry[2];
-			register T zeta = point.entry[3];
+			T rho  = point.entry[1];
+			T eta  = point.entry[2];
+			T zeta = point.entry[3];
 
 			// Shape functions
 			N.entry[1] = T(0.125)*(1 - rho)*(1 - eta)*(1 - zeta);
@@ -1497,9 +1497,9 @@ class ShapeFunctions
 
 		void Hexahedron20(int element_id, const Vector<T>& point, Vector<T>& N, Matrix<T>& dN, T& det_J) const throw()
 		{
-			register T rho  = point.entry[1];
-			register T eta  = point.entry[2];
-			register T zeta = point.entry[3];
+			T rho  = point.entry[1];
+			T eta  = point.entry[2];
+			T zeta = point.entry[3];
 
 			// Shape functions
 			N.entry[1] = T(0.125)*(1 - rho)*(1 - eta)*(1 - zeta)*(-rho - eta - zeta - 2);
@@ -1756,9 +1756,9 @@ class ShapeFunctions
 
 		void Hexahedron27(int element_id, const Vector<T>& point, Vector<T>& N, Matrix<T>& dN, T& det_J) const throw()
 		{
-			register T rho  = point.entry[1];
-			register T eta  = point.entry[2];
-			register T zeta = point.entry[3];
+			T rho  = point.entry[1];
+			T eta  = point.entry[2];
+			T zeta = point.entry[3];
 
 			// Shape functions
 			N.entry[1]  =  ((eta - 1)*eta*(rho - 1)*rho*(zeta - 1)*zeta)*T(0.125);
@@ -2103,8 +2103,8 @@ class ShapeFunctions
 			T y3 = nodes.coordinate.entry[node3][2];
 
 			// Affine transformation for triangle elements.wxm
-			register T x = point_global.entry[1];
-			register T y = point_global.entry[2];
+			T x = point_global.entry[1];
+			T y = point_global.entry[2];
 
 			T A = x2 - x1;
 			T B = x1 - x3;
@@ -2186,8 +2186,8 @@ class ShapeFunctions
 			T H = (y1 - y2 + y3 - y4)*0.25;
 
 			// Newton's method (http://en.wikipedia.org/wiki/Newton%27s_method#Nonlinear_systems_of_equations)
-			register T r_rho = 0;
-			register T r_eta = 0;
+			T r_rho = 0;
+			T r_eta = 0;
 			for(int i = 0; i < 3; ++i)
 			{
 				T f1 = A + r_rho*B + r_eta*C + r_rho*r_eta*D - x;
@@ -2294,9 +2294,9 @@ class ShapeFunctions
 			T y4 = nodes.coordinate.entry[node4][2];
 			T z4 = nodes.coordinate.entry[node4][3];
 
-			register T x = point_global.entry[1];
-			register T y = point_global.entry[2];
-			register T z = point_global.entry[3];
+			T x = point_global.entry[1];
+			T y = point_global.entry[2];
+			T z = point_global.entry[3];
 
 			T factor = 1.0/(((x2 - x1)*y3 + (x1 - x3)*y2 + (x3 - x2)*y1)*z4 + ((x1 - x2)*y4 + (x4 - x1)*y2 + (x2 - x4)*y1)*z3 + ((x3 - x1)*y4 + (x1 - x4)*y3 + (x4 - x3)*y1)*z2 + ((x2 - x3)*y4 + (x4 - x2)*y3 + (x3 - x4)*y2)*z1);
 			rho = (x*((y3 - y1)*z4 + (y1 - y4)*z3 + (y4 - y3)*z1) + y*((x1 - x3)*z4 + (x4 - x1)*z3 + (x3 - x4)*z1) + (x3*y1 - x1*y3)*z4 + (x1*y4 - x4*y1)*z3 + (x4*y3 - x3*y4)*z1 + ((x3 - x1)*y4 + (x1 - x4)*y3 + (x4 - x3)*y1)*z)*factor;
@@ -2418,9 +2418,9 @@ class ShapeFunctions
 			T Y = (-z1 + z2 - z3 + z4 + z5 - z6 + z7 - z8)*0.125;
 
 			// Newton's method (http://en.wikipedia.org/wiki/Newton%27s_method#Nonlinear_systems_of_equations)
-			register T r_rho = 0;
-			register T r_eta = 0;
-			register T r_zeta = 0;
+			T r_rho = 0;
+			T r_eta = 0;
+			T r_zeta = 0;
 			for(int i = 0; i < 5; ++i)
 			{
 				T f1 = A + B*r_rho + C*r_eta + D*r_zeta + E*r_rho*r_eta + F*r_rho*r_zeta + G*r_eta*r_zeta + H*r_rho*r_eta*r_zeta - x;
@@ -2875,8 +2875,8 @@ class ShapeFunctions
 
 		void FacetQuadrilateral9(const Vector<int>& facet_nodes, const Vector<T>& point, Vector<T>& N, T& det_J) const throw()
 		{
-			register T rho = point.entry[1];
-			register T eta = point.entry[2];
+			T rho = point.entry[1];
+			T eta = point.entry[2];
 
 			// Shape functions
 			N.entry[1] = T( 0.25)*(1 - rho)*rho*(1 - eta)*eta;

@@ -188,7 +188,7 @@ class Formula
 
 				va_list variadic;
 				va_start(variadic, v1);
-				for (register ListItem<Variable*>* item = variables.first->next; item; item = item->next)
+				for (ListItem<Variable*>* item = variables.first->next; item; item = item->next)
 				{
 					item->value->var = va_arg(variadic, T);
 				}

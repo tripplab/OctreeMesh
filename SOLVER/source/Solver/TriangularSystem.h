@@ -34,9 +34,9 @@ void LowerTriangularSystem(const CSRMatrix<T>& L, Vector<T>& c, const Vector<T>&
 
 		T sum = b.entry[i];
 		int k_max = L.Count(i);
-		for (register int k = 1; k < k_max; ++k)
+		for (int k = 1; k < k_max; ++k)
 		{
-			register int j = L_index_i[k];
+			int j = L_index_i[k];
 			sum -= L_entry_i[k]*c.entry[j];
 		}
 		c.entry[i] = sum/L_entry_i[k_max];
@@ -55,9 +55,9 @@ void UpperTriangularSystem(const CSRMatrix<T>& U, Vector<T>& x, const Vector<T>&
 
 		T sum = c.entry[i];
 		int k_max = U.Count(i);
-		for (register int k = 2; k <= k_max; ++k)
+		for (int k = 2; k <= k_max; ++k)
 		{
-			register int j = U_index_i[k];
+			int j = U_index_i[k];
 			sum -= U_entry_i[k]*x.entry[j];
 		}
 		x.entry[i] = sum/U_entry_i[1];

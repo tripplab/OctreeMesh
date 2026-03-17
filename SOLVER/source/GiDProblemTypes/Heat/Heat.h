@@ -374,12 +374,12 @@ class Heat
 					shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
 					T weight = element_integration_rules.entry[q].weight;
-					for (register int i = 1; i <= n; ++i)
+					for (int i = 1; i <= n; ++i)
 					{
-						for (register int j = 1; j <= n; ++j)
+						for (int j = 1; j <= n; ++j)
 						{
-							register T sum = 0;
-							for (register int k = 1; k <= d; ++k)
+							T sum = 0;
+							for (int k = 1; k <= d; ++k)
 							{
 								sum += dN.entry[i][k]*dN.entry[j][k];
 							}
@@ -420,12 +420,12 @@ class Heat
 					shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
 					T weight = element_integration_rules.entry[q].weight;
-					for (register int i = 1; i <= n; ++i)
+					for (int i = 1; i <= n; ++i)
 					{
-						for (register int j = 1; j <= n; ++j)
+						for (int j = 1; j <= n; ++j)
 						{
-							register T sum = 0;
-							for (register int k = 1; k <= d; ++k)
+							T sum = 0;
+							for (int k = 1; k <= d; ++k)
 							{
 								sum += dN.entry[i][k]*dN.entry[j][k];
 							}
@@ -447,7 +447,7 @@ class Heat
 		{
 			u.Fill(0);
 
-			for (register int i = 1; i <= temperatures.size; ++i)
+			for (int i = 1; i <= temperatures.size; ++i)
 			{
 				Temperature& temperature_node = temperatures.entry[i];
 
@@ -471,7 +471,7 @@ class Heat
 		{
 			fixed.Fill(false);
 
-			for (register int i = 1; i <= temperatures.size; ++i)
+			for (int i = 1; i <= temperatures.size; ++i)
 			{
 				Temperature& temperature_node = temperatures.entry[i];
 
@@ -499,9 +499,9 @@ class Heat
 						shape_functions.FacetShapeFunctions(heat_flow.facet_nodes, facet_integration_rules.entry[q].point, facet_N, det_J);
 
 						T w = facet_integration_rules.entry[q].weight;
-						for (register int j = 1; j <= shape_functions.mesh.nodes_per_facet; ++j)
+						for (int j = 1; j <= shape_functions.mesh.nodes_per_facet; ++j)
 						{
-							register int n = heat_flow.facet_nodes.entry[j];
+							int n = heat_flow.facet_nodes.entry[j];
 							if (heat_flow.user_function_id == 0)
 							{
 								f.entry[n] += w*heat_flow.flux*facet_N.entry[j]*det_J;
@@ -533,9 +533,9 @@ class Heat
 						shape_functions.ElementShapeFunctions(e, element_integration_rules.entry[q].point, N, dN, det_J);
 
 						T w = element_integration_rules.entry[q].weight;
-						for (register int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
+						for (int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
 						{
-							register int n = connectivity.entry[e][j];
+							int n = connectivity.entry[e][j];
 							if (source.user_function_id == 0)
 							{
 								f.entry[n] += w*source.heat*N.entry[j]*det_J;
@@ -601,10 +601,10 @@ class Heat
 					T det_J;
 					shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
-					for (register int d = 1; d <= shape_functions.nodes.dimension; ++d)
+					for (int d = 1; d <= shape_functions.nodes.dimension; ++d)
 					{
-						register T sum = 0;
-						for (register int i = 1; i <= shape_functions.mesh.nodes_per_element; ++i)
+						T sum = 0;
+						for (int i = 1; i <= shape_functions.mesh.nodes_per_element; ++i)
 						{
 							int node_id = shape_functions.mesh.connectivity.entry[element_id][i];
 							sum += dN.entry[i][d]*u.entry[node_id];
@@ -684,9 +684,9 @@ class Heat
 				}
 
 				Vector<T> global_u(shape_functions.mesh.nodes_count);
-				for (register int n = 1; n <= node_index.size; ++n)
+				for (int n = 1; n <= node_index.size; ++n)
 				{
-					register int node_id = node_index.entry[n];
+					int node_id = node_index.entry[n];
 					global_u.entry[node_id] = u.entry[n];
 				}
 

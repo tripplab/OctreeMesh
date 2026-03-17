@@ -58,7 +58,7 @@ class List
 			last_block((ListBlock*)0),
 			index(BLOCK_SIZE - 1)
 		{
-			for (register ListItem<T>* __restrict item = list.first; item; item = item->next)
+			for (ListItem<T>* __restrict item = list.first; item; item = item->next)
 			{
 				AppendLast(item->value);
 			}
@@ -73,7 +73,7 @@ class List
 			last_block((ListBlock*)0),
 			index(BLOCK_SIZE - 1)
 		{
-			for (register ListItem<T>* __restrict item = list.first; item; item = item->next)
+			for (ListItem<T>* __restrict item = list.first; item; item = item->next)
 			{
 				AppendLast(item->value);
 			}
@@ -84,7 +84,7 @@ class List
 		{
 			while (last_block)
 			{
-				register ListBlock* __restrict previous = last_block->previous;
+				ListBlock* __restrict previous = last_block->previous;
 				delete last_block;
 				last_block = previous;
 			}
@@ -96,7 +96,7 @@ class List
 			if (this != &list)
 			{
 				Clear();
-				for (register ListItem<T>* __restrict item = list.first; item; item = item->next)
+				for (ListItem<T>* __restrict item = list.first; item; item = item->next)
 				{
 					AppendLast(item->value);
 				}
@@ -111,7 +111,7 @@ class List
 			if (this != &list)
 			{
 				Clear();
-				for (register ListItem<T>* __restrict item = list.first; item; item = item->next)
+				for (ListItem<T>* __restrict item = list.first; item; item = item->next)
 				{
 					AppendLast(item->value);
 				}
@@ -128,7 +128,7 @@ class List
 			}
 			else
 			{
-				register ListBlock* __restrict new_block = new ListBlock;
+				ListBlock* __restrict new_block = new ListBlock;
 				if (!new_block)
 				{
 					Throw(Memory::exception);
@@ -144,7 +144,7 @@ class List
 				last_block = new_block;
 				index = 0;
 			}
-			register ListItem<T>* __restrict new_item = &last_block->data[index];
+			ListItem<T>* __restrict new_item = &last_block->data[index];
 			if (last)
 			{
 				new_item->previous = last;
@@ -170,7 +170,7 @@ class List
 			}
 			else
 			{
-				register ListBlock* __restrict new_block = new ListBlock;
+				ListBlock* __restrict new_block = new ListBlock;
 				if (!new_block)
 				{
 					Throw(Memory::exception);
@@ -186,7 +186,7 @@ class List
 				last_block = new_block;
 				index = 0;
 			}
-			register ListItem<T>* __restrict new_item = &last_block->data[index];
+			ListItem<T>* __restrict new_item = &last_block->data[index];
 			if (first)
 			{
 				new_item->next = first;
@@ -208,7 +208,7 @@ class List
 		{
 			while (last_block)
 			{
-				register ListBlock* __restrict previous = last_block->previous;
+				ListBlock* __restrict previous = last_block->previous;
 				delete last_block;
 				last_block = previous;
 			}
@@ -239,7 +239,7 @@ class List
 			{
 				last = item->previous;
 			}
-			register ListItem<T>* __restrict last_item = &last_block->data[index];
+			ListItem<T>* __restrict last_item = &last_block->data[index];
 			if (item != last_item)
 			{
 				item->previous = last_item->previous;
@@ -264,7 +264,7 @@ class List
 			}
 			if (index == 0)
 			{
-				register ListBlock* __restrict delete_block = last_block;
+				ListBlock* __restrict delete_block = last_block;
 				last_block = last_block->previous;
 				delete delete_block;
 				index = BLOCK_SIZE - 1;
@@ -279,7 +279,7 @@ class List
 
 		ListItem<T>* Search(const T& value) throw()
 		{
-			register ListItem<T>* __restrict item = first;
+			ListItem<T>* __restrict item = first;
 			while (item)
 			{
 				if (item->value == value)

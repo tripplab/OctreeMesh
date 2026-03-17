@@ -43,7 +43,7 @@ void MatrixMarketSave(const char* file_name, const CSCMatrix<T>& matrix, const F
 		file.Write(' ');
 		file.Write(matrix.NonZero(), format_integer);
 		file.Write('\n');
-		for (register int j = 1; j <= matrix.columns; ++j)
+		for (int j = 1; j <= matrix.columns; ++j)
 		{
 			int count_j = matrix.Count(j);
 			for (int c = 1; c <= count_j; ++c)
@@ -83,7 +83,7 @@ void MatrixMarketSave(const char* file_name, const CSRMatrix<T>& matrix, const F
 		file.Write(' ');
 		file.Write(matrix.NonZero(), format_integer);
 		file.Write('\n');
-		for (register int i = 1; i <= matrix.rows; ++i)
+		for (int i = 1; i <= matrix.rows; ++i)
 		{
 			int count_i = matrix.Count(i);
 			for (int c = 1; c <= count_i; ++c)

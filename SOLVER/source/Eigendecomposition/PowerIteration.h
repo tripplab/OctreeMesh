@@ -44,12 +44,12 @@ int PowerIteration(const CSRMatrix<T>& A, Vector<Vector<T> >& v, T& l, T toleran
 			#pragma omp parallel for default(shared) reduction(+:ww) num_threads(threads)
 			for (int i = 1; i <= n; ++i)
 			{
-				register int* __restrict A_index_i = A.index[i];
-				register T* __restrict A_entry_i = A.entry[i];
+				int* __restrict A_index_i = A.index[i];
+				T* __restrict A_entry_i = A.entry[i];
 
-				register T sum = 0.0;
+				T sum = 0.0;
 				int k_max = A.Count(i);
-				for (register int k = 1; k <= k_max; ++k)
+				for (int k = 1; k <= k_max; ++k)
 				{
 					sum += A_entry_i[k]*w.entry[A_index_i[k]];
 				}

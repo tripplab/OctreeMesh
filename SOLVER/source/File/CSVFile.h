@@ -36,9 +36,9 @@ void CSVSave(const char* file_name, const CSCMatrix<T>& matrix, const Format& fo
 	{
 		File file;
 		file.Create(file_name);
-		for (register int i = 1; i <= matrix.rows; ++i)
+		for (int i = 1; i <= matrix.rows; ++i)
 		{
-			for (register int j = 1; j <= matrix.columns; ++j)
+			for (int j = 1; j <= matrix.columns; ++j)
 			{
 				file.Write(matrix(i, j), format);
 				file.Write((j < matrix.columns) ? ", " : "\n");
@@ -62,9 +62,9 @@ void CSVSave(const char* file_name, const CSRMatrix<T>& matrix, const Format& fo
 	{
 		File file;
 		file.Create(file_name);
-		for (register int i = 1; i <= matrix.rows; ++i)
+		for (int i = 1; i <= matrix.rows; ++i)
 		{
-			for (register int j = 1; j <= matrix.columns; ++j)
+			for (int j = 1; j <= matrix.columns; ++j)
 			{
 				file.Write(matrix(i, j), format);
 				file.Write((j < matrix.columns) ? ", " : "\n");
@@ -88,9 +88,9 @@ void CSVSave(const char* file_name, const Matrix<T>& matrix, const Format& forma
 	{
 		File file;
 		file.Create(file_name);
-		for (register int i = 1; i <= matrix.rows; ++i)
+		for (int i = 1; i <= matrix.rows; ++i)
 		{
-			for (register int j = 1; j <= matrix.columns; ++j)
+			for (int j = 1; j <= matrix.columns; ++j)
 			{
 				file.Write(matrix.entry[i][j], format);
 				file.Write((j < matrix.columns) ? ", " : "\n");
@@ -116,7 +116,7 @@ void CSVSave(const char* file_name, const Vector<T>& vector, const Format& forma
 		file.Create(file_name);
 		if (column_vector)
 		{
-			for (register int i = 1; i <= vector.size; ++i)
+			for (int i = 1; i <= vector.size; ++i)
 			{
 				file.Write(vector.entry[i], format);
 				file.Write("\n");
@@ -124,7 +124,7 @@ void CSVSave(const char* file_name, const Vector<T>& vector, const Format& forma
 		}
 		else
 		{
-			for (register int j = 1; j <= vector.size; ++j)
+			for (int j = 1; j <= vector.size; ++j)
 			{
 				file.Write(vector.entry[j], format);
 				file.Write((j < vector.size) ? ", " : "\n");

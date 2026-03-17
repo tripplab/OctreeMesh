@@ -64,7 +64,7 @@ class Assembler
 						int n = global_to_local.entry[mesh.connectivity.entry[e][c]];
 						if (n != 0)
 						{
-							for (register int cr = c + 1; cr <= mesh.nodes_per_element; ++cr)
+							for (int cr = c + 1; cr <= mesh.nodes_per_element; ++cr)
 							{
 								int nr = global_to_local.entry[mesh.connectivity.entry[e][cr]];
 								if (nr != 0)
@@ -88,12 +88,12 @@ class Assembler
 						int i = (n - 1)*degrees_of_freedom + d;
 						A.AllocateRow(i, row_size);
 						int k = 1;
-						for (register SetItem<int>* __restrict set_item = adjacency.entry[n].first; set_item; set_item = set_item->next)
+						for (SetItem<int>* __restrict set_item = adjacency.entry[n].first; set_item; set_item = set_item->next)
 						{
-							register int rn = set_item->value;
-							for (register int rd = 1; rd <= degrees_of_freedom; ++rd, ++k)
+							int rn = set_item->value;
+							for (int rd = 1; rd <= degrees_of_freedom; ++rd, ++k)
 							{
-								register int j = (rn - 1)*degrees_of_freedom + rd;
+								int j = (rn - 1)*degrees_of_freedom + rd;
 								A.index[i][k] = j;
 							}
 						}
@@ -183,11 +183,11 @@ class Assembler
 
 			for (int l = 1; l <= node_index.size; ++l)
 			{
-				register int g = node_index.entry[l];
-				for (register int d = 1; d <= degrees_of_freedom; ++d)
+				int g = node_index.entry[l];
+				for (int d = 1; d <= degrees_of_freedom; ++d)
 				{
-					register int ig = (g - 1)*degrees_of_freedom + d;
-					register int il = (l - 1)*degrees_of_freedom + d;
+					int ig = (g - 1)*degrees_of_freedom + d;
+					int il = (l - 1)*degrees_of_freedom + d;
 					v.entry[il] = global_v.entry[ig];
 				}
 			}

@@ -40,8 +40,8 @@ Random<random_mersennetwister32>::Random(uint32 seed) throw()
 :	index(624)
 {
 	x[0] = seed;
-	register uint32* element = x;
-	for (register int i = 1; i < 624; ++i)
+	uint32* element = x;
+	for (int i = 1; i < 624; ++i)
 	{
 		uint32 e = (uint32)1812433253UL*(*element ^ (*element >> 30)) + (uint32)i;
 		*(++element) = e;
@@ -51,17 +51,17 @@ Random<random_mersennetwister32>::Random(uint32 seed) throw()
 
 uint32 Random<random_mersennetwister32>::Get() throw()
 {
-	register uint32 y;
+	uint32 y;
 	if (index == 624)
 	{
 		static const uint32 a[2] = {0UL, (uint32)2567483615UL};
 
-		for (register int k = 0; k < 227; ++k)
+		for (int k = 0; k < 227; ++k)
 		{
 			y = (x[k] & (uint32)0x80000000UL) | (x[k + 1] & (uint32)0x7fffffffUL);
 			x[k] = x[k + 397] ^ (y >> 1) ^ a[y & 1UL];
 		}
-		for (register int k = 227; k < 623; ++k)
+		for (int k = 227; k < 623; ++k)
 		{
 			y = (x[k] & (uint32)0x80000000UL) | (x[k + 1] & (uint32)0x7fffffffUL);
 			x[k] = x[k - 227] ^ (y >> 1) ^ a[y & 1UL];
@@ -89,7 +89,7 @@ Random<random_motherofall32>::Random(uint32 seed) throw()
 	x3(Init(x2)),
 	x4(Init(x3))
 {
-	for (register int i = 19; i; --i)
+	for (int i = 19; i; --i)
 	{
 		Get();
 	}
@@ -98,7 +98,7 @@ Random<random_motherofall32>::Random(uint32 seed) throw()
 
 uint32 Random<random_motherofall32>::Get() throw()
 {
-	register uint64 sum =
+	uint64 sum =
 		(uint64)2111111111UL*(uint64)x3 +
 		(uint64)1492UL*(uint64)x2 +
 		(uint64)1776UL*(uint64)x1 +
@@ -127,7 +127,7 @@ Random<random_lecuyer32>::Random(uint32 seed) throw()
 	s2(Init(s1)),
 	s3(Init(s2))
 {
-	for (register int i = 19; i; --i)
+	for (int i = 19; i; --i)
 	{
 		Get();
 	}
@@ -136,7 +136,7 @@ Random<random_lecuyer32>::Random(uint32 seed) throw()
 
 uint32 Random<random_lecuyer32>::Get() throw()
 {
-	register uint32 b;
+	uint32 b;
 	b = ((s1 << 13) ^ s1) >> 19;
 	s1 = ((s1 & (uint32)4294967294UL) << 12) ^ b;
 	b = ((s2 << 2) ^ s2) >> 25;

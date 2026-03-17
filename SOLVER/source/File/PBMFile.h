@@ -93,7 +93,7 @@ void PBMSave(const char* file_name, const CSRMatrix<T>& matrix) throw(Memory::Ex
 			int k_max = matrix.Count(i);
 			for (int k = 1; k <= k_max; ++k)
 			{
-				register int j = mindex[k] - 1;
+				int j = mindex[k] - 1;
 				brow.entry[(j >> 3) + 1] |= 0x80 >> (j % 8);
 			}
 			file.Write(brow.data, brow.size);
@@ -125,10 +125,10 @@ void PBMSave(const char* file_name, const Matrix<T>& matrix) throw(Memory::Excep
 		file.Write("\n");
 
 		Vector<unsigned char> brow((matrix.columns >> 3) + ((matrix.columns % 8) ? 1 : 0));
-		for (register int i = 1; i <= matrix.rows; ++i)
+		for (int i = 1; i <= matrix.rows; ++i)
 		{
 			brow.Fill((unsigned char)0);
-			for (register int j = 1; j <= matrix.columns; ++j)
+			for (int j = 1; j <= matrix.columns; ++j)
 			{
 				if (matrix.entry[i][j])
 				{

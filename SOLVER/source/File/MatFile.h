@@ -436,7 +436,7 @@ void MatFile::Store(const char* name, const CSCMatrix<T>& matrix) throw(Memory::
 	try
 	{
 		int nnz = 0;
-		for (register int i = matrix.columns; i; --i)
+		for (int i = matrix.columns; i; --i)
 		{
 			nnz += matrix.Count(i);
 		}
@@ -454,11 +454,11 @@ void MatFile::Store(const char* name, const CSCMatrix<T>& matrix) throw(Memory::
 		Vector<T> ridx(nnz);
 		Vector<T> cidx(nnz);
 		Vector<T> value(nnz);
-		register int r = 0;
+		int r = 0;
 		for (int j = 1; j <= matrix.columns; ++j)
 		{
 			int matrix_count_j = matrix.Count(j);
-			for (register int k = 1; k <= matrix_count_j; ++k)
+			for (int k = 1; k <= matrix_count_j; ++k)
 			{
 				int i = matrix.index[j][k];
 				++r;
@@ -662,13 +662,13 @@ void MatFile::ReadByType(CSCMatrix<T>& matrix, int nnz) throw(Memory::Exception,
 
 		Vector<int> column_k((int)columns);
 		column_k.Fill(0);
-		for (register int r = 1; r <= nnz; ++r)
+		for (int r = 1; r <= nnz; ++r)
 		{
-			register int j = (int)cidx.entry[r];
+			int j = (int)cidx.entry[r];
 			++column_k.entry[j];
 		}
 		matrix.Resize((int)rows, (int)columns);
-		for (register int j = 1; j <= matrix.columns; ++j)
+		for (int j = 1; j <= matrix.columns; ++j)
 		{
 			if (column_k.entry[j] > 0)
 			{
@@ -679,9 +679,9 @@ void MatFile::ReadByType(CSCMatrix<T>& matrix, int nnz) throw(Memory::Exception,
 		column_k.Fill(0);
 		for (int r = 1; r <= nnz; ++r)
 		{
-			register int i = (int)ridx.entry[r];
-			register int j = (int)cidx.entry[r];
-			register int k = ++column_k.entry[j];
+			int i = (int)ridx.entry[r];
+			int j = (int)cidx.entry[r];
+			int k = ++column_k.entry[j];
 			matrix.index[j][k] = i;
 			matrix.entry[j][k] = (T)value.entry[r];
 		}
@@ -714,13 +714,13 @@ void MatFile::ReadByType(CSRMatrix<T>& matrix, int nnz) throw(Memory::Exception,
 
 		Vector<int> row_k((int)rows);
 		row_k.Fill(0);
-		for (register int r = 1; r <= nnz; ++r)
+		for (int r = 1; r <= nnz; ++r)
 		{
-			register int i = (int)ridx.entry[r];
+			int i = (int)ridx.entry[r];
 			++row_k.entry[i];
 		}
 		matrix.Resize((int)rows, (int)columns);
-		for (register int i = 1; i <= matrix.rows; ++i)
+		for (int i = 1; i <= matrix.rows; ++i)
 		{
 			if (row_k.entry[i] > 0)
 			{
@@ -731,9 +731,9 @@ void MatFile::ReadByType(CSRMatrix<T>& matrix, int nnz) throw(Memory::Exception,
 		row_k.Fill(0);
 		for (int r = 1; r <= nnz; ++r)
 		{
-			register int i = (int)ridx.entry[r];
-			register int j = (int)cidx.entry[r];
-			register int k = ++row_k.entry[i];
+			int i = (int)ridx.entry[r];
+			int j = (int)cidx.entry[r];
+			int k = ++row_k.entry[i];
 			matrix.index[i][k] = j;
 			matrix.entry[i][k] = (T)value.entry[r];
 		}
@@ -753,9 +753,9 @@ void MatFile::ReadByType(Matrix<T>& matrix) throw(Memory::Exception, ExceptionEO
 	{
 		Matrix<U> value(matrix.columns, matrix.rows);
 		Read(value.data, value.rows*value.columns);
-		for (register int i = 1; i <= matrix.rows; ++i)
+		for (int i = 1; i <= matrix.rows; ++i)
 		{
-			for (register int j = 1; j <= matrix.columns; ++j)
+			for (int j = 1; j <= matrix.columns; ++j)
 			{
 				matrix.entry[i][j] = (T)value.entry[j][i];
 			}
@@ -775,7 +775,7 @@ void MatFile::ReadByType(Vector<T>& vector) throw(Memory::Exception, ExceptionEO
 	{
 		Vector<U> value(vector.size);
 		Read(value.data, value.size);
-		for (register int i = vector.size; i; --i)
+		for (int i = vector.size; i; --i)
 		{
 			vector.entry[i] = (T)value.entry[i];
 		}

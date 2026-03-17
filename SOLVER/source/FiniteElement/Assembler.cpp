@@ -27,9 +27,9 @@ Assembler::Assembler(const Mesh& mesh, const Vector<int>& element_index, const V
 {
 	// Generate global to local node conversion vector
 	global_to_local.Fill(0);
-	for (register int i = 1; i <= node_index.size; ++i)
+	for (int i = 1; i <= node_index.size; ++i)
 	{
-		register int node_id = node_index.entry[i];
+		int node_id = node_index.entry[i];
 		global_to_local.entry[node_id] = i;
 	}
 }

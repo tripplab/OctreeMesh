@@ -157,16 +157,16 @@ class SchurNSMaster
 					{
 						int fixed_count = 0;
 						int k_max = KBB.Count(i);
-						for (register int k = 1; k <= k_max; ++k)
+						for (int k = 1; k <= k_max; ++k)
 						{
-							register int j = KBB.index[i][k];
+							int j = KBB.index[i][k];
 							if (fixedB.entry[j])
 							{
 								fB_adjust.entry[i] += KBB.entry[i][k]*uB.entry[j];
 								fixed.entry[++fixed_count] = j;
 							}
 						}
-						for (register int f = 1; f <= fixed_count; ++f)
+						for (int f = 1; f <= fixed_count; ++f)
 						{
 							KBB.RemoveEntry(i, fixed.entry[f]);
 						}
@@ -245,9 +245,9 @@ class SchurNSMaster
 					int* __restrict KBB_index_i = KBB.index[i];
 					T* __restrict KBB_entry_i = KBB.entry[i];
 
-					register T sum = 0.0;
+					T sum = 0.0;
 					const int k_max = KBB.Count(i);
-					for (register int k = 1; k <= k_max; ++k)
+					for (int k = 1; k <= k_max; ++k)
 					{
 						sum += KBB_entry_i[k]*vB.entry[KBB_index_i[k]];
 					}
@@ -329,9 +329,9 @@ class SchurNSMaster
 					int* __restrict KBB_index_i = KBBt.index[i];
 					T* __restrict KBBt_entry_i = KBBt.entry[i];
 
-					register T sum = 0.0;
+					T sum = 0.0;
 					const int k_max = KBBt.Count(i);
-					for (register int k = 1; k <= k_max; ++k)
+					for (int k = 1; k <= k_max; ++k)
 					{
 						sum += KBBt_entry_i[k]*vB.entry[KBBt_index_i[k]];
 					}
@@ -455,13 +455,13 @@ class SchurNSMaster
 
 						T sum1 = 0.0;
 						int k_max1 = A.Count(i);
-						for (register int k = 1; k <= k_max1; ++k)
+						for (int k = 1; k <= k_max1; ++k)
 						{
 							sum1 += A_entry_i[k]*p1.entry[A_index_i[k]];
 						}
 						T sum2 = 0.0;
 						int k_max2 = At.Count(i);
-						for (register int k = 1; k <= k_max2; ++k)
+						for (int k = 1; k <= k_max2; ++k)
 						{
 							sum2 += At_entry_i[k]*p2.entry[At_index_i[k]];
 						}
@@ -956,31 +956,31 @@ class SchurNSSlave
 						{
 							int fixed_count = 0;
 							int k_max = KIIi.Count(i);
-							for (register int k = 1; k <= k_max; ++k)
+							for (int k = 1; k <= k_max; ++k)
 							{
-								register int j = KIIi.index[i][k];
+								int j = KIIi.index[i][k];
 								if (fixedIi.entry[j])
 								{
 									fIi_adjust.entry[i] += KIIi.entry[i][k]*uIi.entry[j];
 									fixed.entry[++fixed_count] = j;
 								}
 							}
-							for (register int f = 1; f <= fixed_count; ++f)
+							for (int f = 1; f <= fixed_count; ++f)
 							{
 								KIIi.RemoveEntry(i, fixed.entry[f]);
 							}
 							fixed_count = 0;
 							k_max = KIBi.Count(i);
-							for (register int k = 1; k <= k_max; ++k)
+							for (int k = 1; k <= k_max; ++k)
 							{
-								register int j = KIBi.index[i][k];
+								int j = KIBi.index[i][k];
 								if (fixedBi.entry[j])
 								{
 									fIi_adjust.entry[i] += KIBi.entry[i][k]*uBi.entry[j];
 									fixed.entry[++fixed_count] = j;
 								}
 							}
-							for (register int f = 1; f <= fixed_count; ++f)
+							for (int f = 1; f <= fixed_count; ++f)
 							{
 								KIBi.RemoveEntry(i, fixed.entry[f]);
 							}
@@ -1000,16 +1000,16 @@ class SchurNSSlave
 						{
 							int fixed_count = 0;
 							int k_max = KBIi.Count(i);
-							for (register int k = 1; k <= k_max; ++k)
+							for (int k = 1; k <= k_max; ++k)
 							{
-								register int j = KBIi.index[i][k];
+								int j = KBIi.index[i][k];
 								if (fixedIi.entry[j])
 								{
 									fBi_adjust.entry[i] += KBIi.entry[i][k]*uIi.entry[j];
 									fixed.entry[++fixed_count] = j;
 								}
 							}
-							for (register int f = 1; f <= fixed_count; ++f)
+							for (int f = 1; f <= fixed_count; ++f)
 							{
 								KBIi.RemoveEntry(i, fixed.entry[f]);
 							}
@@ -1038,7 +1038,7 @@ class SchurNSSlave
 				for (int i = 1; i <= Bi; ++i)
 				{
 					int k_max = KIBi_csc.Count(i);
-					for (register int k = 1; k <= k_max; ++k)
+					for (int k = 1; k <= k_max; ++k)
 					{
 						int j = KIBi_csc.index[i][k];
 						c.entry[j] = KIBi_csc.entry[i][k];
@@ -1049,7 +1049,7 @@ class SchurNSSlave
 					{
 						Log(0, "[Error] Inverting KII (partition %i).", mpi.rank);
 					}
-					for (register int k = 1; k <= k_max; ++k)
+					for (int k = 1; k <= k_max; ++k)
 					{
 						int j = KIBi_csc.index[i][k];
 						c.entry[j] = 0;
@@ -1059,7 +1059,7 @@ class SchurNSSlave
 					{
 						T sum = 0;
 						int k_max = KBIi.count[b];
-						for (register int k = 1; k <= k_max; ++k)
+						for (int k = 1; k <= k_max; ++k)
 						{
 							int j = KBIi.index[b][k];
 							sum += KBIi.entry[b][k]*t.entry[j];
@@ -1084,7 +1084,7 @@ class SchurNSSlave
 				{
 					T sum = 0;
 					int k_max = KBIi.count[b];
-					for (register int k = 1; k <= k_max; ++k)
+					for (int k = 1; k <= k_max; ++k)
 					{
 						int j = KBIi.index[b][k];
 						sum += KBIi.entry[b][k]*t.entry[j];
@@ -1124,8 +1124,8 @@ class SchurNSSlave
 				for (int i = 1; i <= Bi; ++i)
 				{
 					const T* __restrict barKBBi_entry_i = barKBBi.entry[i];
-					register T sum = 0;
-					for (register int j = 1; j <= Bi; ++j)
+					T sum = 0;
+					for (int j = 1; j <= Bi; ++j)
 					{
 						sum += barKBBi_entry_i[j]*barvBi.entry[j];
 					}
@@ -1154,8 +1154,8 @@ class SchurNSSlave
 				for (int i = 1; i <= Bi; ++i)
 				{
 					const T* __restrict barKBBit_entry_i = barKBBit.entry[i];
-					register T sum = 0;
-					for (register int j = 1; j <= Bi; ++j)
+					T sum = 0;
+					for (int j = 1; j <= Bi; ++j)
 					{
 						sum += barKBBit_entry_i[j]*barvBi.entry[j];
 					}
@@ -1213,9 +1213,9 @@ class SchurNSSlave
 				{
 					T sum = 0;
 					int k_max = KIBi.Count(i);
-					for (register int k = 1; k <= k_max; ++k)
+					for (int k = 1; k <= k_max; ++k)
 					{
-						register int j = KIBi.index[i][k];
+						int j = KIBi.index[i][k];
 						sum += KIBi.entry[i][k]*uBi.entry[j];
 					}
 					if (!fixedIi.entry[i])

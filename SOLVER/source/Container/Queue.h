@@ -66,8 +66,8 @@ class Queue
 					block_size = last_index + 1;
 					new_block->next = (QueueBlock*)0;
 				}
-				register const T* __restrict source = other_block->data;
-				register T* __restrict destiny = new_block->data;
+				const T* __restrict source = other_block->data;
+				T* __restrict destiny = new_block->data;
 				if (last_block)
 				{
 					last_block->next = new_block;
@@ -81,7 +81,7 @@ class Queue
 					destiny += first_index;
 				}
 				size += block_size;
-				for (register int i = block_size; i; --i)
+				for (int i = block_size; i; --i)
 				{
 					*(destiny++) = *(source++);
 				}
@@ -95,7 +95,7 @@ class Queue
 		{
 			while (first_block)
 			{
-				register QueueBlock* __restrict next_block = first_block->next;
+				QueueBlock* __restrict next_block = first_block->next;
 				delete first_block;
 				first_block = next_block;
 			}
@@ -127,8 +127,8 @@ class Queue
 						block_size = last_index + 1;
 						new_block->next = (QueueBlock*)0;
 					}
-					register const T* __restrict source = other_block->data;
-					register T* __restrict destiny = new_block->data;
+					const T* __restrict source = other_block->data;
+					T* __restrict destiny = new_block->data;
 					if (last_block)
 					{
 						last_block->next = new_block;
@@ -142,7 +142,7 @@ class Queue
 						destiny += first_index;
 					}
 					size += block_size;
-					for (register int i = block_size; i; --i)
+					for (int i = block_size; i; --i)
 					{
 						*(destiny++) = *(source++);
 					}
@@ -159,7 +159,7 @@ class Queue
 			size = 0;
 			while (first_block)
 			{
-				register QueueBlock* __restrict next_block = first_block->next;
+				QueueBlock* __restrict next_block = first_block->next;
 				delete first_block;
 				first_block = next_block;
 			}
@@ -177,7 +177,7 @@ class Queue
 			}
 			else
 			{
-				register QueueBlock* __restrict new_block = new QueueBlock;
+				QueueBlock* __restrict new_block = new QueueBlock;
 				if (!new_block)
 				{
 					Throw(Memory::exception);
@@ -212,7 +212,7 @@ class Queue
 			}
 			else
 			{
-				register QueueBlock* __restrict next_block = first_block->next;
+				QueueBlock* __restrict next_block = first_block->next;
 				delete first_block;
 				first_block = next_block;
 				first_index = 0;
@@ -231,14 +231,14 @@ class Queue
 			Assert(first_block);
 			Assert(size > 0);
 
-			register T value = first_block->data[first_index];
+			T value = first_block->data[first_index];
 			if (first_index < ((first_block == last_block) ? last_index : BLOCK_SIZE - 1))
 			{
 				++first_index;
 			}
 			else
 			{
-				register QueueBlock* __restrict next_block = first_block->next;
+				QueueBlock* __restrict next_block = first_block->next;
 				delete first_block;
 				first_block = next_block;
 				first_index = 0;

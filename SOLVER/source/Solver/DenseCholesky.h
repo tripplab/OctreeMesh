@@ -75,7 +75,7 @@ void DenseCholesky(const Matrix<T>& A, LowerTriangularMatrix<T>& L, UpperTriangu
 		T* __restrict Lt_entry_j = Lt.entry[j];
 
 		T L_jj = A.entry[j][j];
-		for (register int k = 1; k < j; ++k)
+		for (int k = 1; k < j; ++k)
 		{
 			L_jj -= L_entry_j[k]*L_entry_j[k];
 		}
@@ -88,8 +88,8 @@ void DenseCholesky(const Matrix<T>& A, LowerTriangularMatrix<T>& L, UpperTriangu
 		{
 			T* __restrict L_entry_i = L.entry[i];
 
-			register T L_ij = A.entry[i][j];
-			for (register int k = 1; k < j; ++k)
+			T L_ij = A.entry[i][j];
+			for (int k = 1; k < j; ++k)
 			{
 				L_ij -= L_entry_i[k]*L_entry_j[k];
 			}

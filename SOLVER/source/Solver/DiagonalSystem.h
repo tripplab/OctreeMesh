@@ -25,7 +25,7 @@ template <typename T>
 void DiagonalSystem(const Vector<T>& D, Vector<T>& x, const Vector<T>& b) throw()
 {
 	int n = D.size;
-	for (register int i = 1; i <= n; ++i)
+	for (int i = 1; i <= n; ++i)
 	{
 		x.entry[i] = b.entry[i]/D.entry[i];
 	}

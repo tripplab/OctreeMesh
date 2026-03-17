@@ -157,16 +157,16 @@ class SchurComplementMaster
 					{
 						int fixed_count = 0;
 						int k_max = KBB.Count(i);
-						for (register int k = 1; k <= k_max; ++k)
+						for (int k = 1; k <= k_max; ++k)
 						{
-							register int j = KBB.index[i][k];
+							int j = KBB.index[i][k];
 							if (fixedB.entry[j])
 							{
 								fB_adjust.entry[i] += KBB.entry[i][k]*uB.entry[j];
 								fixed.entry[++fixed_count] = j;
 							}
 						}
-						for (register int f = 1; f <= fixed_count; ++f)
+						for (int f = 1; f <= fixed_count; ++f)
 						{
 							KBB.RemoveEntry(i, fixed.entry[f]);
 						}
@@ -245,9 +245,9 @@ class SchurComplementMaster
 					int* __restrict KBB_index_i = KBB.index[i];
 					T* __restrict KBB_entry_i = KBB.entry[i];
 
-					register T sum = 0.0;
+					T sum = 0.0;
 					const int k_max = KBB.Count(i);
-					for (register int k = 1; k <= k_max; ++k)
+					for (int k = 1; k <= k_max; ++k)
 					{
 						sum += KBB_entry_i[k]*vB.entry[KBB_index_i[k]];
 					}
@@ -767,31 +767,31 @@ class SchurComplementSlave
 						{
 							int fixed_count = 0;
 							int k_max = KIIi.Count(i);
-							for (register int k = 1; k <= k_max; ++k)
+							for (int k = 1; k <= k_max; ++k)
 							{
-								register int j = KIIi.index[i][k];
+								int j = KIIi.index[i][k];
 								if (fixedIi.entry[j])
 								{
 									fIi_adjust.entry[i] += KIIi.entry[i][k]*uIi.entry[j];
 									fixed.entry[++fixed_count] = j;
 								}
 							}
-							for (register int f = 1; f <= fixed_count; ++f)
+							for (int f = 1; f <= fixed_count; ++f)
 							{
 								KIIi.RemoveEntry(i, fixed.entry[f]);
 							}
 							fixed_count = 0;
 							k_max = KIBi.Count(i);
-							for (register int k = 1; k <= k_max; ++k)
+							for (int k = 1; k <= k_max; ++k)
 							{
-								register int j = KIBi.index[i][k];
+								int j = KIBi.index[i][k];
 								if (fixedBi.entry[j])
 								{
 									fIi_adjust.entry[i] += KIBi.entry[i][k]*uBi.entry[j];
 									fixed.entry[++fixed_count] = j;
 								}
 							}
-							for (register int f = 1; f <= fixed_count; ++f)
+							for (int f = 1; f <= fixed_count; ++f)
 							{
 								KIBi.RemoveEntry(i, fixed.entry[f]);
 							}
@@ -811,16 +811,16 @@ class SchurComplementSlave
 						{
 							int fixed_count = 0;
 							int k_max = KBIi.Count(i);
-							for (register int k = 1; k <= k_max; ++k)
+							for (int k = 1; k <= k_max; ++k)
 							{
-								register int j = KBIi.index[i][k];
+								int j = KBIi.index[i][k];
 								if (fixedIi.entry[j])
 								{
 									fBi_adjust.entry[i] += KBIi.entry[i][k]*uIi.entry[j];
 									fixed.entry[++fixed_count] = j;
 								}
 							}
-							for (register int f = 1; f <= fixed_count; ++f)
+							for (int f = 1; f <= fixed_count; ++f)
 							{
 								KBIi.RemoveEntry(i, fixed.entry[f]);
 							}
@@ -846,7 +846,7 @@ class SchurComplementSlave
 				for (int i = 1; i <= Bi; ++i)
 				{
 					int k_max = KBIi.Count(i);
-					for (register int k = 1; k <= k_max; ++k)
+					for (int k = 1; k <= k_max; ++k)
 					{
 						int j = KBIi.index[i][k];
 						c.entry[j] = KBIi.entry[i][k];
@@ -857,7 +857,7 @@ class SchurComplementSlave
 					{
 						Log(0, "[Error] Inverting KII (partition %i).", mpi.rank);
 					}
-					for (register int k = 1; k <= k_max; ++k)
+					for (int k = 1; k <= k_max; ++k)
 					{
 						int j = KBIi.index[i][k];
 						c.entry[j] = 0;
@@ -867,7 +867,7 @@ class SchurComplementSlave
 					{
 						T sum = 0;
 						int k_max = KBIi.Count(b);
-						for (register int k = 1; k <= k_max; ++k)
+						for (int k = 1; k <= k_max; ++k)
 						{
 							int j = KBIi.index[b][k];
 							sum += KBIi.entry[b][k]*t.entry[j];
@@ -892,7 +892,7 @@ class SchurComplementSlave
 				{
 					T sum = 0;
 					int k_max = KBIi.Count(b);
-					for (register int k = 1; k <= k_max; ++k)
+					for (int k = 1; k <= k_max; ++k)
 					{
 						int j = KBIi.index[b][k];
 						sum += KBIi.entry[b][k]*t.entry[j];
@@ -928,8 +928,8 @@ class SchurComplementSlave
 				for (int i = 1; i <= Bi; ++i)
 				{
 					const T* __restrict barKBBi_entry_i = barKBBi.entry[i];
-					register T sum = 0;
-					for (register int j = 1; j <= Bi; ++j)
+					T sum = 0;
+					for (int j = 1; j <= Bi; ++j)
 					{
 						sum += barKBBi_entry_i[j]*barvBi.entry[j];
 					}
@@ -987,9 +987,9 @@ class SchurComplementSlave
 				{
 					T sum = 0;
 					int k_max = KIBi.Count(i);
-					for (register int k = 1; k <= k_max; ++k)
+					for (int k = 1; k <= k_max; ++k)
 					{
-						register int j = KIBi.index[i][k];
+						int j = KIBi.index[i][k];
 						sum += KIBi.entry[i][k]*uBi.entry[j];
 					}
 					if (!fixedIi.entry[i])

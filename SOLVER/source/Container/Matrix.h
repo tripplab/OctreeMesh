@@ -59,8 +59,8 @@ class Matrix
 			}
 
 			--*(T***)&entry;
-			register T* __restrict row = data - 1;
-			for (register int i = 1; i <= rows; ++i, row += columns)
+			T* __restrict row = data - 1;
+			for (int i = 1; i <= rows; ++i, row += columns)
 			{
 				entry[i] = row;
 			}
@@ -85,8 +85,8 @@ class Matrix
 			}
 
 			--*(T***)&entry;
-			register T* __restrict row = data - 1;
-			for (register int i = 1; i <= rows; ++i, row += columns)
+			T* __restrict row = data - 1;
+			for (int i = 1; i <= rows; ++i, row += columns)
 			{
 				entry[i] = row;
 			}
@@ -120,9 +120,9 @@ class Matrix
 			Assert(rows == a.rows);
 			Assert(columns == a.columns);
 
-			register const U* __restrict src = a.data;
-			register T* __restrict dst = data;
-			for (register size_t k = (size_t)rows*columns; k; --k, ++dst, ++src)
+			const U* __restrict src = a.data;
+			T* __restrict dst = data;
+			for (size_t k = (size_t)rows*columns; k; --k, ++dst, ++src)
 			{
 				*dst = *src;
 			}
@@ -154,8 +154,8 @@ class Matrix
 
 		void Fill(const T& value) throw()
 		{
-			register T* __restrict dst = data;
-			for (register size_t i = (size_t)rows*columns; i; --i, ++dst)
+			T* __restrict dst = data;
+			for (size_t i = (size_t)rows*columns; i; --i, ++dst)
 			{
 				*dst = value;
 			}
@@ -166,9 +166,9 @@ class Matrix
 		{
 			Assert(data);
 
-			register const T* __restrict src = data;
-			register T* __restrict dst = this->data;
-			for (register size_t i = (size_t)rows*columns; i; --i, ++dst, ++src)
+			const T* __restrict src = data;
+			T* __restrict dst = this->data;
+			for (size_t i = (size_t)rows*columns; i; --i, ++dst, ++src)
 			{
 				*dst = *src;
 			}
@@ -196,8 +196,8 @@ class Matrix
 			*(T**)&data = new_data;
 			*(T***)&entry = new_entry;
 			--*(T***)&entry;
-			register T* __restrict row = data - 1;
-			for (register int i = 1; i <= rows; ++i, row += columns)
+			T* __restrict row = data - 1;
+			for (int i = 1; i <= rows; ++i, row += columns)
 			{
 				entry[i] = row;
 			}
@@ -213,10 +213,10 @@ void Transpose(const Matrix<T>& A, Matrix<T>& At) throw(Memory::Exception)
 	Assert(A.rows == At.columns);
 	Assert(A.columns == At.rows);
 
-	for (register int i = 1; i <= A.rows; ++i)
+	for (int i = 1; i <= A.rows; ++i)
 	{
-		register T* __restrict A_entry_i = A.entry[i];
-		for (register int j = 1; j <= A.columns; ++j)
+		T* __restrict A_entry_i = A.entry[i];
+		for (int j = 1; j <= A.columns; ++j)
 		{
 			At.entry[j][i] = A_entry_i[j];
 		}
