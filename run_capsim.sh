@@ -304,6 +304,7 @@ PDB_back="${RUN_DIR}/${resn}_back.pdb"
 ATOMS_VDB="${RUN_DIR}/${VDB}_ATOMS.vdb"
 
 RUN_MANIFEST="${RUN_DIR}/manifest.json"
+PYTHON_BIN="$(command -v python3 || command -v python)"
 RUN_TAG_VAL="$RUN_TAG" \
 RUN_DIR_VAL="$RUN_DIR" \
 CONFIG_FILE_VAL="$CONFIG_FILE" \
@@ -327,7 +328,6 @@ POST_VAL="$POST" \
 MSH2_VAL="$MSH2" \
 PDB_RESULTS_VAL="$PDB_results" \
 PDB_BACK_VAL="$PDB_back" \
-PYTHON_BIN="$(command -v python3 || command -v python)"
 "$PYTHON_BIN" - "$RUN_MANIFEST" <<'PYJSON'
 import json
 import os
