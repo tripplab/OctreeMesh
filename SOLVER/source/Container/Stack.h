@@ -64,9 +64,9 @@ class Stack
 					size = index + 1;
 				}
 				current_block = new_block;
-				register const T* __restrict source = other_block->data;
-				register T* __restrict destiny = current_block->data;
-				for (register int i = BLOCK_SIZE; i; --i)
+				const T* __restrict source = other_block->data;
+				T* __restrict destiny = current_block->data;
+				for (int i = BLOCK_SIZE; i; --i)
 				{
 					*(destiny++) = *(source++);
 				}
@@ -83,7 +83,7 @@ class Stack
 		{
 			while (last_block)
 			{
-				register StackBlock* __restrict previous = last_block->previous;
+				StackBlock* __restrict previous = last_block->previous;
 				delete last_block;
 				last_block = previous;
 			}
@@ -117,9 +117,9 @@ class Stack
 						size = index + 1;
 					}
 					current_block = new_block;
-					register const T* __restrict source = other_block->data;
-					register T* __restrict destiny = current_block->data;
-					for (register int i = BLOCK_SIZE; i; --i)
+					const T* __restrict source = other_block->data;
+					T* __restrict destiny = current_block->data;
+					for (int i = BLOCK_SIZE; i; --i)
 					{
 						*(destiny++) = *(source++);
 					}
@@ -138,7 +138,7 @@ class Stack
 		{
 			while (last_block)
 			{
-				register StackBlock* __restrict previous_block = last_block->previous;
+				StackBlock* __restrict previous_block = last_block->previous;
 				delete last_block;
 				last_block = previous_block;
 			}
@@ -155,7 +155,7 @@ class Stack
 			}
 			else
 			{
-				register StackBlock* __restrict new_block = new StackBlock;
+				StackBlock* __restrict new_block = new StackBlock;
 				if (!new_block)
 				{
 					Throw(Memory::exception);
@@ -180,7 +180,7 @@ class Stack
 			}
 			else
 			{
-				register StackBlock* __restrict delete_block = last_block;
+				StackBlock* __restrict delete_block = last_block;
 				last_block = last_block->previous;
 				delete delete_block;
 				index = BLOCK_SIZE - 1;
@@ -193,14 +193,14 @@ class Stack
 		{
 			Assert(last_block);
 
-			register T value = last_block->data[index];
+			T value = last_block->data[index];
 			if (index)
 			{
 				--index;
 			}
 			else
 			{
-				register StackBlock* __restrict delete_block = last_block;
+				StackBlock* __restrict delete_block = last_block;
 				last_block = last_block->previous;
 				delete delete_block;
 				index = BLOCK_SIZE - 1;

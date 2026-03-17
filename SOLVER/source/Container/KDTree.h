@@ -36,7 +36,7 @@ struct KDNode
 		K distance = 0;
 		for (int k = 0; k < D; ++k)
 		{
-			register K value = this->key[k] - key[k];
+			K value = this->key[k] - key[k];
 			distance += value*value;
 		}
 		return distance;
@@ -137,7 +137,7 @@ class KDTree
 		{
 			while (last_block)
 			{
-				register KDNodesBlock* __restrict previous = last_block->previous;
+				KDNodesBlock* __restrict previous = last_block->previous;
 				delete last_block;
 				last_block = previous;
 			}
@@ -175,7 +175,7 @@ class KDTree
 			}
 			else
 			{
-				register KDNodesBlock* __restrict new_block = new KDNodesBlock;
+				KDNodesBlock* __restrict new_block = new KDNodesBlock;
 				if (!new_block)
 				{
 					Throw(Memory::exception);
@@ -184,21 +184,21 @@ class KDTree
 				last_block = new_block;
 				index = 0;
 			}
-			register KDNode<T, K, D>* __restrict new_node = &last_block->data[index];
+			KDNode<T, K, D>* __restrict new_node = &last_block->data[index];
 			new_node->left = (KDNode<T, K, D>*)0;
 			new_node->right = (KDNode<T, K, D>*)0;
 			new_node->value = value;
-			for (register int k = 0; k < D; ++k)
+			for (int k = 0; k < D; ++k)
 			{
 				new_node->key[k] = key[k];
 			}
 
 			if (root)
 			{
-				register KDNode<T, K, D>* __restrict node = root;
-				for (register int k = 0; ; k = (k + 1) % D)
+				KDNode<T, K, D>* __restrict node = root;
+				for (int k = 0; ; k = (k + 1) % D)
 				{
-					register KDNode<T, K, D>*& side = (node->key[k] > key[k]) ? node->left : node->right;
+					KDNode<T, K, D>*& side = (node->key[k] > key[k]) ? node->left : node->right;
 					if (side)
 					{
 						node = side;
@@ -221,7 +221,7 @@ class KDTree
 		{
 			while (last_block)
 			{
-				register KDNodesBlock* __restrict previous = last_block->previous;
+				KDNodesBlock* __restrict previous = last_block->previous;
 				delete last_block;
 				last_block = previous;
 			}

@@ -76,7 +76,7 @@ class Sequence
 			index(BLOCK_SIZE - 1),
 			size(0)
 		{
-			for (register SequenceItem<TYPE>* __restrict item = sequence.first; item; item = item->next)
+			for (SequenceItem<TYPE>* __restrict item = sequence.first; item; item = item->next)
 			{
 				AppendLast(item->value);
 			}
@@ -91,7 +91,7 @@ class Sequence
 			index(BLOCK_SIZE - 1),
 			size(0)
 		{
-			for (register SequenceItem<TYPE>* __restrict item = sequence.first; item; item = item->next)
+			for (SequenceItem<TYPE>* __restrict item = sequence.first; item; item = item->next)
 			{
 				AppendLast(item->value);
 			}
@@ -102,7 +102,7 @@ class Sequence
 		{
 			while (last_block)
 			{
-				register SequenceBlock* __restrict previous = last_block->previous;
+				SequenceBlock* __restrict previous = last_block->previous;
 				delete last_block;
 				last_block = previous;
 			}
@@ -114,7 +114,7 @@ class Sequence
 			if (this != &sequence)
 			{
 				Clear();
-				for (register SequenceItem<TYPE>* __restrict item = sequence.first; item; item = item->next)
+				for (SequenceItem<TYPE>* __restrict item = sequence.first; item; item = item->next)
 				{
 					AppendLast(item->value);
 				}
@@ -129,7 +129,7 @@ class Sequence
 			if (this != &sequence)
 			{
 				Clear();
-				for (register SequenceItem<TYPE>* __restrict item = sequence.first; item; item = item->next)
+				for (SequenceItem<TYPE>* __restrict item = sequence.first; item; item = item->next)
 				{
 					AppendLast(item->value);
 				}
@@ -140,7 +140,7 @@ class Sequence
 
 		TYPE& Append() throw(Memory::Exception)
 		{
-			register SequenceItem<TYPE>* __restrict new_item;
+			SequenceItem<TYPE>* __restrict new_item;
 			if (index < BLOCK_SIZE - 1)
 			{
 				++index;
@@ -148,7 +148,7 @@ class Sequence
 			}
 			else
 			{
-				register SequenceBlock* __restrict new_block = new SequenceBlock;
+				SequenceBlock* __restrict new_block = new SequenceBlock;
 				if (!new_block)
 				{
 					Throw(Memory::Exception());
@@ -185,7 +185,7 @@ class Sequence
 		{
 			while (last_block)
 			{
-				register SequenceBlock* __restrict previous = last_block->previous;
+				SequenceBlock* __restrict previous = last_block->previous;
 				delete last_block;
 				last_block = previous;
 			}
@@ -198,7 +198,7 @@ class Sequence
 
 		SequenceItem<TYPE>* Search(const TYPE& value) throw()
 		{
-			register SequenceItem<TYPE>* __restrict item = first;
+			SequenceItem<TYPE>* __restrict item = first;
 			while (item)
 			{
 				if (item->value == value)

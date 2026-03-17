@@ -57,7 +57,7 @@ class CSVector
 			}
 			--*(T**)&entry;
 			--*(int**)&index;
-			for (register int k = 1; k <= count; ++k)
+			for (int k = 1; k <= count; ++k)
 			{
 				entry[k] = a.entry[k];
 				index[k] = a.index[k];
@@ -104,7 +104,7 @@ class CSVector
 			Assert(k <= size);
 
 			static T zero = 0;
-			register int i = Search(k);
+			int i = Search(k);
 			return i ? entry[i] : zero;
 		}
 
@@ -142,7 +142,7 @@ class CSVector
 			{
 				Allocate(a.count);
 			}
-			for (register int k = 1; k <= count; ++k)
+			for (int k = 1; k <= count; ++k)
 			{
 				entry[k] = (T)a.entry[k];
 				index[k] = a.index[k];
@@ -159,7 +159,7 @@ class CSVector
 
 		void Fill(const T& value) throw()
 		{
-			for (register int k = 1; k <= count; ++k)
+			for (int k = 1; k <= count; ++k)
 			{
 				entry[k] = value;
 			}
@@ -167,8 +167,8 @@ class CSVector
 
 		void FillSeries(const T& start, const T& increment) throw()
 		{
-			register T value = start;
-			for (register int k = 1; k <= count; ++k, value += increment)
+			T value = start;
+			for (int k = 1; k <= count; ++k, value += increment)
 			{
 				entry[k] = value;
 			}
@@ -210,11 +210,11 @@ class CSVector
 			Assert(k <= size);
 
 			// Binary search http://en.wikipedia.org/wiki/Binary_search#Single_comparison_per_iteration
-			register int low = 1;
-			register int hight = count + 1;
+			int low = 1;
+			int hight = count + 1;
 			while (low < hight)
 			{
-				register int middle = low + ((hight - low) >> 1);
+				int middle = low + ((hight - low) >> 1);
 				if (index[middle] < k)
 				{
 					low = middle + 1;
@@ -235,7 +235,7 @@ class CSVector
 		{
 			// Combsort11 http://en.wikipedia.org/wiki/Comb_sort
 			bool swapped;
-			register int gap = count;
+			int gap = count;
 			do
 			{
 				gap = (gap*10)/13;
@@ -258,12 +258,12 @@ class CSVector
 					}
 				}
 				swapped = false;
-				for (register int j = gap + 1; j <= count; ++j)
+				for (int j = gap + 1; j <= count; ++j)
 				{
 					int k = j - gap;
 					if (index[j] < index[k])
 					{
-						register int t = index[j];
+						int t = index[j];
 						index[j] = index[k];
 						index[k] = t;
 						swapped = true;
@@ -276,7 +276,7 @@ class CSVector
 		{
 			// Combsort11 http://en.wikipedia.org/wiki/Comb_sort
 			bool swapped;
-			register int gap = count;
+			int gap = count;
 			do
 			{
 				gap = (gap*10)/13;
@@ -299,15 +299,15 @@ class CSVector
 					}
 				}
 				swapped = false;
-				for (register int j = gap + 1; j <= count; ++j)
+				for (int j = gap + 1; j <= count; ++j)
 				{
 					int k = j - gap;
 					if (index[j] < index[k])
 					{
-						register int t = index[j];
+						int t = index[j];
 						index[j] = index[k];
 						index[k] = t;
-						register T v = entry[j];
+						T v = entry[j];
 						entry[j] = entry[k];
 						entry[k] = v;
 						swapped = true;
@@ -323,10 +323,10 @@ T SparseDotMultiplication(const int* a_index, const T* a_entry, int a_count, con
 {
 	T sum = 0;
 
-	register int qa = 1;
-	register int qb = 1;
-	register int ka = a_index[qa];
-	register int kb = b_index[qb];
+	int qa = 1;
+	int qb = 1;
+	int ka = a_index[qa];
+	int kb = b_index[qb];
 	for (bool next = true; next; )
 	{
 		while (ka < kb)

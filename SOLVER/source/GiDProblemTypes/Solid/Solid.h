@@ -484,10 +484,10 @@ class Solid
 							T det_J;
 							shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
-							for (register int i = 1; i <= shape_functions.mesh.nodes_per_element; ++i)
+							for (int i = 1; i <= shape_functions.mesh.nodes_per_element; ++i)
 							{
-								register int i2 = i*2;
-								register int i1 = i2 - 1;
+								int i2 = i*2;
+								int i1 = i2 - 1;
 								T p = dN.entry[i][1];
 								T q = dN.entry[i][2];
 								Bt.entry[i1][1] = p; Bt.entry[i2][1] = 0;
@@ -499,12 +499,12 @@ class Solid
 							}
 
 							T weight = element_integration_rules.entry[q].weight;
-							for (register int i = 1; i <= m; ++i)
+							for (int i = 1; i <= m; ++i)
 							{
-								for (register int j = 1; j <= m; ++j)
+								for (int j = 1; j <= m; ++j)
 								{
 									T sum = 0;
-									for (register int k = 1; k <= 3; ++k)
+									for (int k = 1; k <= 3; ++k)
 									{
 										sum += Bt.entry[i][k]*DB.entry[k][j];
 									}
@@ -525,10 +525,10 @@ class Solid
 							T det_J;
 							shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
-							for (register int i = 1; i <= shape_functions.mesh.nodes_per_element; ++i)
+							for (int i = 1; i <= shape_functions.mesh.nodes_per_element; ++i)
 							{
-								register int i2 = i*2;
-								register int i1 = i2 - 1;
+								int i2 = i*2;
+								int i1 = i2 - 1;
 								T p = dN.entry[i][1];
 								T q = dN.entry[i][2];
 								Bt.entry[i1][1] = p; Bt.entry[i2][1] = 0;
@@ -540,12 +540,12 @@ class Solid
 							}
 
 							T weight = element_integration_rules.entry[q].weight;
-							for (register int i = 1; i <= m; ++i)
+							for (int i = 1; i <= m; ++i)
 							{
-								for (register int j = 1; j <= m; ++j)
+								for (int j = 1; j <= m; ++j)
 								{
-									register T sum = 0;
-									for (register int k = 1; k <= 3; ++k)
+									T sum = 0;
+									for (int k = 1; k <= 3; ++k)
 									{
 										sum += Bt.entry[i][k]*DB.entry[k][j];
 									}
@@ -571,11 +571,11 @@ class Solid
 						T det_J;
 						shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
-						for (register int i = 1; i <= shape_functions.mesh.nodes_per_element; ++i)
+						for (int i = 1; i <= shape_functions.mesh.nodes_per_element; ++i)
 						{
-							register int i3 = i*3;
-							register int i2 = i3 - 1;
-							register int i1 = i3 - 2;
+							int i3 = i*3;
+							int i2 = i3 - 1;
+							int i1 = i3 - 2;
 							T p = dN.entry[i][1];
 							T q = dN.entry[i][2];
 							T r = dN.entry[i][3];
@@ -594,12 +594,12 @@ class Solid
 						}
 
 						T weight = element_integration_rules.entry[q].weight;
-						for (register int i = 1; i <= m; ++i)
+						for (int i = 1; i <= m; ++i)
 						{
-							for (register int j = 1; j <= m; ++j)
+							for (int j = 1; j <= m; ++j)
 							{
 								T sum = 0;
-								for (register int k = 1; k <= 6; ++k)
+								for (int k = 1; k <= 6; ++k)
 								{
 									sum += Bt.entry[i][k]*DB.entry[k][j];
 								}
@@ -655,10 +655,10 @@ class Solid
 							T det_J;
 							shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
-							for (register int i = 1; i <= shape_functions.mesh.nodes_per_element; ++i)
+							for (int i = 1; i <= shape_functions.mesh.nodes_per_element; ++i)
 							{
-								register int i2 = i*2;
-								register int i1 = i2 - 1;
+								int i2 = i*2;
+								int i1 = i2 - 1;
 								T p = dN.entry[i][1];
 								T q = dN.entry[i][2];
 								Bt.entry[i1][1] = p; Bt.entry[i2][1] = 0;
@@ -670,12 +670,12 @@ class Solid
 							}
 
 							T weight = element_integration_rules.entry[q].weight;
-							for (register int i = 1; i <= m; ++i)
+							for (int i = 1; i <= m; ++i)
 							{
-								for (register int j = 1; j <= m; ++j)
+								for (int j = 1; j <= m; ++j)
 								{
 									T sum = 0;
-									for (register int k = 1; k <= 3; ++k)
+									for (int k = 1; k <= 3; ++k)
 									{
 										sum += Bt.entry[i][k]*DB.entry[k][j];
 									}
@@ -703,10 +703,10 @@ class Solid
 							T det_J;
 							shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
-							for (register int i = 1; i <= shape_functions.mesh.nodes_per_element; ++i)
+							for (int i = 1; i <= shape_functions.mesh.nodes_per_element; ++i)
 							{
-								register int i2 = i*2;
-								register int i1 = i2 - 1;
+								int i2 = i*2;
+								int i1 = i2 - 1;
 								T p = dN.entry[i][1];
 								T q = dN.entry[i][2];
 								Bt.entry[i1][1] = p; Bt.entry[i2][1] = 0;
@@ -718,12 +718,12 @@ class Solid
 							}
 
 							T weight = element_integration_rules.entry[q].weight;
-							for (register int i = 1; i <= m; ++i)
+							for (int i = 1; i <= m; ++i)
 							{
-								for (register int j = 1; j <= m; ++j)
+								for (int j = 1; j <= m; ++j)
 								{
 									T sum = 0;
-									for (register int k = 1; k <= 3; ++k)
+									for (int k = 1; k <= 3; ++k)
 									{
 										sum += Bt.entry[i][k]*DB.entry[k][j];
 									}
@@ -758,11 +758,11 @@ class Solid
 						T det_J;
 						shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
-						for (register int i = 1; i <= shape_functions.mesh.nodes_per_element; ++i)
+						for (int i = 1; i <= shape_functions.mesh.nodes_per_element; ++i)
 						{
-							register int i3 = i*3;
-							register int i2 = i3 - 1;
-							register int i1 = i3 - 2;
+							int i3 = i*3;
+							int i2 = i3 - 1;
+							int i1 = i3 - 2;
 							T p = dN.entry[i][1];
 							T q = dN.entry[i][2];
 							T r = dN.entry[i][3];
@@ -781,12 +781,12 @@ class Solid
 						}
 
 						T weight = element_integration_rules.entry[q].weight;
-						for (register int i = 1; i <= m; ++i)
+						for (int i = 1; i <= m; ++i)
 						{
-							for (register int j = 1; j <= m; ++j)
+							for (int j = 1; j <= m; ++j)
 							{
 								T sum = 0;
-								for (register int k = 1; k <= 6; ++k)
+								for (int k = 1; k <= 6; ++k)
 								{
 									sum += Bt.entry[i][k]*DB.entry[k][j];
 								}
@@ -816,12 +816,12 @@ class Solid
 
 			if (shape_functions.nodes.dimension == 2)
 			{
-				for (register int i = 1; i <= displacements.size; ++i)
+				for (int i = 1; i <= displacements.size; ++i)
 				{
 					Displacement& displacement = displacements.entry[i];
 
-					register int i2 = 2*displacement.node_id;
-					register int i1 = i2 - 1;
+					int i2 = 2*displacement.node_id;
+					int i1 = i2 - 1;
 					if (displacement.user_function_x_id == 0)
 					{
 						u.entry[i1] = displacement.displacement_x;
@@ -848,13 +848,13 @@ class Solid
 			}
 			else if (shape_functions.nodes.dimension == 3)
 			{
-				for (register int i = 1; i <= displacements.size; ++i)
+				for (int i = 1; i <= displacements.size; ++i)
 				{
 					Displacement& displacement = displacements.entry[i];
 
-					register int i3 = 3*displacement.node_id;
-					register int i2 = i3 - 1;
-					register int i1 = i2 - 1;
+					int i3 = 3*displacement.node_id;
+					int i2 = i3 - 1;
+					int i1 = i2 - 1;
 					if (displacement.user_function_x_id == 0)
 					{
 						u.entry[i1] = displacement.displacement_x;
@@ -899,25 +899,25 @@ class Solid
 
 			if (shape_functions.nodes.dimension == 2)
 			{
-				for (register int i = 1; i <= displacements.size; ++i)
+				for (int i = 1; i <= displacements.size; ++i)
 				{
 					Displacement& displacement = displacements.entry[i];
 
-					register int i2 = 2*displacement.node_id;
-					register int i1 = i2 - 1;
+					int i2 = 2*displacement.node_id;
+					int i1 = i2 - 1;
 					fixed.entry[i1] = displacement.fixed_x;
 					fixed.entry[i2] = displacement.fixed_y;
 				}
 			}
 			else if (shape_functions.nodes.dimension == 3)
 			{
-				for (register int i = 1; i <= displacements.size; ++i)
+				for (int i = 1; i <= displacements.size; ++i)
 				{
 					Displacement& displacement = displacements.entry[i];
 
-					register int i3 = 3*displacement.node_id;
-					register int i2 = i3 - 1;
-					register int i1 = i2 - 1;
+					int i3 = 3*displacement.node_id;
+					int i2 = i3 - 1;
+					int i1 = i2 - 1;
 					fixed.entry[i1] = displacement.fixed_x;
 					fixed.entry[i2] = displacement.fixed_y;
 					fixed.entry[i3] = displacement.fixed_z;
@@ -935,12 +935,12 @@ class Solid
 				// Fill nodal forces
 				if (shape_functions.nodes.dimension == 2)
 				{
-					for (register int i = 1; i <= nodal_forces.size; ++i)
+					for (int i = 1; i <= nodal_forces.size; ++i)
 					{
 						NodalForce& node_force = nodal_forces.entry[i];
 
-						register int i2 = 2*node_force.node_id;
-						register int i1 = i2 - 1;
+						int i2 = 2*node_force.node_id;
+						int i1 = i2 - 1;
 						if (node_force.user_function_x_id == 0)
 						{
 							f.entry[i1] = node_force.force_x;
@@ -967,13 +967,13 @@ class Solid
 				}
 				else if (shape_functions.nodes.dimension == 3)
 				{
-					for (register int i = 1; i <= nodal_forces.size; ++i)
+					for (int i = 1; i <= nodal_forces.size; ++i)
 					{
 						NodalForce& node_force = nodal_forces.entry[i];
 
-						register int i3 = 3*node_force.node_id;
-						register int i2 = i3 - 1;
-						register int i1 = i2 - 1;
+						int i3 = 3*node_force.node_id;
+						int i2 = i3 - 1;
+						int i1 = i2 - 1;
 						if (node_force.user_function_x_id == 0)
 						{
 							f.entry[i1] = node_force.force_x;
@@ -1015,7 +1015,7 @@ class Solid
 
 				if (shape_functions.nodes.dimension == 2)
 				{
-					for (register int i = 1; i <= normal_forces.size; ++i)
+					for (int i = 1; i <= normal_forces.size; ++i)
 					{
 						NormalForce& facet_force = normal_forces.entry[i];
 						int material_id = material_index.entry[facet_force.element_id];
@@ -1038,9 +1038,9 @@ class Solid
 							shape_functions.FacetShapeFunctions(facet_force.facet_nodes, facet_integration_rules.entry[q].point, facet_N, det_J);
 
 							T w = facet_integration_rules.entry[q].weight;
-							for (register int j = 1; j <= shape_functions.mesh.nodes_per_facet; ++j)
+							for (int j = 1; j <= shape_functions.mesh.nodes_per_facet; ++j)
 							{
-								register int n = (facet_force.facet_nodes.entry[j] - 1)*2;
+								int n = (facet_force.facet_nodes.entry[j] - 1)*2;
 								if (facet_force.user_function_id == 0)
 								{
 									f.entry[n + 1] += w*t*(facet_force.force*nfx)*facet_N.entry[j]*det_J;
@@ -1061,7 +1061,7 @@ class Solid
 				}
 				else if (shape_functions.nodes.dimension == 3)
 				{
-					for (register int i = 1; i <= normal_forces.size; ++i)
+					for (int i = 1; i <= normal_forces.size; ++i)
 					{
 						NormalForce& facet_force = normal_forces.entry[i];
 
@@ -1089,9 +1089,9 @@ class Solid
 							shape_functions.FacetShapeFunctions(facet_force.facet_nodes, facet_integration_rules.entry[q].point, facet_N, det_J);
 
 							T w = facet_integration_rules.entry[q].weight;
-							for (register int j = 1; j <= shape_functions.mesh.nodes_per_facet; ++j)
+							for (int j = 1; j <= shape_functions.mesh.nodes_per_facet; ++j)
 							{
-								register int n = (facet_force.facet_nodes.entry[j] - 1)*3;
+								int n = (facet_force.facet_nodes.entry[j] - 1)*3;
 								if (facet_force.user_function_id == 0)
 								{
 									f.entry[n + 1] += w*(facet_force.force*nfx)*facet_N.entry[j]*det_J;
@@ -1138,9 +1138,9 @@ class Solid
 								shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
 								T w = element_integration_rules.entry[q].weight;
-								for (register int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
+								for (int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
 								{
-									register int n = connectivity.entry[element_id][j]*2; // y axis
+									int n = connectivity.entry[element_id][j]*2; // y axis
 									f.entry[n] -= w*t*material.density*g*N.entry[j]*det_J;
 								}
 							}
@@ -1159,9 +1159,9 @@ class Solid
 								shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
 								T w = element_integration_rules.entry[q].weight;
-								for (register int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
+								for (int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
 								{
-									register int n = connectivity.entry[element_id][j]*3; // z axis
+									int n = connectivity.entry[element_id][j]*3; // z axis
 									f.entry[n] -= w*material.density*g*N.entry[j]*det_J;
 								}
 							}
@@ -1201,7 +1201,7 @@ class Solid
 							shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
 							T w = element_integration_rules.entry[q].weight;
-							for (register int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
+							for (int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
 							{
 								total_weight += w*t*material.density*g*N.entry[j]*det_J;
 							}
@@ -1221,7 +1221,7 @@ class Solid
 							shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
 							T w = element_integration_rules.entry[q].weight;
-							for (register int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
+							for (int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
 							{
 								total_weight += w*material.density*g*N.entry[j]*det_J;
 							}
@@ -1254,7 +1254,7 @@ class Solid
 						shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
 						T w = element_integration_rules.entry[q].weight;
-						for (register int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
+						for (int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
 						{
 							area += w*N.entry[j]*det_J;
 						}
@@ -1270,7 +1270,7 @@ class Solid
 						shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
 						T w = element_integration_rules.entry[q].weight;
-						for (register int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
+						for (int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
 						{
 							volume += w*N.entry[j]*det_J;
 						}
@@ -1303,7 +1303,7 @@ class Solid
 							shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
 							T w = element_integration_rules.entry[q].weight;
-							for (register int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
+							for (int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
 							{
 								area += w*N.entry[j]*det_J;
 							}
@@ -1322,7 +1322,7 @@ class Solid
 							shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
 							T w = element_integration_rules.entry[q].weight;
-							for (register int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
+							for (int j = 1; j <= shape_functions.mesh.nodes_per_element; ++j)
 							{
 								volume += w*N.entry[j]*det_J;
 							}
@@ -1424,7 +1424,7 @@ class Solid
 						shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
 						epsilon.Fill(0);
-						for (register int n = 1; n <= shape_functions.mesh.nodes_per_element; ++n)
+						for (int n = 1; n <= shape_functions.mesh.nodes_per_element; ++n)
 						{
 							int node_id = shape_functions.mesh.connectivity.entry[element_id][n];
 							T ui = u.entry[(node_id - 1)*2 + 1];
@@ -1447,7 +1447,7 @@ class Solid
 						shape_functions.ElementShapeFunctions(element_id, element_integration_rules.entry[q].point, N, dN, det_J);
 
 						epsilon.Fill(0);
-						for (register int n = 1; n <= shape_functions.mesh.nodes_per_element; ++n)
+						for (int n = 1; n <= shape_functions.mesh.nodes_per_element; ++n)
 						{
 							int node_id = shape_functions.mesh.connectivity.entry[element_id][n];
 							T ui = u.entry[(node_id - 1)*3 + 1];
@@ -1645,11 +1645,11 @@ class Solid
 				Vector<T> global_u(shape_functions.mesh.nodes_count*shape_functions.nodes.dimension);
 				for (int n = 1; n <= node_index.size; ++n)
 				{
-					int register node_id = node_index.entry[n];
-					for (register int d = 1; d <= shape_functions.nodes.dimension; ++d)
+					int node_id = node_index.entry[n];
+					for (int d = 1; d <= shape_functions.nodes.dimension; ++d)
 					{
-						register int l = (n - 1)*shape_functions.nodes.dimension + d;
-						register int g = (node_id - 1)*shape_functions.nodes.dimension + d;
+						int l = (n - 1)*shape_functions.nodes.dimension + d;
+						int g = (node_id - 1)*shape_functions.nodes.dimension + d;
 						global_u.entry[g] = u.entry[l];
 					}
 				}
@@ -1704,11 +1704,11 @@ class Solid
 				Vector<T> global_u(shape_functions.mesh.nodes_count*shape_functions.nodes.dimension);
 				for (int n = 1; n <= node_index.size; ++n)
 				{
-					int register node_id = node_index.entry[n];
-					for (register int d = 1; d <= shape_functions.nodes.dimension; ++d)
+					int node_id = node_index.entry[n];
+					for (int d = 1; d <= shape_functions.nodes.dimension; ++d)
 					{
-						register int l = (n - 1)*shape_functions.nodes.dimension + d;
-						register int g = (node_id - 1)*shape_functions.nodes.dimension + d;
+						int l = (n - 1)*shape_functions.nodes.dimension + d;
+						int g = (node_id - 1)*shape_functions.nodes.dimension + d;
 						global_u.entry[g] = u.entry[l];
 					}
 				}
@@ -1767,11 +1767,11 @@ class Solid
 				Vector<T> global_u(shape_functions.mesh.nodes_count*shape_functions.nodes.dimension);
 				for (int n = 1; n <= node_index.size; ++n)
 				{
-					int register node_id = node_index.entry[n];
-					for (register int d = 1; d <= shape_functions.nodes.dimension; ++d)
+					int node_id = node_index.entry[n];
+					for (int d = 1; d <= shape_functions.nodes.dimension; ++d)
 					{
-						register int l = (n - 1)*shape_functions.nodes.dimension + d;
-						register int g = (node_id - 1)*shape_functions.nodes.dimension + d;
+						int l = (n - 1)*shape_functions.nodes.dimension + d;
+						int g = (node_id - 1)*shape_functions.nodes.dimension + d;
 						global_u.entry[g] = u.entry[l];
 					}
 				}

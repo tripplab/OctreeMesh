@@ -134,10 +134,10 @@ void Mesh::GetElementsNodes(const Vector<int>& element_index, const bool reorder
 		int element_id_size = element_index.size;
 		for (int pe = 1; pe <= element_id_size; ++pe)
 		{
-			register int e = element_index.entry[pe];
-			for (register int v = 1; v <= nodes_per_element; ++v)
+			int e = element_index.entry[pe];
+			for (int v = 1; v <= nodes_per_element; ++v)
 			{
-				register int n = connectivity.entry[e][v];
+				int n = connectivity.entry[e][v];
 				if (!node_belong.entry[n])
 				{
 					node_belong.entry[n] = true;
@@ -148,7 +148,7 @@ void Mesh::GetElementsNodes(const Vector<int>& element_index, const bool reorder
 
 		// Fill node_index
 		node_index.Resize(node_index_size);
-		for (register int n = 1, index = 0; n <= nodes_count; ++n)
+		for (int n = 1, index = 0; n <= nodes_count; ++n)
 		{
 			if (node_belong.entry[n])
 			{
@@ -191,7 +191,7 @@ void Mesh::GetElementsNodes(const Vector<int>& element_index, const bool reorder
 
 			// Count total number of edges
 			int total_edges = 0;
-			for (register int n = 1; n <= node_index_size; ++n)
+			for (int n = 1; n <= node_index_size; ++n)
 			{
 				total_edges += adjacency.entry[n].size;
 			}
@@ -202,9 +202,9 @@ void Mesh::GetElementsNodes(const Vector<int>& element_index, const bool reorder
 			for (int n = 1, ads = 1; n <= node_index_size; ++n)
 			{
 				adjacency_start.entry[n] = ads;
-				for (register SetItem<int>* __restrict item = adjacency.entry[n].first; item; item = item->next, ++ads)
+				for (SetItem<int>* __restrict item = adjacency.entry[n].first; item; item = item->next, ++ads)
 				{
-					register int ne = item->value;
+					int ne = item->value;
 					adjacency_nodes.entry[ads] = ne;
 				}
 			}
@@ -360,9 +360,9 @@ void Mesh::GetAdjacencies(Adjacencies& adjacencies) const throw(Memory::Exceptio
 				Vector<Sequence<int, 16> > node_elements(nodes_count);
 				for (int e = 1; e <= elements_count; ++e)
 				{
-					for (register int v = 1; v <= vertex_count; ++v)
+					for (int v = 1; v <= vertex_count; ++v)
 					{
-						register int n = connectivity.entry[e][v];
+						int n = connectivity.entry[e][v];
 						node_elements.entry[n].Append() = e;
 					}
 				}
@@ -370,10 +370,10 @@ void Mesh::GetAdjacencies(Adjacencies& adjacencies) const throw(Memory::Exceptio
 				// List of ejements in contact
 				for (int n = 1; n <= nodes_count; ++n)
 				{
-					for (register SequenceItem<int>* __restrict l1 = node_elements.entry[n].first; l1; l1 = l1->next)
+					for (SequenceItem<int>* __restrict l1 = node_elements.entry[n].first; l1; l1 = l1->next)
 					{
 						int e1 = l1->value;
-						for (register SequenceItem<int>* __restrict l2 = l1->next; l2; l2 = l2->next)
+						for (SequenceItem<int>* __restrict l2 = l1->next; l2; l2 = l2->next)
 						{
 							int e2 = l2->value;
 							contact.entry[e1].Append() = e2;
@@ -390,7 +390,7 @@ void Mesh::GetAdjacencies(Adjacencies& adjacencies) const throw(Memory::Exceptio
 			for (int e = 1; e <= elements_count; ++e)
 			{
 				int count = 0;
-				for (register SequenceItem<int>* __restrict c = contact.entry[e].first; c; c = c->next)
+				for (SequenceItem<int>* __restrict c = contact.entry[e].first; c; c = c->next)
 				{
 					++contact_count.entry[c->value];
 					if (contact_count.entry[c->value] == facet_vertex_count)
@@ -401,7 +401,7 @@ void Mesh::GetAdjacencies(Adjacencies& adjacencies) const throw(Memory::Exceptio
 				total_adjacency_count += count;
 
 				count = 0;
-				for (register SequenceItem<int>* __restrict c = contact.entry[e].first; c; c = c->next)
+				for (SequenceItem<int>* __restrict c = contact.entry[e].first; c; c = c->next)
 				{
 					if (contact_count.entry[c->value] == facet_vertex_count)
 					{
@@ -425,7 +425,7 @@ void Mesh::GetAdjacencies(Adjacencies& adjacencies) const throw(Memory::Exceptio
 			adjacencies.start.entry[e] = start;
 			for (int j = 1; j <= facets_per_element; ++j)
 			{
-				register int a = adjacency_matrix.entry[e][j];
+				int a = adjacency_matrix.entry[e][j];
 				if (a)
 				{
 					adjacencies.data.entry[start++] = a;
@@ -453,9 +453,9 @@ void Mesh::ElementColoring(Vector<Vector<int> >& element_index) const throw(Memo
 		Vector<Stack<int, 16> > node_elements(nodes_count);
 		for (int e = 1; e <= elements_count; ++e)
 		{
-			for (register int v = 1; v <= vertex_count; ++v)
+			for (int v = 1; v <= vertex_count; ++v)
 			{
-				register int n = connectivity.entry[e][v];
+				int n = connectivity.entry[e][v];
 				node_elements.entry[n].Push(e);
 			}
 		}
@@ -466,16 +466,16 @@ void Mesh::ElementColoring(Vector<Vector<int> >& element_index) const throw(Memo
 			Array<int, 2048> contact;
 			Stack<int, 16>& elements = node_elements.entry[n];
 			int size = elements.size;
-			for (register int i = 1; i <= size; ++i)
+			for (int i = 1; i <= size; ++i)
 			{
 				int e;
 				elements.Pop(e);
 				contact.entry[i] = e;
 			}
-			for (register int i = 1; i <= size; ++i)
+			for (int i = 1; i <= size; ++i)
 			{
 				int e1 = contact.entry[i];
-				for (register int j = i + 1; j <= size; ++j)
+				for (int j = i + 1; j <= size; ++j)
 				{
 					int e2 = contact.entry[j];
 					adjacencies.entry[e1].Push(e2);
@@ -497,11 +497,11 @@ void Mesh::ElementColoring(Vector<Vector<int> >& element_index) const throw(Memo
 	for (int e = 1; e <= elements_count; ++e)
 	{
 		Stack<int, 16>& adjacency = adjacencies.entry[e];
-		for (register int i = adjacency.size; i; --i)
+		for (int i = adjacency.size; i; --i)
 		{
 			int a;
 			adjacency.Pop(a);
-			register int c = elements_color.entry[a];
+			int c = elements_color.entry[a];
 			if (c)
 			{
 				color_used.entry[c] = true;
@@ -509,9 +509,9 @@ void Mesh::ElementColoring(Vector<Vector<int> >& element_index) const throw(Memo
 		}
 
 		short color = 0;
-		for (register short d = number_of_colors; d; --d)
+		for (short d = number_of_colors; d; --d)
 		{
-			register short c = ((e + d - 2) % number_of_colors) + 1;
+			short c = ((e + d - 2) % number_of_colors) + 1;
 			if (!color_used.entry[c])
 			{
 				color = c;
@@ -527,7 +527,7 @@ void Mesh::ElementColoring(Vector<Vector<int> >& element_index) const throw(Memo
 		elements_color.entry[e] = color;
 		++color_count.entry[color];
 
-		for (register short c = 1; c <= number_of_colors; ++c)
+		for (short c = 1; c <= number_of_colors; ++c)
 		{
 			color_used.entry[c] = false;
 		}
@@ -540,9 +540,9 @@ void Mesh::ElementColoring(Vector<Vector<int> >& element_index) const throw(Memo
 		index.Resize(color_count.entry[c]);
 	}
 	color_count.Fill(0);
-	for (register int e = 1; e <= elements_count; ++e)
+	for (int e = 1; e <= elements_count; ++e)
 	{
-		register int c = elements_color.entry[e];
+		int c = elements_color.entry[e];
 		element_index.entry[c].entry[++color_count.entry[c]] = e;
 	}
 }
@@ -561,9 +561,9 @@ void Mesh::GetAdjacencies(Matrix<int>& adjacencies) const throw(Memory::Exceptio
 			Vector<Sequence<int, 16> > node_elements(nodes_count);
 			for (int e = 1; e <= elements_count; ++e)
 			{
-				for (register int v = 1; v <= vertex_count; ++v)
+				for (int v = 1; v <= vertex_count; ++v)
 				{
-					register int n = connectivity.entry[e][v];
+					int n = connectivity.entry[e][v];
 					node_elements.entry[n].Append() = e;
 				}
 			}
@@ -571,10 +571,10 @@ void Mesh::GetAdjacencies(Matrix<int>& adjacencies) const throw(Memory::Exceptio
 			// List of elements in contact
 			for (int n = 1; n <= nodes_count; ++n)
 			{
-				for (register SequenceItem<int>* __restrict l1 = node_elements.entry[n].first; l1; l1 = l1->next)
+				for (SequenceItem<int>* __restrict l1 = node_elements.entry[n].first; l1; l1 = l1->next)
 				{
 					int e1 = l1->value;
-					for (register SequenceItem<int>* __restrict l2 = l1->next; l2; l2 = l2->next)
+					for (SequenceItem<int>* __restrict l2 = l1->next; l2; l2 = l2->next)
 					{
 						int e2 = l2->value;
 						contact.entry[e1].Append() = e2;
@@ -599,14 +599,14 @@ void Mesh::GetAdjacencies(Matrix<int>& adjacencies) const throw(Memory::Exceptio
 		for (int e = 1; e <= elements_count; ++e)
 		{
 			// Store all nodes in element (using local numeration)
-			for (register int l = 1; l <= vertex_count; ++l)
+			for (int l = 1; l <= vertex_count; ++l)
 			{
-				register int n = connectivity.entry[e][l];
+				int n = connectivity.entry[e][l];
 				common_nodes.entry[n] = l;
 			}
 
 			// Identify how many nodes are shared with each element
-			for (register SequenceItem<int>* __restrict node = contact.entry[e].first; node; node = node->next)
+			for (SequenceItem<int>* __restrict node = contact.entry[e].first; node; node = node->next)
 			{
 				int ce = node->value;
 				++contact_count.entry[ce];
@@ -614,10 +614,10 @@ void Mesh::GetAdjacencies(Matrix<int>& adjacencies) const throw(Memory::Exceptio
 				{
 					// Identify the facet that is adjacent to the element ce
 					unsigned int facet_mask = 0;
-					for (register int v = 1; v <= vertex_count; ++v)
+					for (int v = 1; v <= vertex_count; ++v)
 					{
-						register int n = connectivity.entry[ce][v];
-						register int l = common_nodes.entry[n];
+						int n = connectivity.entry[ce][v];
+						int l = common_nodes.entry[n];
 						if (l)
 						{
 							facet_mask |= 1 << l;
@@ -632,7 +632,7 @@ void Mesh::GetAdjacencies(Matrix<int>& adjacencies) const throw(Memory::Exceptio
 
 					// Add element adjacencies for the corresponding facet
 					const unsigned int* mask = all_masks[element_type];
-					for (register int f = 1; f <= facets_per_element; ++f)
+					for (int f = 1; f <= facets_per_element; ++f)
 					{
 						if (facet_mask == mask[f])
 						{
@@ -644,15 +644,15 @@ void Mesh::GetAdjacencies(Matrix<int>& adjacencies) const throw(Memory::Exceptio
 			}
 
 			// Clear contacts
-			for (register SequenceItem<int>* __restrict node = contact.entry[e].first; node; node = node->next)
+			for (SequenceItem<int>* __restrict node = contact.entry[e].first; node; node = node->next)
 			{
 				contact_count.entry[node->value] = 0;
 			}
 
 			// Clear nodes
-			for (register int v = 1; v <= vertex_count; ++v)
+			for (int v = 1; v <= vertex_count; ++v)
 			{
-				register int n = connectivity.entry[e][v];
+				int n = connectivity.entry[e][v];
 				common_nodes.entry[n] = 0;
 			}
 		}
@@ -682,7 +682,7 @@ void Mesh::ElementColoring(const Matrix<int>& adjacencies, Vector<Vector<int> >&
 			int a = adjacencies.entry[e][c];
 			if (a)
 			{
-				register int c = elements_color.entry[a];
+				int c = elements_color.entry[a];
 				if (c)
 				{
 					color_used.entry[c] = true;
@@ -691,9 +691,9 @@ void Mesh::ElementColoring(const Matrix<int>& adjacencies, Vector<Vector<int> >&
 		}
 
 		short color = 0;
-		for (register short d = number_of_colors; d; --d)
+		for (short d = number_of_colors; d; --d)
 		{
-			register short c = ((e + d - 2) % number_of_colors) + 1;
+			short c = ((e + d - 2) % number_of_colors) + 1;
 			if (!color_used.entry[c])
 			{
 				color = c;
@@ -709,7 +709,7 @@ void Mesh::ElementColoring(const Matrix<int>& adjacencies, Vector<Vector<int> >&
 		elements_color.entry[e] = color;
 		++color_count.entry[color];
 
-		for (register short c = 1; c <= number_of_colors; ++c)
+		for (short c = 1; c <= number_of_colors; ++c)
 		{
 			color_used.entry[c] = false;
 		}
@@ -722,9 +722,9 @@ void Mesh::ElementColoring(const Matrix<int>& adjacencies, Vector<Vector<int> >&
 		index.Resize(color_count.entry[c]);
 	}
 	color_count.Fill(0);
-	for (register int e = 1; e <= elements_count; ++e)
+	for (int e = 1; e <= elements_count; ++e)
 	{
-		register int c = elements_color.entry[e];
+		int c = elements_color.entry[e];
 		element_index.entry[c].entry[++color_count.entry[c]] = e;
 	}
 }

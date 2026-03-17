@@ -199,7 +199,7 @@ FormatInteger::FormatInteger(bool space, bool sign, int width, Type type) throw(
 	{
 		++size;
 	}
-	for (register int w = width; w; ++size)
+	for (int w = width; w; ++size)
 	{
 		w /= 10;
 	}

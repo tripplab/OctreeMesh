@@ -30,8 +30,8 @@ void LowerTriangularSystem(const LowerTriangularMatrix<T>& L, Vector<T>& c, cons
 	{
 		T* __restrict L_entry_i = L.entry[i];
 
-		register T sum = b.entry[i];
-		for (register int j = 1; j < i; ++j)
+		T sum = b.entry[i];
+		for (int j = 1; j < i; ++j)
 		{
 			sum -= L_entry_i[j]*c.entry[j];
 		}
@@ -48,8 +48,8 @@ void UpperTriangularSystem(const UpperTriangularMatrix<T>& U, Vector<T>& x, cons
 	{
 		T* __restrict U_entry_i = U.entry[i];
 
-		register T sum = c.entry[i];
-		for (register int j = i + 1; j <= n; ++j)
+		T sum = c.entry[i];
+		for (int j = i + 1; j <= n; ++j)
 		{
 			sum -= U_entry_i[j]*x.entry[j];
 		}

@@ -483,16 +483,16 @@ class DistributedConjugateGradientSlave
 					{
 						int fixed_count = 0;
 						int k_max = K.Count(i);
-						for (register int k = 1; k <= k_max; ++k)
+						for (int k = 1; k <= k_max; ++k)
 						{
-							register int j = K.index[i][k];
+							int j = K.index[i][k];
 							if (fixed.entry[j])
 							{
 								f_adjust.entry[i] += K.entry[i][k]*u.entry[j];
 								fixed_index.entry[++fixed_count] = j;
 							}
 						}
-						for (register int f = 1; f <= fixed_count; ++f)
+						for (int f = 1; f <= fixed_count; ++f)
 						{
 							K.RemoveEntry(i, fixed_index.entry[f]);
 						}
@@ -533,7 +533,7 @@ class DistributedConjugateGradientSlave
 
 					T sum = 0.0;
 					int k_max = K.Count(i);
-					for (register int k = 1; k <= k_max; ++k)
+					for (int k = 1; k <= k_max; ++k)
 					{
 						sum += K_entry_i[k]*v.entry[K_index_i[k]];
 					}

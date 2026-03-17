@@ -31,12 +31,12 @@ static void keyvaliqst(KeyValueType *, KeyValueType *);
 **************************************************************************/
 void iidxsort(int n, idxtype *base)
 {
-  register idxtype *i;
-  register idxtype *j;
-  register idxtype *lo;
-  register idxtype *hi;
-  register idxtype *min;
-  register idxtype c;
+  idxtype *i;
+  idxtype *j;
+  idxtype *lo;
+  idxtype *hi;
+  idxtype *min;
+  idxtype c;
   idxtype *max;
 
   if (n <= 1)
@@ -76,12 +76,12 @@ void iidxsort(int n, idxtype *base)
 
 static void siqst(idxtype *base, idxtype *max)
 {
-  register idxtype *i;
-  register idxtype *j;
-  register idxtype *jj;
-  register idxtype *mid;
-  register int ii;
-  register idxtype c;
+  idxtype *i;
+  idxtype *j;
+  idxtype *jj;
+  idxtype *mid;
+  int ii;
+  idxtype c;
   idxtype *tmp;
   int lo;
   int hi;
@@ -160,12 +160,12 @@ swap:
 **************************************************************************/
 void iintsort(int n, int *base)
 {
-  register int *i;
-  register int *j;
-  register int *lo;
-  register int *hi;
-  register int *min;
-  register int c;
+  int *i;
+  int *j;
+  int *lo;
+  int *hi;
+  int *min;
+  int c;
   int *max;
 
   if (n <= 1)
@@ -206,12 +206,12 @@ void iintsort(int n, int *base)
 
 static void iiqst(int *base, int *max)
 {
-  register int *i;
-  register int *j;
-  register int *jj;
-  register int *mid;
-  register int ii;
-  register int c;
+  int *i;
+  int *j;
+  int *jj;
+  int *mid;
+  int ii;
+  int c;
   int *tmp;
   int lo;
   int hi;
@@ -290,12 +290,12 @@ swap:
 **************************************************************************/
 void ikeysort(int n, KeyValueType *base)
 {
-  register KeyValueType *i;
-  register KeyValueType *j;
-  register KeyValueType *lo;
-  register KeyValueType *hi;
-  register KeyValueType *min;
-  register KeyValueType c;
+  KeyValueType *i;
+  KeyValueType *j;
+  KeyValueType *lo;
+  KeyValueType *hi;
+  KeyValueType *min;
+  KeyValueType c;
   KeyValueType *max;
 
   if (n <= 1)
@@ -344,11 +344,11 @@ void ikeysort(int n, KeyValueType *base)
 
 static void keyiqst(KeyValueType *base, KeyValueType *max)
 {
-  register KeyValueType *i;
-  register KeyValueType *j;
-  register KeyValueType *jj;
-  register KeyValueType *mid;
-  register KeyValueType c;
+  KeyValueType *i;
+  KeyValueType *j;
+  KeyValueType *jj;
+  KeyValueType *mid;
+  KeyValueType c;
   KeyValueType *tmp;
   int lo;
   int hi;
@@ -426,12 +426,12 @@ swap:
 **************************************************************************/
 void ikeyvalsort(int n, KeyValueType *base)
 {
-  register KeyValueType *i;
-  register KeyValueType *j;
-  register KeyValueType *lo;
-  register KeyValueType *hi;
-  register KeyValueType *min;
-  register KeyValueType c;
+  KeyValueType *i;
+  KeyValueType *j;
+  KeyValueType *lo;
+  KeyValueType *hi;
+  KeyValueType *min;
+  KeyValueType c;
   KeyValueType *max;
 
   if (n <= 1)
@@ -472,11 +472,11 @@ void ikeyvalsort(int n, KeyValueType *base)
 
 static void keyvaliqst(KeyValueType *base, KeyValueType *max)
 {
-  register KeyValueType *i;
-  register KeyValueType *j;
-  register KeyValueType *jj;
-  register KeyValueType *mid;
-  register KeyValueType c;
+  KeyValueType *i;
+  KeyValueType *j;
+  KeyValueType *jj;
+  KeyValueType *mid;
+  KeyValueType c;
   KeyValueType *tmp;
   int lo;
   int hi;

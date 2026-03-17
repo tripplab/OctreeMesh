@@ -86,7 +86,7 @@ void SimplePartitioning(const Mesh& mesh, const int partitions_count, Vector<Par
 			Vector<int>& node_index = partitions.entry[p].node_index;
 
 			element_index.Resize(partition_elements_count.entry[p]);
-			for (register int e = 1, index = 0; e <= elements_count; ++e)
+			for (int e = 1, index = 0; e <= elements_count; ++e)
 			{
 				if (element_partition_id.entry[e] == p)
 				{
@@ -141,7 +141,7 @@ void StructurePartitioning(const Mesh& mesh, const int partitions_count, Vector<
 				Vector<int>& element_index = substructures.entry[p].element_index;
 
 				element_index.Resize(partition_elements_count.entry[p]);
-				for (register int e = 1, index = 0; e <= elements_count; ++e)
+				for (int e = 1, index = 0; e <= elements_count; ++e)
 				{
 					if (element_partition_id.entry[e] == p)
 					{
@@ -301,7 +301,7 @@ void StructurePartitioning(const CSRMatrix<double>& A, const int partitions_coun
 				// Count nodes per partition and add boundary nodes
 				substructures.Resize(partitions_count);
 				partition_nodes_count.Fill(0);
-				for (register int n = 1; n <= nodes_count; ++n)
+				for (int n = 1; n <= nodes_count; ++n)
 				{
 					int p = node_partition_id.entry[n];
 					++partition_nodes_count.entry[p];
@@ -327,7 +327,7 @@ void StructurePartitioning(const CSRMatrix<double>& A, const int partitions_coun
 				substructures.entry[p].node_index.Resize(partition_nodes_count.entry[p]);
 			}
 			partition_nodes_count.Fill(0);
-			for (register int n = 1; n <= nodes_count; ++n)
+			for (int n = 1; n <= nodes_count; ++n)
 			{
 				int p = node_partition_id.entry[n];
 				substructures.entry[p].node_index.entry[++partition_nodes_count.entry[p]] = n;

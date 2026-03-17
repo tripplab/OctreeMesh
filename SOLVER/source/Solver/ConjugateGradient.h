@@ -53,7 +53,7 @@ int ConjugateGradient(const CSRMatrix<T>& A, Vector<T>& x, const Vector<T>& b, T
 
 			T sum = 0.0;
 			int k_max = A.Count(i);
-			for (register int k = 1; k <= k_max; ++k)
+			for (int k = 1; k <= k_max; ++k)
 			{
 				sum += A_entry_i[k]*x.entry[A_index_i[k]];
 			}
@@ -89,7 +89,7 @@ int ConjugateGradient(const CSRMatrix<T>& A, Vector<T>& x, const Vector<T>& b, T
 
 				T sum = 0.0;
 				int k_max = A.Count(i);
-				for (register int k = 1; k <= k_max; ++k)
+				for (int k = 1; k <= k_max; ++k)
 				{
 					sum += A_entry_i[k]*p.entry[A_index_i[k]];
 				}
@@ -205,7 +205,7 @@ int ConjugateGradientJacobi(const CSRMatrix<T>& A, Vector<T>& x, const Vector<T>
 
 			T sum = 0.0;
 			int k_max = A.Count(i);
-			for (register int k = 1; k <= k_max; ++k)
+			for (int k = 1; k <= k_max; ++k)
 			{
 				sum += A_entry_i[k]*x.entry[A_index_i[k]];
 			}
@@ -243,7 +243,7 @@ int ConjugateGradientJacobi(const CSRMatrix<T>& A, Vector<T>& x, const Vector<T>
 
 				T sum = 0.0;
 				int k_max = A.Count(i);
-				for (register int k = 1; k <= k_max; ++k)
+				for (int k = 1; k <= k_max; ++k)
 				{
 					sum += A_entry_i[k]*p.entry[A_index_i[k]];
 				}
@@ -370,7 +370,7 @@ int ConjugateGradientIncompleteCholesky(const CSRMatrix<T>& A, Vector<T>& x, con
 
 			T sum = 0.0;
 			int k_max = A.Count(i);
-			for (register int k = 1; k <= k_max; ++k)
+			for (int k = 1; k <= k_max; ++k)
 			{
 				sum += A_entry_i[k]*x.entry[A_index_i[k]];
 			}
@@ -417,7 +417,7 @@ int ConjugateGradientIncompleteCholesky(const CSRMatrix<T>& A, Vector<T>& x, con
 
 				T sum = 0.0;
 				int k_max = A.Count(i);
-				for (register int k = 1; k <= k_max; ++k)
+				for (int k = 1; k <= k_max; ++k)
 				{
 					sum += A_entry_i[k]*p.entry[A_index_i[k]];
 				}
@@ -561,7 +561,7 @@ int ConjugateGradientIncompleteCholesky2(const CSRMatrix<T>& A, Vector<T>& x, co
 
 			T sum = 0.0;
 			int k_max = A.Count(i);
-			for (register int k = 1; k <= k_max; ++k)
+			for (int k = 1; k <= k_max; ++k)
 			{
 				sum += A_entry_i[k]*x.entry[A_index_i[k]];
 			}
@@ -609,7 +609,7 @@ int ConjugateGradientIncompleteCholesky2(const CSRMatrix<T>& A, Vector<T>& x, co
 
 				T sum = 0.0;
 				int k_max = A.Count(i);
-				for (register int k = 1; k <= k_max; ++k)
+				for (int k = 1; k <= k_max; ++k)
 				{
 					sum += A_entry_i[k]*p.entry[A_index_i[k]];
 				}
@@ -757,7 +757,7 @@ int ConjugateGradientSparseApproximateInverse(const CSRMatrix<T>& A, Vector<T>& 
 			T* __restrict A_entry_i = A.entry[i];
 			T Ax_sum = 0;
 			int A_count_i = A.Count(i);
-			for (register int k = 1; k <= A_count_i; ++k)
+			for (int k = 1; k <= A_count_i; ++k)
 			{
 				Ax_sum += A_entry_i[k]*x.entry[A_index_i[k]];
 			}
@@ -773,7 +773,7 @@ int ConjugateGradientSparseApproximateInverse(const CSRMatrix<T>& A, Vector<T>& 
 			T* __restrict G_entry_i = G.entry[i];
 			T ti_sum = 0;
 			int G_count_i = G.Count(i);
-			for (register int k = 1; k <= G_count_i; ++k)
+			for (int k = 1; k <= G_count_i; ++k)
 			{
 				ti_sum += G_entry_i[k]*r.entry[G_index_i[k]];
 			}
@@ -788,7 +788,7 @@ int ConjugateGradientSparseApproximateInverse(const CSRMatrix<T>& A, Vector<T>& 
 			T* __restrict Gt_entry_i = Gt.entry[i];
 			T Mr_sum = 0;
 			int Gt_count_i = Gt.Count(i);
-			for (register int k = 1; k <= Gt_count_i; ++k)
+			for (int k = 1; k <= Gt_count_i; ++k)
 			{
 				Mr_sum += Gt_entry_i[k]*t.entry[Gt_index_i[k]];
 			}
@@ -824,7 +824,7 @@ int ConjugateGradientSparseApproximateInverse(const CSRMatrix<T>& A, Vector<T>& 
 				T* __restrict A_entry_i = A.entry[i];
 				T Ap_sum = 0.0;
 				int A_count_i = A.Count(i);
-				for (register int k = 1; k <= A_count_i; ++k)
+				for (int k = 1; k <= A_count_i; ++k)
 				{
 					Ap_sum += A_entry_i[k]*p.entry[A_index_i[k]];
 				}
@@ -852,7 +852,7 @@ int ConjugateGradientSparseApproximateInverse(const CSRMatrix<T>& A, Vector<T>& 
 				T* __restrict G_entry_i = G.entry[i];
 				T ti_sum = 0;
 				int G_count_i = G.Count(i);
-				for (register int k = 1; k <= G_count_i; ++k)
+				for (int k = 1; k <= G_count_i; ++k)
 				{
 					ti_sum += G_entry_i[k]*r.entry[G_index_i[k]];
 				}
@@ -867,7 +867,7 @@ int ConjugateGradientSparseApproximateInverse(const CSRMatrix<T>& A, Vector<T>& 
 				T* __restrict Gt_entry_i = Gt.entry[i];
 				T Mr_sum = 0;
 				int Gt_count_i = Gt.Count(i);
-				for (register int k = 1; k <= Gt_count_i; ++k)
+				for (int k = 1; k <= Gt_count_i; ++k)
 				{
 					Mr_sum += Gt_entry_i[k]*t.entry[Gt_index_i[k]];
 				}

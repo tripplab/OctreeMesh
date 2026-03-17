@@ -115,9 +115,9 @@ class Vector
 		{
 			Assert(size == a.size);
 
-			register const U* __restrict src = a.data;
-			register T* __restrict dst = data;
-			for (register int k = size; k; --k, ++dst, ++src)
+			const U* __restrict src = a.data;
+			T* __restrict dst = data;
+			for (int k = size; k; --k, ++dst, ++src)
 			{
 				*dst = (T)*src;
 			}
@@ -145,8 +145,8 @@ class Vector
 
 		void Fill(const T& value) throw()
 		{
-			register T* __restrict dst = data;
-			for (register int k = size; k; --k, ++dst)
+			T* __restrict dst = data;
+			for (int k = size; k; --k, ++dst)
 			{
 				*dst = value;
 			}
@@ -155,9 +155,9 @@ class Vector
 
 		void FillSeries(const T& start, const T& increment) throw()
 		{
-			register T* __restrict dst = data;
-			register T value = start;
-			for (register int k = size; k; --k, ++dst, value += increment)
+			T* __restrict dst = data;
+			T value = start;
+			for (int k = size; k; --k, ++dst, value += increment)
 			{
 				*dst = value;
 			}
@@ -168,9 +168,9 @@ class Vector
 		{
 			Assert(data);
 
-			register const T* __restrict src = data;
-			register T* __restrict dst = this->data;
-			for (register int k = size; k; --k, ++dst, ++src)
+			const T* __restrict src = data;
+			T* __restrict dst = this->data;
+			for (int k = size; k; --k, ++dst, ++src)
 			{
 				*dst = *src;
 			}
@@ -182,9 +182,9 @@ class Vector
 			Assert(k >= 1);
 			Assert(k <= size);
 
-			register T* __restrict src = data + k;
-			register T* __restrict dst = data + k - 1;
-			for (register int l = size - k; l; --l, ++dst, ++src)
+			T* __restrict src = data + k;
+			T* __restrict dst = data + k - 1;
+			for (int l = size - k; l; --l, ++dst, ++src)
 			{
 				*dst = *src;
 			}
@@ -214,7 +214,7 @@ class Vector
 		{
 			// Combsort11 http://en.wikipedia.org/wiki/Comb_sort
 			bool swapped;
-			register int gap = size;
+			int gap = size;
 			do
 			{
 				gap = (gap*10)/13;
@@ -237,12 +237,12 @@ class Vector
 					}
 				}
 				swapped = false;
-				for (register int j = gap + 1; j <= size; ++j)
+				for (int j = gap + 1; j <= size; ++j)
 				{
 					int k = j - gap;
 					if (entry[j] < entry[k])
 					{
-						register T t = entry[j];
+						T t = entry[j];
 						entry[j] = entry[k];
 						entry[k] = t;
 						swapped = true;

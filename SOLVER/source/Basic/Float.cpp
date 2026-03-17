@@ -162,7 +162,7 @@ FormatFloat::FormatFloat(bool space, bool sign, int width, int precision, Type t
 	{
 		++size;
 	}
-	for (register int w = width; w; ++size)
+	for (int w = width; w; ++size)
 	{
 		w /= 10;
 	}
@@ -172,7 +172,7 @@ FormatFloat::FormatFloat(bool space, bool sign, int width, int precision, Type t
 	}
 	else
 	{
-		for (register int p = precision; p; ++size)
+		for (int p = precision; p; ++size)
 		{
 			p /= 10;
 		}

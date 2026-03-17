@@ -58,7 +58,7 @@ class Set
 			last_block((SetBlock*)0),
 			index(BLOCK_SIZE - 1)
 		{
-			for (register SetItem<T>* __restrict item = set.first; item; item = item->next)
+			for (SetItem<T>* __restrict item = set.first; item; item = item->next)
 			{
 				Append(item->value);
 			}
@@ -73,7 +73,7 @@ class Set
 			last_block((SetBlock*)0),
 			index(BLOCK_SIZE - 1)
 		{
-			for (register SetItem<T>* __restrict item = set.first; item; item = item->next)
+			for (SetItem<T>* __restrict item = set.first; item; item = item->next)
 			{
 				Append(item->value);
 			}
@@ -84,7 +84,7 @@ class Set
 		{
 			while (last_block)
 			{
-				register SetBlock* __restrict previous = last_block->previous;
+				SetBlock* __restrict previous = last_block->previous;
 				delete last_block;
 				last_block = previous;
 			}
@@ -96,7 +96,7 @@ class Set
 			if (this != &set)
 			{
 				Clear();
-				for (register SetItem<T>* __restrict item = set.first; item; item = item->next)
+				for (SetItem<T>* __restrict item = set.first; item; item = item->next)
 				{
 					Append(item->value);
 				}
@@ -111,7 +111,7 @@ class Set
 			if (this != &set)
 			{
 				Clear();
-				for (register SetItem<T>* __restrict item = set.first; item; item = item->next)
+				for (SetItem<T>* __restrict item = set.first; item; item = item->next)
 				{
 					Append(item->value);
 				}
@@ -122,7 +122,7 @@ class Set
 
 		void Append(const T& value) throw(Memory::Exception)
 		{
-			register SetItem<T>* __restrict search_item = first;
+			SetItem<T>* __restrict search_item = first;
 			while (search_item)
 			{
 				if (value == search_item->value)
@@ -141,7 +141,7 @@ class Set
 			}
 			else
 			{
-				register SetBlock* __restrict new_block = new SetBlock;
+				SetBlock* __restrict new_block = new SetBlock;
 				if (!new_block)
 				{
 					Throw(Memory::exception);
@@ -157,7 +157,7 @@ class Set
 				last_block = new_block;
 				index = 0;
 			}
-			register SetItem<T>* __restrict new_item = &last_block->data[index];
+			SetItem<T>* __restrict new_item = &last_block->data[index];
 			if (search_item)
 			{
 				if (search_item->previous)
@@ -197,7 +197,7 @@ class Set
 		{
 			while (last_block)
 			{
-				register SetBlock* __restrict previous = last_block->previous;
+				SetBlock* __restrict previous = last_block->previous;
 				delete last_block;
 				last_block = previous;
 			}
@@ -228,7 +228,7 @@ class Set
 			{
 				last = item->previous;
 			}
-			register SetItem<T>* __restrict last_item = &last_block->data[index];
+			SetItem<T>* __restrict last_item = &last_block->data[index];
 			if (item != last_item)
 			{
 				item->previous = last_item->previous;
@@ -253,7 +253,7 @@ class Set
 			}
 			if (index == 0)
 			{
-				register SetBlock* __restrict delete_block = last_block;
+				SetBlock* __restrict delete_block = last_block;
 				last_block = last_block->previous;
 				delete delete_block;
 				index = BLOCK_SIZE - 1;
@@ -268,7 +268,7 @@ class Set
 
 		SetItem<T>* Search(const T& value) throw()
 		{
-			register SetItem<T>* __restrict item = first;
+			SetItem<T>* __restrict item = first;
 			while (item)
 			{
 				if (item->value == value)

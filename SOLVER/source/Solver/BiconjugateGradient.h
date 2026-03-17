@@ -63,7 +63,7 @@ int BiconjugateGradient(const CSRMatrix<T>& A, const CSRMatrix<T>& At, Vector<T>
 
 			T sum = 0.0;
 			int k_max = A.Count(i);
-			for (register int k = 1; k <= k_max; ++k)
+			for (int k = 1; k <= k_max; ++k)
 			{
 				sum += A_entry_i[k]*x.entry[A_index_i[k]];
 			}
@@ -104,13 +104,13 @@ int BiconjugateGradient(const CSRMatrix<T>& A, const CSRMatrix<T>& At, Vector<T>
 
 				T sum1 = 0.0;
 				int k_max1 = A.Count(i);
-				for (register int k = 1; k <= k_max1; ++k)
+				for (int k = 1; k <= k_max1; ++k)
 				{
 					sum1 += A_entry_i[k]*p1.entry[A_index_i[k]];
 				}
 				T sum2 = 0.0;
 				int k_max2 = At.Count(i);
-				for (register int k = 1; k <= k_max2; ++k)
+				for (int k = 1; k <= k_max2; ++k)
 				{
 					sum2 += At_entry_i[k]*p2.entry[At_index_i[k]];
 				}
@@ -245,7 +245,7 @@ int BiconjugateGradientJacobi(const CSRMatrix<T>& A, const CSRMatrix<T>& At, Vec
 
 			T sum = 0.0;
 			int k_max = A.Count(i);
-			for (register int k = 1; k <= k_max; ++k)
+			for (int k = 1; k <= k_max; ++k)
 			{
 				sum += A_entry_i[k]*x.entry[A_index_i[k]];
 			}
@@ -288,13 +288,13 @@ int BiconjugateGradientJacobi(const CSRMatrix<T>& A, const CSRMatrix<T>& At, Vec
 
 				T sum1 = 0.0;
 				int k_max1 = A.Count(i);
-				for (register int k = 1; k <= k_max1; ++k)
+				for (int k = 1; k <= k_max1; ++k)
 				{
 					sum1 += A_entry_i[k]*p1.entry[A_index_i[k]];
 				}
 				T sum2 = 0.0;
 				int k_max2 = At.Count(i);
-				for (register int k = 1; k <= k_max2; ++k)
+				for (int k = 1; k <= k_max2; ++k)
 				{
 					sum2 += At_entry_i[k]*p2.entry[At_index_i[k]];
 				}
@@ -376,9 +376,9 @@ class BiconjugateGradientJacobiSolver : public Solver<T>
 					T* __restrict A_entry_i = A.entry[i];
 
 					int k_max = A.Count(i);
-					for (register int k = 1; k <= k_max; ++k)
+					for (int k = 1; k <= k_max; ++k)
 					{
-						register int j = A_index_i[k];
+						int j = A_index_i[k];
 						if (i == j)
 						{
 							M.entry[i] = A_entry_i[k]; // M(i, i) = A(i, i)
@@ -450,7 +450,7 @@ int BiconjugateGradientIncompleteLU(const CSRMatrix<T>& A, const CSRMatrix<T>& A
 
 			T sum = 0.0;
 			int k_max = A.Count(i);
-			for (register int k = 1; k <= k_max; ++k)
+			for (int k = 1; k <= k_max; ++k)
 			{
 				sum += A_entry_i[k]*x.entry[A_index_i[k]];
 			}
@@ -506,13 +506,13 @@ int BiconjugateGradientIncompleteLU(const CSRMatrix<T>& A, const CSRMatrix<T>& A
 
 				T sum1 = 0.0;
 				int k_max1 = A.Count(i);
-				for (register int k = 1; k <= k_max1; ++k)
+				for (int k = 1; k <= k_max1; ++k)
 				{
 					sum1 += A_entry_i[k]*p1.entry[A_index_i[k]];
 				}
 				T sum2 = 0.0;
 				int k_max2 = At.Count(i);
-				for (register int k = 1; k <= k_max2; ++k)
+				for (int k = 1; k <= k_max2; ++k)
 				{
 					sum2 += At_entry_i[k]*p2.entry[At_index_i[k]];
 				}
@@ -673,7 +673,7 @@ int BiconjugateGradientSparseApproximateInverse(const CSRMatrix<T>& A, const CSC
 			T* __restrict A_entry_i = A.entry[i];
 			T Ax_sum = 0;
 			int A_count_i = A.Count(i);
-			for (register int k = 1; k <= A_count_i; ++k)
+			for (int k = 1; k <= A_count_i; ++k)
 			{
 				Ax_sum += A_entry_i[k]*x.entry[A_index_i[k]];
 			}
@@ -689,10 +689,10 @@ int BiconjugateGradientSparseApproximateInverse(const CSRMatrix<T>& A, const CSC
 			T t1_sum = 0;
 			T t2_sum = 0;
 			int G_count_i = G.Count(i);
-			for (register int k = 1; k <= G_count_i; ++k)
+			for (int k = 1; k <= G_count_i; ++k)
 			{
-				register int j = G_index_i[k];
-				register T v = G_entry_i[k];
+				int j = G_index_i[k];
+				T v = G_entry_i[k];
 				t1_sum += v*r1.entry[j];
 				t2_sum += v*r2.entry[j];
 			}
@@ -710,10 +710,10 @@ int BiconjugateGradientSparseApproximateInverse(const CSRMatrix<T>& A, const CSC
 			T Mr1_sum = 0;
 			T r2M_sum = 0;
 			int Gt_count_i = Gt.Count(i);
-			for (register int k = 1; k <= Gt_count_i; ++k)
+			for (int k = 1; k <= Gt_count_i; ++k)
 			{
-				register int j = Gt_index_i[k];
-				register T v = Gt_entry_i[k];
+				int j = Gt_index_i[k];
+				T v = Gt_entry_i[k];
 				Mr1_sum += v*t1.entry[j];
 				r2M_sum += v*t2.entry[j];
 			}
@@ -754,7 +754,7 @@ int BiconjugateGradientSparseApproximateInverse(const CSRMatrix<T>& A, const CSC
 				T* __restrict A_entry_i = A.entry[i];
 				T Ap1_sum = 0;
 				int A_count_i = A.Count(i);
-				for (register int k = 1; k <= A_count_i; ++k)
+				for (int k = 1; k <= A_count_i; ++k)
 				{
 					Ap1_sum += A_entry_i[k]*p1.entry[A_index_i[k]];
 				}
@@ -764,7 +764,7 @@ int BiconjugateGradientSparseApproximateInverse(const CSRMatrix<T>& A, const CSC
 				T* __restrict Ac_entry_i = Ac.entry[i];
 				T p2A_sum = 0;
 				int Ac_count_i = Ac.Count(i);
-				for (register int k = 1; k <= Ac_count_i; ++k)
+				for (int k = 1; k <= Ac_count_i; ++k)
 				{
 					p2A_sum += p2.entry[Ac_index_i[k]]*Ac_entry_i[k];
 				}
@@ -794,10 +794,10 @@ int BiconjugateGradientSparseApproximateInverse(const CSRMatrix<T>& A, const CSC
 				T t1_sum = 0;
 				T t2_sum = 0;
 				int G_count_i = G.Count(i);
-				for (register int k = 1; k <= G_count_i; ++k)
+				for (int k = 1; k <= G_count_i; ++k)
 				{
-					register int j = G_index_i[k];
-					register T v = G_entry_i[k];
+					int j = G_index_i[k];
+					T v = G_entry_i[k];
 					t1_sum += v*r1.entry[j];
 					t2_sum += v*r2.entry[j];
 				}
@@ -814,10 +814,10 @@ int BiconjugateGradientSparseApproximateInverse(const CSRMatrix<T>& A, const CSC
 				T Mr1_sum = 0;
 				T r2M_sum = 0;
 				int Gt_count_i = Gt.Count(i);
-				for (register int k = 1; k <= Gt_count_i; ++k)
+				for (int k = 1; k <= Gt_count_i; ++k)
 				{
-					register int j = Gt_index_i[k];
-					register T v = Gt_entry_i[k];
+					int j = Gt_index_i[k];
+					T v = Gt_entry_i[k];
 					Mr1_sum += v*t1.entry[j];
 					r2M_sum += v*t2.entry[j];
 				}

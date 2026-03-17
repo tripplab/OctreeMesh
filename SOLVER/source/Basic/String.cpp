@@ -22,9 +22,9 @@ String::String(const String& string) throw(Memory::Exception)
 :	size(string.size),
 	data(new char[size])
 {
-	register const char* __restrict src = string.data;
-	register char* __restrict dst = data;
-	for (register int i = size; i; --i)
+	const char* __restrict src = string.data;
+	char* __restrict dst = data;
+	for (int i = size; i; --i)
 	{
 		*(dst++) = *(src++);
 	}
@@ -51,9 +51,9 @@ String::String(const char* characters) throw(Memory::Exception)
 		Throw(Memory::exception);
 	}
 
-	register const char* __restrict src = characters;
-	register char* __restrict dst = data;
-	for (register int i = size; i; --i)
+	const char* __restrict src = characters;
+	char* __restrict dst = data;
+	for (int i = size; i; --i)
 	{
 		*(dst++) = *(src++);
 	}
@@ -74,10 +74,10 @@ String::String(const char* characters, const char*, ...) throw(Memory::Exception
 	{
 		Throw(Memory::exception);
 	}
-	register char* __restrict dst = data;
+	char* __restrict dst = data;
 	for (const char** c = &characters; *c; ++c)
 	{
-		register const char* __restrict src = *c;
+		const char* __restrict src = *c;
 		while (*src)
 		{
 			*(dst++) = *(src++);
@@ -96,9 +96,9 @@ String::String(const char* characters, int length) throw(Memory::Exception)
 		Throw(Memory::exception);
 	}
 
-	register const char* __restrict src = characters;
-	register char* __restrict dst = data;
-	for (register int i = length; i && *src; --i)
+	const char* __restrict src = characters;
+	char* __restrict dst = data;
+	for (int i = length; i && *src; --i)
 	{
 		*(dst++) = *(src++);
 	}
@@ -121,9 +121,9 @@ String& String::operator = (const String& string) throw(Memory::Exception)
 			size = string.size;
 			data = new_data;
 		}
-		register const char* __restrict src = string.data;
-		register char* __restrict dst = data;
-		for (register int i = size; i; --i)
+		const char* __restrict src = string.data;
+		char* __restrict dst = data;
+		for (int i = size; i; --i)
 		{
 			*(dst++) = *(src++);
 		}
@@ -148,9 +148,9 @@ String& String::operator = (const char* characters) throw(Memory::Exception)
 		size = new_size;
 		data = new_data;
 	}
-	register const char* __restrict src = characters;
-	register char* __restrict dst = data;
-	for (register int i = size; i; --i)
+	const char* __restrict src = characters;
+	char* __restrict dst = data;
+	for (int i = size; i; --i)
 	{
 		*(dst++) = *(src++);
 	}
@@ -162,7 +162,7 @@ int String::Length() const throw()
 {
 	if (data)
 	{
-		register const char* __restrict c = data;
+		const char* __restrict c = data;
 		while (*c)
 		{
 			++c;
@@ -177,7 +177,7 @@ int String::Length(const char* characters) throw()
 {
 	Assert(characters);
 
-	register const char* __restrict c = characters;
+	const char* __restrict c = characters;
 	while (*c)
 	{
 		++c;

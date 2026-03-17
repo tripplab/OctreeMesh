@@ -68,7 +68,7 @@ class CSCMatrix
 			--*(int**)&count;
 			--*(T***)&entry;
 			--*(int***)&index;
-			for (register int j = 1; j <= columns; ++j)
+			for (int j = 1; j <= columns; ++j)
 			{
 				count[j] = 0;
 				entry[j] = (T*)0;
@@ -88,7 +88,7 @@ class CSCMatrix
 			}
 			catch (Memory::Exception&)
 			{
-				for (register int j = 1; j <= columns; ++j)
+				for (int j = 1; j <= columns; ++j)
 				{
 					++entry[j];
 					++index[j];
@@ -127,7 +127,7 @@ class CSCMatrix
 			--*(int**)&count;
 			--*(T***)&entry;
 			--*(int***)&index;
-			for (register int j = 1; j <= columns; ++j)
+			for (int j = 1; j <= columns; ++j)
 			{
 				count[j] = 0;
 				entry[j] = (T*)0;
@@ -140,12 +140,12 @@ class CSCMatrix
 
 		~CSCMatrix() throw()
 		{
-			for (register int j = columns; j; --j)
+			for (int j = columns; j; --j)
 			{
 				++entry[j];
 				delete [] entry[j];
 			}
-			for (register int j = columns; j; --j)
+			for (int j = columns; j; --j)
 			{
 				++index[j];
 				delete [] index[j];
@@ -186,7 +186,7 @@ class CSCMatrix
 			Assert(j <= columns);
 
 			static T zero = 0;
-			register int k = Search(i, j);
+			int k = Search(i, j);
 			return k ? entry[j][k] : zero;
 		}
 
@@ -227,9 +227,9 @@ class CSCMatrix
 			Assert(j <= columns);
 			Assert(count[j] == matrix.count[j]);
 
-			register int* __restrict dst = &index[j][1];
-			register int* __restrict src = &matrix.index[j][1];
-			for (register int k = count[j]; k; --k, ++dst, ++src)
+			int* __restrict dst = &index[j][1];
+			int* __restrict src = &matrix.index[j][1];
+			for (int k = count[j]; k; --k, ++dst, ++src)
 			{
 				*dst = *src;
 			}
@@ -242,9 +242,9 @@ class CSCMatrix
 			Assert(j <= columns);
 			Assert(count[j] == matrix.count[j]);
 
-			register T* __restrict dst = &entry[j][1];
-			register T* __restrict src = &matrix.entry[j][1];
-			for (register int k = count[j]; k; --k, ++dst, ++src)
+			T* __restrict dst = &entry[j][1];
+			T* __restrict src = &matrix.entry[j][1];
+			for (int k = count[j]; k; --k, ++dst, ++src)
 			{
 				*dst = *src;
 			}
@@ -299,8 +299,8 @@ class CSCMatrix
 			#pragma omp parallel for default(shared) schedule(guided)
 			for(int j = 1; j <= columns; ++j)
 			{
-				register T* __restrict entry_row = entry[j];
-				for (register int k = count[j]; k; --k)
+				T* __restrict entry_row = entry[j];
+				for (int k = count[j]; k; --k)
 				{
 					entry_row[k] = value;
 				}
@@ -322,7 +322,7 @@ class CSCMatrix
 		int NonZero() const throw()
 		{
 			int nnz = 0;
-			for(register int j = columns; j; --j)
+			for(int j = columns; j; --j)
 			{
 				nnz += count[j];
 			}
@@ -337,21 +337,21 @@ class CSCMatrix
 			Assert(j >= 1);
 			Assert(j <= columns);
 
-			register int k = Search(i, j);
+			int k = Search(i, j);
 			if (k)
 			{
 				{
-					register T* __restrict src = &entry[j][k + 1];
-					register T* __restrict dst = &entry[j][k];
-					for (register int l = count[j] - k; l; --l, ++dst, ++src)
+					T* __restrict src = &entry[j][k + 1];
+					T* __restrict dst = &entry[j][k];
+					for (int l = count[j] - k; l; --l, ++dst, ++src)
 					{
 						*dst = *src;
 					}
 				}
 				{
-					register int* __restrict src = &index[j][k + 1];
-					register int* __restrict dst = &index[j][k];
-					for (register int l = count[j] - k; l; --l, ++dst, ++src)
+					int* __restrict src = &index[j][k + 1];
+					int* __restrict dst = &index[j][k];
+					for (int l = count[j] - k; l; --l, ++dst, ++src)
 					{
 						*dst = *src;
 					}
@@ -377,7 +377,7 @@ class CSCMatrix
 				Throw(Memory::exception);
 			}
 
-			for (register int j = this->columns; j; --j)
+			for (int j = this->columns; j; --j)
 			{
 				++entry[j];
 				++index[j];
@@ -397,7 +397,7 @@ class CSCMatrix
 			--*(int**)&count;
 			--*(T***)&entry;
 			--*(int***)&index;
-			for (register int j = columns; j; --j)
+			for (int j = columns; j; --j)
 			{
 				count[j] = 0;
 				entry[j] = (T*)0;
@@ -420,11 +420,11 @@ class CSCMatrix
 			// Binary search http://en.wikipedia.org/wiki/Binary_search#Single_comparison_per_iteration
 			int* __restrict index_j = index[j];
 			int size_j = count[j];
-			register int low = 1;
-			register int hight = size_j + 1;
+			int low = 1;
+			int hight = size_j + 1;
 			while (low < hight)
 			{
-				register int middle = low + ((hight - low) >> 1);
+				int middle = low + ((hight - low) >> 1);
 				if (index_j[middle] < i)
 				{
 					low = middle + 1;
@@ -459,7 +459,7 @@ class CSCMatrix
 
 			// Combsort11 http://en.wikipedia.org/wiki/Comb_sort
 			bool swapped;
-			register int gap = size_j;
+			int gap = size_j;
 			do
 			{
 				gap = (gap*10)/13;
@@ -482,12 +482,12 @@ class CSCMatrix
 					}
 				}
 				swapped = false;
-				for (register int i = gap + 1; i <= size_j; ++i)
+				for (int i = gap + 1; i <= size_j; ++i)
 				{
 					int k = i - gap;
 					if (index_j[i] < index_j[k])
 					{
-						register int t = index_j[i];
+						int t = index_j[i];
 						index_j[i] = index_j[k];
 						index_j[k] = t;
 						swapped = true;
@@ -515,7 +515,7 @@ class CSCMatrix
 
 			// Combsort11 http://en.wikipedia.org/wiki/Comb_sort
 			bool swapped;
-			register int gap = size_j;
+			int gap = size_j;
 			do
 			{
 				gap = (gap*10)/13;
@@ -538,15 +538,15 @@ class CSCMatrix
 					}
 				}
 				swapped = false;
-				for (register int i = gap + 1; i <= size_j; ++i)
+				for (int i = gap + 1; i <= size_j; ++i)
 				{
 					int k = i - gap;
 					if (index_j[i] < index_j[k])
 					{
-						register int t = index_j[i];
+						int t = index_j[i];
 						index_j[i] = index_j[k];
 						index_j[k] = t;
-						register T v = entry_j[i];
+						T v = entry_j[i];
 						entry_j[i] = entry_j[k];
 						entry_j[k] = v;
 						swapped = true;
@@ -571,9 +571,9 @@ void Transpose(const CSCMatrix<T>& A, CSCMatrix<T>& At) throw(Memory::Exception)
 		{
 			int* __restrict A_index_j = A.index[j];
 			int A_count_j = A.count[j];
-			for (register int c = 1; c <= A_count_j; ++c)
+			for (int c = 1; c <= A_count_j; ++c)
 			{
-				register int i = A_index_j[c];
+				int i = A_index_j[c];
 				++At_count.entry[i];
 			}
 		}
@@ -586,9 +586,9 @@ void Transpose(const CSCMatrix<T>& A, CSCMatrix<T>& At) throw(Memory::Exception)
 			T* __restrict A_entry_i = A.entry[i];
 			int* __restrict A_index_i = A.index[i];
 			int A_count_i = A.Count(i);
-			for (register int c = 1; c <= A_count_i; ++c)
+			for (int c = 1; c <= A_count_i; ++c)
 			{
-				register int j = A_index_i[c];
+				int j = A_index_i[c];
 				At.entry[j][At_count.entry[j]] = A_entry_i[c];
 				At.index[j][At_count.entry[j]--] = i;
 			}

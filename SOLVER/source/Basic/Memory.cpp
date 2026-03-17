@@ -40,7 +40,7 @@ size_t Memory::current_usage = 0;
 Memory::Exception Memory::exception;
 
 
-void* operator new (register size_t size) throw()
+void* operator new (size_t size) throw()
 {
 	#ifdef MEMORY_USAGE
 		void* __restrict memory = malloc(size);
@@ -70,7 +70,7 @@ void* operator new (register size_t size) throw()
 }
 
 
-void* operator new [] (register size_t size) throw()
+void* operator new [] (size_t size) throw()
 {
 	#ifdef MEMORY_USAGE
 		void* __restrict memory = malloc(size);
@@ -100,7 +100,7 @@ void* operator new [] (register size_t size) throw()
 }
 
 
-void operator delete (register void* __restrict object) throw()
+void operator delete (void* __restrict object) throw()
 {
 	#ifdef MEMORY_USAGE
 		if (object)
@@ -122,7 +122,7 @@ void operator delete (register void* __restrict object) throw()
 }
 
 
-void operator delete [] (register void* __restrict array) throw()
+void operator delete [] (void* __restrict array) throw()
 {
 	#ifdef MEMORY_USAGE
 		if (array)

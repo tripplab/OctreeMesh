@@ -153,7 +153,7 @@ void SymbolicCholeskyDecomposition(const CSRMatrix<T>& A, CSRMatrix<T>& L, CSRMa
 				int k_max = A.Count(j);
 				for (int k = 1; k <= k_max; ++k)
 				{
-					register int i = A_index_j[k];
+					int i = A_index_j[k];
 					if (i > j)
 					{
 						if (!used.entry[i])
@@ -178,7 +178,7 @@ void SymbolicCholeskyDecomposition(const CSRMatrix<T>& A, CSRMatrix<T>& L, CSRMa
 						int Lt_count_i = Lt.Count(i);
 						for (int k = 2; k <= Lt_count_i; ++k)
 						{
-							register int l = Lt_index_i[k];
+							int l = Lt_index_i[k];
 							if ((l - j) > ick)
 							{
 								r = R.entry[j].last;
@@ -206,7 +206,7 @@ void SymbolicCholeskyDecomposition(const CSRMatrix<T>& A, CSRMatrix<T>& L, CSRMa
 				++N;
 				index.entry[N] = j;
 				Lt.AllocateRow(j, N);
-				for (register int c = 1; c <= N; ++c)
+				for (int c = 1; c <= N; ++c)
 				{
 					int i = index.entry[c];
 					Lt.index[j][c] = i;
@@ -235,9 +235,9 @@ void SymbolicCholeskyDecomposition(const CSRMatrix<T>& A, CSRMatrix<T>& L, CSRMa
 		{
 			int* __restrict Lt_index_j = Lt.index[j];
 			int Lt_count_j = Lt.Count(j);
-			for (register int c = 1; c <= Lt_count_j; ++c)
+			for (int c = 1; c <= Lt_count_j; ++c)
 			{
-				register int i = Lt_index_j[c];
+				int i = Lt_index_j[c];
 				L.index[i][L_count.entry[i]--] = j;
 			}
 		}
@@ -264,7 +264,7 @@ void FillCholeskyDecomposition(const CSRMatrix<T>& A, CSRMatrix<T>& L, CSRMatrix
 
 		T L_jj = A(j, j);
 		int L_count_j = L.Count(j);
-		for (register int q = 1; q < L_count_j; ++q)
+		for (int q = 1; q < L_count_j; ++q)
 		{
 			L_jj -= L_entry_j[q]*L_entry_j[q];
 		}
@@ -282,13 +282,13 @@ void FillCholeskyDecomposition(const CSRMatrix<T>& A, CSRMatrix<T>& L, CSRMatrix
 
 			T L_ij = A(i, j);
 
-			const register int* __restrict L_index_j = L.index[j];
-			const register int* __restrict L_index_i = L.index[i];
+			const int* __restrict L_index_j = L.index[j];
+			const int* __restrict L_index_i = L.index[i];
 
-			register int qi = 1;
-			register int qj = 1;
-			register int ki = L_index_i[qi];
-			register int kj = L_index_j[qj];
+			int qi = 1;
+			int qj = 1;
+			int ki = L_index_i[qi];
+			int kj = L_index_j[qj];
 			for (bool next = true; next; )
 			{
 				while (ki < kj)
@@ -379,11 +379,11 @@ void FillCholesky2Decomposition(const CSRMatrix<T>& A, CSRMatrix<T>& L, Vector<T
 	{
 		T* __restrict L_entry_j = L.entry[j];
 		T* __restrict Lt_entry_j = Lt.entry[j];
-		const register int* __restrict L_index_j = L.index[j];
+		const int* __restrict L_index_j = L.index[j];
 
 		T D_j = A(j, j);
 		int L_count_j = L.Count(j);
-		for (register int q = 1; q < L_count_j; ++q)
+		for (int q = 1; q < L_count_j; ++q)
 		{
 			D_j -= L_entry_j[q]*L_entry_j[q]*D.entry[L_index_j[q]];
 		}
@@ -401,12 +401,12 @@ void FillCholesky2Decomposition(const CSRMatrix<T>& A, CSRMatrix<T>& L, Vector<T
 
 			T L_ij = A(i, j);
 
-			const register int* __restrict L_index_i = L.index[i];
+			const int* __restrict L_index_i = L.index[i];
 
-			register int qi = 1;
-			register int qj = 1;
-			register int ki = L_index_i[qi];
-			register int kj = L_index_j[qj];
+			int qi = 1;
+			int qj = 1;
+			int ki = L_index_i[qi];
+			int kj = L_index_j[qj];
 			for (bool next = true; next; )
 			{
 				while (ki < kj)
@@ -460,11 +460,11 @@ void FillCholesky2Decomposition(const CSRMatrix<T>& A, CSRMatrix<T>& L, Vector<T
 	{
 		T* __restrict L_entry_j = L.entry[j];
 		T* __restrict Lt_entry_j = Lt.entry[j];
-		const register int* __restrict L_index_j = L.index[j];
+		const int* __restrict L_index_j = L.index[j];
 
 		T D_j = alpha*A(j, j);
 		int L_count_j = L.Count(j);
-		for (register int q = 1; q < L_count_j; ++q)
+		for (int q = 1; q < L_count_j; ++q)
 		{
 			D_j -= L_entry_j[q]*L_entry_j[q]*D.entry[L_index_j[q]];
 		}
@@ -473,9 +473,9 @@ void FillCholesky2Decomposition(const CSRMatrix<T>& A, CSRMatrix<T>& L, Vector<T
 		{
 			T* __restrict A_entry_j = A.entry[j];
 			int* __restrict A_index_j = A.index[j];
-			register T Sum_A_j = 0;
+			T Sum_A_j = 0;
 			int A_count_j = A.Count(j);
-			for (register int q = 1; q <= A_count_j; ++q)
+			for (int q = 1; q <= A_count_j; ++q)
 			{
 				if (A_index_j[q] != j)
 				{
@@ -503,12 +503,12 @@ void FillCholesky2Decomposition(const CSRMatrix<T>& A, CSRMatrix<T>& L, Vector<T
 
 			T L_ij = A(i, j);
 
-			const register int* __restrict L_index_i = L.index[i];
+			const int* __restrict L_index_i = L.index[i];
 
-			register int qi = 1;
-			register int qj = 1;
-			register int ki = L_index_i[qi];
-			register int kj = L_index_j[qj];
+			int qi = 1;
+			int qj = 1;
+			int ki = L_index_i[qi];
+			int kj = L_index_j[qj];
 			for (bool next = true; next; )
 			{
 				while (ki < kj)

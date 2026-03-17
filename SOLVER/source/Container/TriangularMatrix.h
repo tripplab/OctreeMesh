@@ -57,8 +57,8 @@ class LowerTriangularMatrix
 			}
 
 			--*(T***)&entry;
-			register T* __restrict row = data - 1;
-			for (register int i = 1; i <= rows; row += i++)
+			T* __restrict row = data - 1;
+			for (int i = 1; i <= rows; row += i++)
 			{
 				entry[i] = row;
 			}
@@ -83,8 +83,8 @@ class LowerTriangularMatrix
 			}
 
 			--*(T***)&entry;
-			register T* __restrict row = data - 1;
-			for (register int i = 1; i <= rows; row += i++)
+			T* __restrict row = data - 1;
+			for (int i = 1; i <= rows; row += i++)
 			{
 				entry[i] = row;
 			}
@@ -118,9 +118,9 @@ class LowerTriangularMatrix
 			Assert(rows == a.rows);
 			Assert(columns == a.columns);
 
-			register const U* __restrict src = a.data;
-			register T* __restrict dst = data;
-			for (register size_t k = ((size_t)rows*(rows + 1)) >> 1; k; --k, ++dst, ++src)
+			const U* __restrict src = a.data;
+			T* __restrict dst = data;
+			for (size_t k = ((size_t)rows*(rows + 1)) >> 1; k; --k, ++dst, ++src)
 			{
 				*dst = *src;
 			}
@@ -141,8 +141,8 @@ class LowerTriangularMatrix
 
 		void Fill(const T& value) throw()
 		{
-			register T* __restrict dst = data;
-			for (register size_t i = ((size_t)rows*(rows + 1)) >> 1; i; --i, ++dst)
+			T* __restrict dst = data;
+			for (size_t i = ((size_t)rows*(rows + 1)) >> 1; i; --i, ++dst)
 			{
 				*dst = value;
 			}
@@ -153,9 +153,9 @@ class LowerTriangularMatrix
 		{
 			Assert(data);
 
-			register const T* __restrict src = data;
-			register T* __restrict dst = this->data;
-			for (register size_t i = ((size_t)rows*(rows + 1)) >> 1; i; --i, ++dst, ++src)
+			const T* __restrict src = data;
+			T* __restrict dst = this->data;
+			for (size_t i = ((size_t)rows*(rows + 1)) >> 1; i; --i, ++dst, ++src)
 			{
 				*dst = *src;
 			}
@@ -183,8 +183,8 @@ class LowerTriangularMatrix
 			*(T**)&data = new_data;
 			*(T***)&entry = new_entry;
 			--*(T***)&entry;
-			register T* __restrict row = data - 1;
-			for (register int i = 1; i <= rows; row += i++)
+			T* __restrict row = data - 1;
+			for (int i = 1; i <= rows; row += i++)
 			{
 				entry[i] = row;
 			}
@@ -229,8 +229,8 @@ class UpperTriangularMatrix
 			}
 
 			--*(T***)&entry;
-			register T* __restrict row = data - 1;
-			for (register int i = 1, j = rows - 1; i <= rows; ++i, row += j, --j)
+			T* __restrict row = data - 1;
+			for (int i = 1, j = rows - 1; i <= rows; ++i, row += j, --j)
 			{
 				entry[i] = row;
 			}
@@ -255,8 +255,8 @@ class UpperTriangularMatrix
 			}
 
 			--*(T***)&entry;
-			register T* __restrict row = data - 1;
-			for (register int i = 1, j = rows - 1; i <= rows; ++i, row += j, --j)
+			T* __restrict row = data - 1;
+			for (int i = 1, j = rows - 1; i <= rows; ++i, row += j, --j)
 			{
 				entry[i] = row;
 			}
@@ -290,9 +290,9 @@ class UpperTriangularMatrix
 			Assert(rows == a.rows);
 			Assert(columns == a.columns);
 
-			register const U* __restrict src = a.data;
-			register T* __restrict dst = data;
-			for (register size_t k = ((size_t)rows*(rows + 1)) >> 1; k; --k, ++dst, ++src)
+			const U* __restrict src = a.data;
+			T* __restrict dst = data;
+			for (size_t k = ((size_t)rows*(rows + 1)) >> 1; k; --k, ++dst, ++src)
 			{
 				*dst = *src;
 			}
@@ -313,8 +313,8 @@ class UpperTriangularMatrix
 
 		void Fill(const T& value) throw()
 		{
-			register T* __restrict dst = data;
-			for (register size_t i = ((size_t)rows*(rows + 1)) >> 1; i; --i, ++dst)
+			T* __restrict dst = data;
+			for (size_t i = ((size_t)rows*(rows + 1)) >> 1; i; --i, ++dst)
 			{
 				*dst = value;
 			}
@@ -325,9 +325,9 @@ class UpperTriangularMatrix
 		{
 			Assert(data);
 
-			register const T* __restrict src = data;
-			register T* __restrict dst = this->data;
-			for (register size_t i = ((size_t)rows*(rows + 1)) >> 1; i; --i, ++dst, ++src)
+			const T* __restrict src = data;
+			T* __restrict dst = this->data;
+			for (size_t i = ((size_t)rows*(rows + 1)) >> 1; i; --i, ++dst, ++src)
 			{
 				*dst = *src;
 			}
@@ -355,8 +355,8 @@ class UpperTriangularMatrix
 			*(T**)&data = new_data;
 			*(T***)&entry = new_entry;
 			--*(T***)&entry;
-			register T* __restrict row = data - 1;
-			for (register int i = 1, j = rows - 1; i <= rows; ++i, row += j, --j)
+			T* __restrict row = data - 1;
+			for (int i = 1, j = rows - 1; i <= rows; ++i, row += j, --j)
 			{
 				entry[i] = row;
 			}

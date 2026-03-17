@@ -57,14 +57,14 @@ class KDTreeB
 
 			// Convert float to an integer representation
 			{
-				register const int* __restrict value = values.data;
-				register const float* __restrict coordinate = coordinates.data;
-				register Node* __restrict node = nodes;
-				for (register int i = 0; i < size; ++i, ++node)
+				const int* __restrict value = values.data;
+				const float* __restrict coordinate = coordinates.data;
+				Node* __restrict node = nodes;
+				for (int i = 0; i < size; ++i, ++node)
 				{
 					index[i] = node;
 					node->value = *(value++);
-					for (register int d = 0; d < 2; ++d)
+					for (int d = 0; d < 2; ++d)
 					{
 						node->keys[d] = *(coordinate++);
 						node->bits[d] ^= -sint32(node->bits[d] >> 31) | 0x80000000; // Michael Herf. Radix Tricks. 2001. http://stereopsis.com/radix.html
@@ -85,10 +85,10 @@ class KDTreeB
 
 			// Convert integer representation to float
 			{
-				register Node* __restrict node = nodes;
-				for (register int i = 0; i < size; ++i, ++node)
+				Node* __restrict node = nodes;
+				for (int i = 0; i < size; ++i, ++node)
 				{
-					for (register int d = 0; d < 2; ++d)
+					for (int d = 0; d < 2; ++d)
 					{
 						node->bits[d] ^= (((node->bits[d] >> 31) - 1) | 0x80000000); // Michael Herf. Radix Tricks. 2001. http://stereopsis.com/radix.html
 					}
@@ -120,14 +120,14 @@ class KDTreeB
 
 			// Convert double to an integer representation
 			{
-				register const int* __restrict value = values.data;
-				register const double* __restrict coordinate = coordinates.data;
-				register Node* __restrict node = nodes;
-				for (register int i = 0; i < size; ++i, ++node)
+				const int* __restrict value = values.data;
+				const double* __restrict coordinate = coordinates.data;
+				Node* __restrict node = nodes;
+				for (int i = 0; i < size; ++i, ++node)
 				{
 					index[i] = node;
 					node->value = *(value++);
-					for (register int d = 0; d < 2; ++d)
+					for (int d = 0; d < 2; ++d)
 					{
 						node->keys[d] = *(coordinate++);
 						node->bits[d] ^= -sint64(node->bits[d] >> 63) | 0x8000000000000000; // Michael Herf. Radix Tricks. 2001. http://stereopsis.com/radix.html
@@ -148,10 +148,10 @@ class KDTreeB
 
 			// Convert integer representation to double
 			{
-				register Node* __restrict node = nodes;
-				for (register int i = 0; i < size; ++i, ++node)
+				Node* __restrict node = nodes;
+				for (int i = 0; i < size; ++i, ++node)
 				{
-					for (register int d = 0; d < 2; ++d)
+					for (int d = 0; d < 2; ++d)
 					{
 						node->bits[d] ^= (((node->bits[d] >> 63) - 1) | 0x8000000000000000); // Michael Herf. Radix Tricks. 2001. http://stereopsis.com/radix.html
 					}
@@ -201,10 +201,10 @@ class KDTreeB
 //printf("%i\n", value);
 				// Calculate distance to point
 				{
-					register double distance_to_point = 0;
-					for (register int k = 0; k < 2; ++k)
+					double distance_to_point = 0;
+					for (int k = 0; k < 2; ++k)
 					{
-						register double value = keys[k] - point[k];
+						double value = keys[k] - point[k];
 						distance_to_point += value*value;
 					}
 					if (distance_to_point < distance_min)
@@ -214,10 +214,10 @@ class KDTreeB
 					}
 				}
 
-				register int k = depth % 2;
-				register double point_k = point[k];
-				register double keys_k = keys[k];
-				register double distance_k = keys_k - point_k;
+				int k = depth % 2;
+				double point_k = point[k];
+				double keys_k = keys[k];
+				double distance_k = keys_k - point_k;
 				distance_k *= distance_k;
 				if (point_k < keys_k)
 				{
@@ -286,12 +286,12 @@ class KDTreeB
 			}
 			else if (size == 3)
 			{
-				register FloatFlip::type a = index[0]->bits[k];
-				register FloatFlip::type b = index[1]->bits[k];
-				register FloatFlip::type c = index[2]->bits[k];
-				register uint8 i;
-				register uint8 j;
-				register uint8 k;
+				FloatFlip::type a = index[0]->bits[k];
+				FloatFlip::type b = index[1]->bits[k];
+				FloatFlip::type c = index[2]->bits[k];
+				uint8 i;
+				uint8 j;
+				uint8 k;
 				if (a < b)
 				{
 					if (b < c)
@@ -370,13 +370,13 @@ class KDTreeB
 			Assert(size <= 64);
 
 			FloatFlip::type array[64];
-			for (register int i = 0; i < size; ++i)
+			for (int i = 0; i < size; ++i)
 			{
 				array[i] = index[i]->bits[k];
 			}
 
-			register bool swapped;
-			register int gap = size;
+			bool swapped;
+			int gap = size;
 			do
 			{
 				gap *= 93;
@@ -390,16 +390,16 @@ class KDTreeB
 					gap = 1;
 				}
 				swapped = false;
-				for (register int i = gap; i < size; ++i)
+				for (int i = gap; i < size; ++i)
 				{
-					register int j = i - gap;
+					int j = i - gap;
 					if (array[i] < array[j])
 					{
-						register Node* tmp_index = index[i];
+						Node* tmp_index = index[i];
 						index[i] = index[j];
 						index[j] = tmp_index;
 
-						register FloatFlip::type tmp_array = array[i];
+						FloatFlip::type tmp_array = array[i];
 						array[i] = array[j];
 						array[j] = tmp_array;
 						swapped = true;
@@ -432,9 +432,9 @@ class KDTreeB
 			int histogram6[256] = {0};
 			int histogram7[256] = {0};
 
-			for (register int i = 0; i < size; ++i)
+			for (int i = 0; i < size; ++i)
 			{
-				register uint64 data = index[i]->bits[k];
+				uint64 data = index[i]->bits[k];
 				array[i] = data;
 				++histogram0[data & 0xff];
 				++histogram1[data >> 8 & 0xff];
@@ -447,17 +447,17 @@ class KDTreeB
 			}
 
 			{
-				register int count0 = 0;
-				register int count1 = 0;
-				register int count2 = 0;
-				register int count3 = 0;
-				register int count4 = 0;
-				register int count5 = 0;
-				register int count6 = 0;
-				register int count7 = 0;
-				for (register sint16 h = 0; h < 256; ++h)
+				int count0 = 0;
+				int count1 = 0;
+				int count2 = 0;
+				int count3 = 0;
+				int count4 = 0;
+				int count5 = 0;
+				int count6 = 0;
+				int count7 = 0;
+				for (sint16 h = 0; h < 256; ++h)
 				{
-					register int tmp;
+					int tmp;
 
 					tmp = histogram0[h];
 					histogram0[h] = count0;
@@ -493,58 +493,58 @@ class KDTreeB
 				}
 			}
 
-			for (register int i = 0; i < size; ++i)
+			for (int i = 0; i < size; ++i)
 			{
-				register int j = histogram0[array[i] & 0xff]++;
+				int j = histogram0[array[i] & 0xff]++;
 				array_b[j] = array[i];
 				index_b[j] = index[i];
 			}
 
-			for (register int i = 0; i < size; ++i)
+			for (int i = 0; i < size; ++i)
 			{
-				register int j = histogram1[array_b[i] >> 8 & 0xff]++;
+				int j = histogram1[array_b[i] >> 8 & 0xff]++;
 				array[j] = array_b[i];
 				index[j] = index_b[i];
 			}
 
-			for (register int i = 0; i < size; ++i)
+			for (int i = 0; i < size; ++i)
 			{
-				register int j = histogram2[array[i] >> 16 & 0xff]++;
+				int j = histogram2[array[i] >> 16 & 0xff]++;
 				array_b[j] = array[i];
 				index_b[j] = index[i];
 			}
 
-			for (register int i = 0; i < size; ++i)
+			for (int i = 0; i < size; ++i)
 			{
-				register int j = histogram3[array_b[i] >> 24 & 0xff]++;
+				int j = histogram3[array_b[i] >> 24 & 0xff]++;
 				array[j] = array_b[i];
 				index[j] = index_b[i];
 			}
 
-			for (register int i = 0; i < size; ++i)
+			for (int i = 0; i < size; ++i)
 			{
-				register int j = histogram4[array[i] >> 32 & 0xff]++;
+				int j = histogram4[array[i] >> 32 & 0xff]++;
 				array_b[j] = array[i];
 				index_b[j] = index[i];
 			}
 
-			for (register int i = 0; i < size; ++i)
+			for (int i = 0; i < size; ++i)
 			{
-				register int j = histogram5[array_b[i] >> 40 & 0xff]++;
+				int j = histogram5[array_b[i] >> 40 & 0xff]++;
 				array[j] = array_b[i];
 				index[j] = index_b[i];
 			}
 
-			for (register int i = 0; i < size; ++i)
+			for (int i = 0; i < size; ++i)
 			{
-				register int j = histogram6[array[i] >> 48 & 0xff]++;
+				int j = histogram6[array[i] >> 48 & 0xff]++;
 				array_b[j] = array[i];
 				index_b[j] = index[i];
 			}
 
-			for (register int i = 0; i < size; ++i)
+			for (int i = 0; i < size; ++i)
 			{
-				register int j = histogram7[array_b[i] >> 56 & 0xff]++;
+				int j = histogram7[array_b[i] >> 56 & 0xff]++;
 				index[j] = index_b[i];
 			}
 

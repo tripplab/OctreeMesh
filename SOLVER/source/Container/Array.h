@@ -57,9 +57,9 @@ class Array
 		template <typename U>
 		Array& operator = (const Array<U, S>& a) throw()
 		{
-			register const U* __restrict src = a.data;
-			register T* __restrict dst = data;
-			for (register int k = S; k; --k, ++dst, ++src)
+			const U* __restrict src = a.data;
+			T* __restrict dst = data;
+			for (int k = S; k; --k, ++dst, ++src)
 			{
 				*dst = (T)*src;
 			}
@@ -78,8 +78,8 @@ class Array
 
 		void Fill(const T& value) throw()
 		{
-			register T* __restrict dst = data;
-			for (register int k = S; k; --k, ++dst)
+			T* __restrict dst = data;
+			for (int k = S; k; --k, ++dst)
 			{
 				*dst = value;
 			}
@@ -90,9 +90,9 @@ class Array
 		{
 			Assert(data);
 
-			register const T* __restrict src = data;
-			register T* __restrict dst = this->data;
-			for (register int k = S; k; --k, ++dst, ++src)
+			const T* __restrict src = data;
+			T* __restrict dst = this->data;
+			for (int k = S; k; --k, ++dst, ++src)
 			{
 				*dst = *src;
 			}
@@ -103,7 +103,7 @@ class Array
 		{
 			// Combsort11 http://en.wikipedia.org/wiki/Comb_sort
 			bool swapped;
-			register int gap = S;
+			int gap = S;
 			do
 			{
 				gap = (gap*10)/13;
@@ -126,12 +126,12 @@ class Array
 					}
 				}
 				swapped = false;
-				for (register int j = gap + 1; j <= S; ++j)
+				for (int j = gap + 1; j <= S; ++j)
 				{
 					int k = j - gap;
 					if (entry[j] < entry[k])
 					{
-						register T t = entry[j];
+						T t = entry[j];
 						entry[j] = entry[k];
 						entry[k] = t;
 						swapped = true;

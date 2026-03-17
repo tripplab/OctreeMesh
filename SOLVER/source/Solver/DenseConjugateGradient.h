@@ -46,7 +46,7 @@ int DenseConjugateGradient(const Matrix<T>& A, Vector<T>& x, const Vector<T>& b,
 			T* __restrict A_entry_i = A.entry[i];
 
 			T sum = 0;
-			for (register int j = 1; j <= A.columns; ++j)
+			for (int j = 1; j <= A.columns; ++j)
 			{
 				sum += A_entry_i[j]*x.entry[j];
 			}
@@ -73,7 +73,7 @@ int DenseConjugateGradient(const Matrix<T>& A, Vector<T>& x, const Vector<T>& b,
 				T* __restrict A_entry_i = A.entry[i];
 
 				T sum = 0.0;
-				for (register int j = 1; j <= A.columns; ++j)
+				for (int j = 1; j <= A.columns; ++j)
 				{
 					sum += A_entry_i[j]*p.entry[j];
 				}
@@ -183,7 +183,7 @@ int DenseConjugateGradientJacobi(const Matrix<T>& A, Vector<T>& x, const Vector<
 			T* __restrict A_entry_i = A.entry[i];
 
 			T sum = 0.0;
-			for (register int j = 1; j <= A.columns; ++j)
+			for (int j = 1; j <= A.columns; ++j)
 			{
 				sum += A_entry_i[j]*x.entry[j];
 			}
@@ -212,7 +212,7 @@ int DenseConjugateGradientJacobi(const Matrix<T>& A, Vector<T>& x, const Vector<
 				T* __restrict A_entry_i = A.entry[i];
 
 				T sum = 0.0;
-				for (register int j = 1; j <= A.columns; ++j)
+				for (int j = 1; j <= A.columns; ++j)
 				{
 					sum += A_entry_i[j]*p.entry[j];
 				}

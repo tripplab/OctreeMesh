@@ -65,7 +65,7 @@ class Solver
 							int k_max = A.Count(i);
 							for (int k = 1; k <= k_max; ++k)
 							{
-								register int j = A_index_i[k];
+								int j = A_index_i[k];
 								if (fixed.entry[j])
 								{
 									++fixed_count;
@@ -76,7 +76,7 @@ class Solver
 							A_adjust_entry_i = A_adjust.entry[i];
 							for (int k = 1, bk = 1; k <= k_max; ++k)
 							{
-								register int j = A_index_i[k];
+								int j = A_index_i[k];
 								if (fixed.entry[j])
 								{
 									A_adjust_index_i[bk] = j;
@@ -101,7 +101,7 @@ class Solver
 							int k_max = A.Count(i);
 							for (int k = 1; k <= k_max; ++k)
 							{
-								register int j = A_index_i[k];
+								int j = A_index_i[k];
 								if (fixed.entry[j])
 								{
 									b_adjust.entry[i] += A_entry_i[k]*x.entry[j];
@@ -160,9 +160,9 @@ class Solver
 
 						int k_max = A_adjust.Count(i);
 						T sum = 0;
-						for (register int k = 1; k <= k_max; ++k)
+						for (int k = 1; k <= k_max; ++k)
 						{
-							register int j = A_adjust_index_i[k];
+							int j = A_adjust_index_i[k];
 							sum += A_adjust_entry_i[k]*x.entry[j];
 						}
 						b.entry[i] -= sum;
