@@ -1067,10 +1067,10 @@ void Mesher::RotateCoordianteToFold( double* coord ){
 	coord[ 0 ] = newcoord[ 0 ];	coord[ 1 ] = newcoord[ 1 ];	coord[ 2 ] = newcoord[ 2 ];
 	//printf(" - New Coord: %f, %f, %f \n", coord[ 0 ], coord[ 1 ], coord[ 2 ]);
 
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 
 	//printf("%s \n","  leaving RotateCoordianteToFold ");
 	//assert(0);
@@ -1243,10 +1243,10 @@ void Mesher::RotateFold2Id0( double* coord ){
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , coord , 3 , newcoord , 3 );
 	coord[ 0 ] = newcoord[ 0 ];	coord[ 1 ] = newcoord[ 1 ];	coord[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 
 }
 
@@ -1293,10 +1293,10 @@ void Mesher::RotateFold2Id1( double* coord ){
 	coord[ 0 ] = newcoord[ 0 ];	coord[ 1 ] = newcoord[ 1 ];	coord[ 2 ] = newcoord[ 2 ];
 	printf(" - New Coord: %f, %f, %f \n", coord[ 0 ], coord[ 1 ], coord[ 2 ]);
 
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 
 	printf("%s \n","  leaving RotateFold2Id1 ");
 	assert(0);
@@ -1407,10 +1407,10 @@ void Mesher::RotateFold3Id0( double* coord ){
 	matrix[ 1 ][ 0 ] = 0.0; matrix[ 1 ][ 1 ] = cos( teta ); matrix[ 1 ][ 2 ] = -sin( teta );
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , newcoord , 3 , coord , 3 );
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 
 }
 
@@ -1520,10 +1520,10 @@ void Mesher::RotateFold5Id0( double* coord ){
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , coord , 3 , newcoord , 3 );
 	coord[ 0 ] = newcoord[ 0 ];	coord[ 1 ] = newcoord[ 1 ];	coord[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 
 }
 
@@ -1545,10 +1545,10 @@ void Mesher::RotateFold5Id1( double* coord ){
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , coord , 3 , newcoord , 3 );
 	coord[ 0 ] = newcoord[ 0 ];	coord[ 1 ] = newcoord[ 1 ];	coord[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -1569,10 +1569,10 @@ void Mesher::RotateFold5Id2( double* coord ){
 	matrix[ 2 ][ 0 ] = 0.0;         matrix[ 2 ][ 1 ] = 0.0;          matrix[ 2 ][ 2 ] = 1.0;
 	MatrixVectorMultiplication( matrix , 3 , 3 , coord , 3 , newcoord , 3 );
 	coord[ 0 ] = newcoord[ 0 ];	coord[ 1 ] = newcoord[ 1 ];	coord[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -1593,10 +1593,10 @@ void Mesher::RotateFold5Id3( double* coord ){
 	matrix[ 2 ][ 0 ] = 0.0;         matrix[ 2 ][ 1 ] = 0.0;          matrix[ 2 ][ 2 ] = 1.0;
 	MatrixVectorMultiplication( matrix , 3 , 3 , coord , 3 , newcoord , 3 );
 	coord[ 0 ] = newcoord[ 0 ];	coord[ 1 ] = newcoord[ 1 ];	coord[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -1624,10 +1624,10 @@ void Mesher::RotateFold5Id4( double* coord ){
 	matrix[ 1 ][ 0 ] = 0.0; matrix[ 1 ][ 1 ] = cos( teta ); matrix[ 1 ][ 2 ] = -sin( teta );
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , newcoord , 3 , coord , 3 );
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -1655,10 +1655,10 @@ void Mesher::RotateFold5Id5( double* coord ){
 	matrix[ 1 ][ 0 ] = 0.0; matrix[ 1 ][ 1 ] = cos( teta ); matrix[ 1 ][ 2 ] = -sin( teta );
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , newcoord , 3 , coord , 3 );
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -1679,10 +1679,10 @@ void Mesher::RotateFold5Id6( double* coord ){
 	matrix[ 2 ][ 0 ] = 0.0;         matrix[ 2 ][ 1 ] = 0.0;          matrix[ 2 ][ 2 ] = 1.0;
 	MatrixVectorMultiplication( matrix , 3 , 3 , coord , 3 , newcoord , 3 );
 	coord[ 0 ] = newcoord[ 0 ];	coord[ 1 ] = newcoord[ 1 ];	coord[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -1703,10 +1703,10 @@ void Mesher::RotateFold5Id7( double* coord ){
 	matrix[ 2 ][ 0 ] = 0.0;         matrix[ 2 ][ 1 ] = 0.0;          matrix[ 2 ][ 2 ] = 1.0;
 	MatrixVectorMultiplication( matrix , 3 , 3 , coord , 3 , newcoord , 3 );
 	coord[ 0 ] = newcoord[ 0 ];	coord[ 1 ] = newcoord[ 1 ];	coord[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -1734,10 +1734,10 @@ void Mesher::RotateFold5Id8( double* coord ){
 	matrix[ 1 ][ 0 ] = sin( teta ); matrix[ 1 ][ 1 ] = cos( teta );  matrix[ 1 ][ 2 ] = 0.0;
 	matrix[ 2 ][ 0 ] = 0.0;         matrix[ 2 ][ 1 ] = 0.0;          matrix[ 2 ][ 2 ] = 1.0;
 	MatrixVectorMultiplication( matrix , 3 , 3 , newcoord , 3 , coord , 3 );
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -1758,10 +1758,10 @@ void Mesher::RotateFold5Id9( double* coord ){
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , coord , 3 , newcoord , 3 );
 	coord[ 0 ] = newcoord[ 0 ];	coord[ 1 ] = newcoord[ 1 ];	coord[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -1782,10 +1782,10 @@ void Mesher::RotateFold5Id10( double* coord ){
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , coord , 3 , newcoord , 3 );
 	coord[ 0 ] = newcoord[ 0 ];	coord[ 1 ] = newcoord[ 1 ];	coord[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -1813,10 +1813,10 @@ void Mesher::RotateFold5Id11( double* coord ){
 	matrix[ 1 ][ 0 ] = sin( teta ); matrix[ 1 ][ 1 ] = cos( teta );  matrix[ 1 ][ 2 ] = 0.0;
 	matrix[ 2 ][ 0 ] = 0.0;         matrix[ 2 ][ 1 ] = 0.0;          matrix[ 2 ][ 2 ] = 1.0;
 	MatrixVectorMultiplication( matrix , 3 , 3 , newcoord , 3 , coord , 3 );
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**

@@ -368,7 +368,7 @@ void Interpolator::TranslateAllResultsToNodes(  ){
 		res_nodes_[ 13 ][ i_node ] = (( res_nodes_[ 13 ][ i_node ] - min )/( max - min )*99.00)+1.0;
 		res_nodes_[ 13 ][ i_node ] = log( res_nodes_[ 13 ][ i_node ] );
 	}
-	delete counter;
+	delete[] counter;
 }
 
 /**
