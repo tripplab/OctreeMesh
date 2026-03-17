@@ -263,10 +263,10 @@ void Atom::RotateFold0(){
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , coords_ , 3 , newcoord , 3 );
 	coords_[ 0 ] = newcoord[ 0 ];	coords_[ 1 ] = newcoord[ 1 ];	coords_[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -286,10 +286,10 @@ void Atom::RotateFold1(){
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , coords_ , 3 , newcoord , 3 );
 	coords_[ 0 ] = newcoord[ 0 ];	coords_[ 1 ] = newcoord[ 1 ];	coords_[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -309,10 +309,10 @@ void Atom::RotateFold2(){
 	matrix[ 2 ][ 0 ] = 0.0;         matrix[ 2 ][ 1 ] = 0.0;          matrix[ 2 ][ 2 ] = 1.0;
 	MatrixVectorMultiplication( matrix , 3 , 3 , coords_ , 3 , newcoord , 3 );
 	coords_[ 0 ] = newcoord[ 0 ];	coords_[ 1 ] = newcoord[ 1 ];	coords_[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -332,10 +332,10 @@ void Atom::RotateFold3(){
 	matrix[ 2 ][ 0 ] = 0.0;         matrix[ 2 ][ 1 ] = 0.0;          matrix[ 2 ][ 2 ] = 1.0;
 	MatrixVectorMultiplication( matrix , 3 , 3 , coords_ , 3 , newcoord , 3 );
 	coords_[ 0 ] = newcoord[ 0 ];	coords_[ 1 ] = newcoord[ 1 ];	coords_[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -362,10 +362,10 @@ void Atom::RotateFold4(){
 	matrix[ 1 ][ 0 ] = 0.0; matrix[ 1 ][ 1 ] = cos( teta ); matrix[ 1 ][ 2 ] = -sin( teta );
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , newcoord , 3 , coords_ , 3 );
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -392,10 +392,10 @@ void Atom::RotateFold5(){
 	matrix[ 1 ][ 0 ] = 0.0; matrix[ 1 ][ 1 ] = cos( teta ); matrix[ 1 ][ 2 ] = -sin( teta );
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , newcoord , 3 , coords_ , 3 );
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -415,10 +415,10 @@ void Atom::RotateFold6(){
 	matrix[ 2 ][ 0 ] = 0.0;         matrix[ 2 ][ 1 ] = 0.0;          matrix[ 2 ][ 2 ] = 1.0;
 	MatrixVectorMultiplication( matrix , 3 , 3 , coords_ , 3 , newcoord , 3 );
 	coords_[ 0 ] = newcoord[ 0 ];	coords_[ 1 ] = newcoord[ 1 ];	coords_[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -438,10 +438,10 @@ void Atom::RotateFold7(){
 	matrix[ 2 ][ 0 ] = 0.0;         matrix[ 2 ][ 1 ] = 0.0;          matrix[ 2 ][ 2 ] = 1.0;
 	MatrixVectorMultiplication( matrix , 3 , 3 , coords_ , 3 , newcoord , 3 );
 	coords_[ 0 ] = newcoord[ 0 ];	coords_[ 1 ] = newcoord[ 1 ];	coords_[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -468,10 +468,10 @@ void Atom::RotateFold8(){
 	matrix[ 1 ][ 0 ] = sin( teta ); matrix[ 1 ][ 1 ] = cos( teta );  matrix[ 1 ][ 2 ] = 0.0;
 	matrix[ 2 ][ 0 ] = 0.0;         matrix[ 2 ][ 1 ] = 0.0;          matrix[ 2 ][ 2 ] = 1.0;
 	MatrixVectorMultiplication( matrix , 3 , 3 , newcoord , 3 , coords_ , 3 );
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -491,10 +491,10 @@ void Atom::RotateFold9(){
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , coords_ , 3 , newcoord , 3 );
 	coords_[ 0 ] = newcoord[ 0 ];	coords_[ 1 ] = newcoord[ 1 ];	coords_[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -514,10 +514,10 @@ void Atom::RotateFold10(){
 	matrix[ 2 ][ 0 ] = 0.0; matrix[ 2 ][ 1 ] = sin( teta ); matrix[ 2 ][ 2 ] = cos( teta );
 	MatrixVectorMultiplication( matrix , 3 , 3 , coords_ , 3 , newcoord , 3 );
 	coords_[ 0 ] = newcoord[ 0 ];	coords_[ 1 ] = newcoord[ 1 ];	coords_[ 2 ] = newcoord[ 2 ];
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 /**
@@ -544,10 +544,10 @@ void Atom::RotateFold11(){
 	matrix[ 1 ][ 0 ] = sin( teta ); matrix[ 1 ][ 1 ] = cos( teta );  matrix[ 1 ][ 2 ] = 0.0;
 	matrix[ 2 ][ 0 ] = 0.0;         matrix[ 2 ][ 1 ] = 0.0;          matrix[ 2 ][ 2 ] = 1.0;
 	MatrixVectorMultiplication( matrix , 3 , 3 , newcoord , 3 , coords_ , 3 );
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;
 }
 
 

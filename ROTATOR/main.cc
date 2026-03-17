@@ -149,10 +149,10 @@ void RotateNodes( size_t n_nodes , double** nodes ){
 		nodes[ i_node ][ 0 ] = newcoord[ 0 ];	nodes[ i_node ][ 1 ] = newcoord[ 1 ];	nodes[ i_node ][ 2 ] = newcoord[ 2 ];
 	}
 
-	delete matrix[ 0 ];
-	delete matrix[ 1 ];
-	delete matrix[ 2 ];
-	delete matrix;	
+	delete[] matrix[ 0 ];
+	delete[] matrix[ 1 ];
+	delete[] matrix[ 2 ];
+	delete[] matrix;	
 
 }
 

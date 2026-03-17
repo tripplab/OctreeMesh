@@ -434,9 +434,9 @@ bool Triangle::IntersectsBox( double* bbox_min , double* bbox_max ){
 	//performing the test
 	bool intersection = TriangleIntersectsBox( box_center , box_half_size , triverts );	
 
-	delete triverts[ 0 ];	
-	delete triverts[ 1 ];	
-	delete triverts[ 2 ];	
+	delete[] triverts[ 0 ];	
+	delete[] triverts[ 1 ];	
+	delete[] triverts[ 2 ];	
 
 	return intersection;
 }
