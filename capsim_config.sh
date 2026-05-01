@@ -5,6 +5,9 @@
 PDB=1CWP  ## capsid identifier
 VDB=1cwp_full ## VDB file.vdb with capsid structure from VIPERdb (atoms)
 Res=16.00  ## mesh resolution in ang [float]
+## Young modulus / 10,000: 3j4u= 96MPa (0.0096); 3izg= 245MPa (0.0245); 4g93= 147MPa (0.0147);  1cwp= 193MPa (0.0193)
+## https://doi.org/10.1002/cnm.2991
+Young=0.0193
 
 ## Select indentation point by type and index:
 FOLD_TYPE=2    # Fold symmetry: 2, 3, or 5
@@ -18,7 +21,6 @@ T=3 ## Capsid's T-number 1|3
 VDW=1 ## use van der Waals radius for atoms
 cone=15.00  ## angle in degrees of cone to set boundary conditions
 load_ele=0.00  ## variation in the proportion of loaded elements
-Young=0.020  ## Young modulus / 10,000
 log_lev=2  ## 0: only fatal errors, 1: current process, 2: solver iterations
 ref_lev=5  ## octree searching level for interpolation
 
