@@ -5,7 +5,11 @@
 PDB=1CWP  ## capsid identifier
 VDB=1cwp_full ## VDB file.vdb with capsid structure from VIPERdb (atoms)
 Res=16.00  ## mesh resolution in ang [float]
-## Young modulus / 10,000: 3j4u= 96MPa (0.0096); 3izg= 245MPa (0.0245); 4g93= 147MPa (0.0147);  1cwp= 193MPa (0.0193)
+## Young modulus / 10,000:
+##  3j4u=  96MPa (0.0096);
+##  3izg= 245MPa (0.0245);
+##  4g93= 147MPa (0.0147);
+##  1cwp= 193MPa (0.0193)
 ## https://doi.org/10.1002/cnm.2991
 Young=0.0193
 
@@ -25,7 +29,7 @@ log_lev=2  ## 0: only fatal errors, 1: current process, 2: solver iterations
 ref_lev=5  ## octree searching level for interpolation
 
 ## Number of threads for FEM solver
-SOLVER_THREADS=1
+SOLVER_THREADS=30
 
 ## Set absolute path to executables
 BIN=/path/to/OctreeMesh/bin
