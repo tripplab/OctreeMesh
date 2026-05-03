@@ -53,7 +53,8 @@ RUN_SCRIPT="$SCRIPT_DIR/run_capsim.sh"
 [[ -x "$RUN_SCRIPT" || -f "$RUN_SCRIPT" ]] || { echo "Missing run script: $RUN_SCRIPT"; exit 1; }
 
 # validate required bin entries inferred from run_capsim.sh
-for b in extract_ATOM octree_mesh meshsolver mesh2pdb apply-matrix.awk rotate_back; do
+# Step 5 is named "rotate_back" but implemented via apply-matrix.awk.
+for b in extract_ATOM octree_mesh meshsolver mesh2pdb apply-matrix.awk; do
   [[ -e "$BIN_PATH/$b" ]] || { echo "Missing required BIN entry: $BIN_PATH/$b"; exit 1; }
 done
 

@@ -154,6 +154,8 @@ Use `run_capsim_batch.sh` to execute many simulations **sequentially** across co
   - `4g93 -> 0.0147`
 - `--res` supports mixed syntax (example: `1-4,8,10-12`) and each value must be within `[1,16]`.
 - `Res` is written as formatted float (`1.00`, `2.00`, ...).
+- `--bin` must contain these entries: `extract_ATOM`, `octree_mesh`, `meshsolver`, `mesh2pdb`, and `apply-matrix.awk`.
+- Step 5 is named `rotate_back`, but it is executed through `apply-matrix.awk` (there is no separate `rotate_back` executable requirement).
 - `--threads` is required and must be integer `[1,30]`.
 - Fold tokens must be from: `2_0,2_1,3_0,3_1,5_0`.
 
@@ -547,6 +549,5 @@ These are different:
 
 Compile parallelism (faster build): make -jN and solver submake PARALLEL=4.
 Runtime thread count (OpenMP execution): set env vars like SOLVER_THREADS when running solver tools/scripts.
-
 
 
