@@ -119,6 +119,98 @@ View all options:
 ./run_capsim.sh --config=my_experiment.conf
 ```
 
+
+## Batch execution with `run_capsim_batch.sh`
+
+Use `run_capsim_batch.sh` to execute many simulations **sequentially** across combinations of PDB, fold token, and resolution.
+
+### What it does
+- Builds a full Cartesian product in this exact order: **PDB (outer) × Fold token (middle) × Res (inner)**.
+- Runs one simulation at a time (strictly sequential).
+- Always self-detaches with `nohup` so jobs continue if your SSH/session ends.
+- Creates per-job configs under `runs/batch_<UTC_TS>_<PID>/tmp_configs/`.
+- Writes per-job run output to `<RUN_DIR>/batch_run.log`.
+- Writes batch-level summaries:
+  - `runs/batch_<UTC_TS>_<PID>.tsv` (orchestration/status fields)
+  - `runs/batch_<UTC_TS>_<PID>.csv` (requested metrics/timings)
+
+### Required arguments
+```bash
+./run_capsim_batch.sh   --pdb 1cwp,3j4u   --folds 2_0,2_1,3_0,3_1,5_0   --res 1-16   --threads 30   --bin /path/to/OctreeMesh/bin   --vdb-dir /path/to/vdbs
+```
+
+### Optional flags
+- `--strict-skips`: if any job is skipped because VDB is missing, final batch exit becomes non-zero.
+- `--smoke`: validate/build matrix and summaries without executing simulations.
+
+### Input rules and inference
+- Allowed PDB IDs only: `1cwp`, `3j4u`, `3izg`, `4g93` (input case-insensitive).
+- PDB is written uppercase into temp config (`1cwp -> 1CWP`).
+- VDB is inferred as `${pdb_lower}_full`.
+- Hardcoded Young map:
+  - `1cwp -> 0.0193`
+  - `3j4u -> 0.0096`
+  - `3izg -> 0.0245`
+  - `4g93 -> 0.0147`
+- `--res` supports mixed syntax (example: `1-4,8,10-12`) and each value must be within `[1,16]`.
+- `Res` is written as formatted float (`1.00`, `2.00`, ...).
+- `--threads` is required and must be integer `[1,30]`.
+- Fold tokens must be from: `2_0,2_1,3_0,3_1,5_0`.
+
+### VDB existence check (mandatory)
+For each inferred VDB file `<vdb>.vdb`, lookup order is:
+1. `--vdb-dir/<vdb>.vdb`
+2. repo root `<repo>/<vdb>.vdb`
+
+If not found, job is logged as `SKIPPED_MISSING_VDB` in both TSV and CSV.
+
+### Detach behavior and monitoring
+When invoked, the parent process immediately prints:
+- spawned PID
+- master log path
+- exact `tail -f` command
+
+Example:
+```bash
+./run_capsim_batch.sh --pdb 1cwp --folds 2_0 --res 16 --threads 8 --bin "$PWD/bin" --vdb-dir "$PWD"
+# prints:
+# Spawned batch PID: <pid>
+# Master log: runs/batch_<UTC_TS>_<PID>.log
+# Tail command: tail -f runs/batch_<UTC_TS>_<PID>.log
+```
+
+### Smoke mode example
+```bash
+./run_capsim_batch.sh   --pdb 1cwp,3j4u   --folds 2_0,5_0   --res 4-6   --threads 12   --bin /path/to/OctreeMesh/bin   --vdb-dir /path/to/vdbs   --smoke
+```
+Expected behavior:
+- still detaches
+- still validates inputs/BIN/VDB checks
+- still writes TSV+CSV summaries
+- **does not run** `run_capsim.sh`
+- non-missing jobs are marked `SMOKE_OK`
+
+### Status and exit semantics
+- Normal successful run: `DONE`
+- Failed run: `FAILED_STEP_1` ... `FAILED_STEP_5` (or `FAILED_STEP_NA` if step cannot be inferred)
+- Missing VDB: `SKIPPED_MISSING_VDB`
+- Smoke non-skipped: `SMOKE_OK`
+
+Final batch exit code:
+- non-zero if any `FAILED_*`
+- additionally non-zero for skipped jobs only when `--strict-skips` is set
+
+### CSV/TSV contents
+- TSV columns:
+  - `status, exit_code, runtime_sec, pdb, vdb, res, young, fold_type, fold_index, threads, run_dir`
+- CSV columns:
+  - `job_name, total_proteins, total_atoms, nodes, elements, mesh_volume, volume_loaded, octree_mesh_sec, meshsolver_sec, mesh2pdb_sec`
+
+Notes:
+- numeric parsing in CSV normalizes values like `1,234` -> `1234` when possible
+- missing fields are written as `NA`
+- timings are read from `.checkpoints/timings.ts` for `octree_mesh`, `meshsolver`, `mesh2pdb`
+
 ### 4. Pipeline Steps
 
 | Step | Name | Description |
