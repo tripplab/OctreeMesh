@@ -23,6 +23,8 @@ for req in awk sed date tr nohup; do
   command -v "$req" >/dev/null 2>&1 || { echo "Missing required tool: $req"; exit 1; }
 done
 
+ORIG_ARGS=("$@")
+
 PDB_LIST=""; FOLD_LIST=""; RES_SPEC=""; THREADS=""; BIN_PATH=""; VDB_DIR=""; STRICT_SKIPS=0; SMOKE=0
 
 while [[ $# -gt 0 ]]; do
@@ -63,7 +65,7 @@ if [[ "${CAPSIM_BATCH_CHILD:-0}" != "1" ]]; then
   ts="$(date -u +%Y%m%dT%H%M%SZ)"
   mkdir -p "$SCRIPT_DIR/runs"
   master_log="$SCRIPT_DIR/runs/batch_${ts}_$$.log"
-  CAPSIM_BATCH_CHILD=1 nohup "$0" "$@" > "$master_log" 2>&1 &
+  CAPSIM_BATCH_CHILD=1 nohup "$0" "${ORIG_ARGS[@]}" > "$master_log" 2>&1 &
   pid=$!
   echo "Spawned batch PID: $pid"
   echo "Master log: $master_log"
