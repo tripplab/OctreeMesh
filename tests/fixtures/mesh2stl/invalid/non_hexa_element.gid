@@ -1,0 +1,10 @@
+MESH "non_hexa_element" dimension 3 ElemType Tetrahedra Nnode 4
+Coordinates
+1 0 0 0
+2 1 0 0
+3 0 1 0
+4 0 0 1
+End Coordinates
+Elements
+1 1 2 3 4
+End Elements
