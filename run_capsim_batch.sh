@@ -100,16 +100,26 @@ normalize_num() { echo "$1" | tr -d ','; }
 
 parse_metric() {
   local file="$1"; shift
-  local regex="$1"
+  local sed_expr="$1"
   local v
-  v=$(sed -nE "s/${regex}/\\1/p" "$file" | tail -n1 || true)
+  v=$(sed -nE "$sed_expr" "$file" | tail -n1 || true)
   if [[ -z "$v" ]]; then echo "NA"; else normalize_num "$v"; fi
 }
 
 step_timing() {
   local run_dir="$1"; local step="$2"
   local v
-  v=$(awk -F'\t' -v rd="$run_dir" -v st="$step" 'NR>1 && $1==rd && $2==st && $3=="done" {val=$4} END{if(val!="") print val}' "$SCRIPT_DIR/.checkpoints/timings.ts" 2>/dev/null || true)
+  v=$(awk -F'\t' -v rd="$run_dir" -v st="$step" '
+    NR>1 && $2==st && $3=="done" {
+      key=$1
+      sub(/^\.\//, "", key)
+      sub(/^\.\//, "", rd)
+      short=rd
+      sub(/^.*\/runs\//, "runs/", short)
+      if (key==rd || key==short) val=$4
+    }
+    END{if(val!="") print val}
+  ' "$SCRIPT_DIR/.checkpoints/timings.ts" 2>/dev/null || true)
   [[ -n "$v" ]] && echo "$v" || echo "NA"
 }
 
@@ -233,6 +243,12 @@ for pdb_l in "${pdb_arr[@]}"; do
             t2=$(step_timing "$run_dir" "octree_mesh")
             t3=$(step_timing "$run_dir" "meshsolver")
             t4=$(step_timing "$run_dir" "mesh2pdb")
+          fi
+          if [[ "$status" == "DONE" && "$tp" == "NA" && "$ta" == "NA" && "$nodes" == "NA" && "$elems" == "NA" && "$mv" == "NA" && "$vl" == "NA" ]]; then
+            echo "WARN parse_metric: all structural metrics are NA for job=$job_name log=$src_log"
+          fi
+          if [[ "$status" == "DONE" && "$run_dir" != "NA" && "$t2" == "NA" && "$t3" == "NA" && "$t4" == "NA" ]]; then
+            echo "WARN step_timing: all timing metrics are NA for job=$job_name run_dir=$run_dir"
           fi
         else
           runtime=0
