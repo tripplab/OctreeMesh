@@ -345,7 +345,6 @@ void Mesher::GetConeDirectionFold5( double* dir ){
  *@return A size_t with the number of nodes in the final mesh
  */
 size_t Mesher::GetNNodesInFinalMesh(  ){
-	printf("%s %lu \n"," # nodes: ", n_final_nodes_);
 	return n_final_nodes_;
 }
 
@@ -365,7 +364,6 @@ size_t Mesher::GetNElementsInFinalMesh(  ){
 			index++;
 		}
 	}
-	printf("%s %lu \n"," # elements: ", index);
 	return index;
 }
 
