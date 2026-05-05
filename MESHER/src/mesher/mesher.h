@@ -49,6 +49,7 @@ class Mesher{
 	double resolution_;
 	double resolution_capside_;
 	double percentage_;
+	double domain_refinement_input_;
 	OctreeDriver* octree_;
 	OctreeCell* local_root_;
 	Vdb* vdb_;
@@ -111,7 +112,8 @@ class Mesher{
                 void ScaleCapside(  );  
 		void RefineLocalRoot();
 		void AssignAtomsOnLocalRoot( );
-		void CalculateRefinementAndPercentage();
+			void CalculateRefinementAndPercentage();
+			void PrintMeshSummary();
 		void RotateCoordianteToFold( double* coord );
 		void RotateFold2( double* coord );
 		void RotateFold3( double* coord );
