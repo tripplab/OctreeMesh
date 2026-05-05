@@ -42,6 +42,7 @@ int main( int argc , char** argv ){
 	std::cout << " 60/100 OCTREE REFINED " << std::endl;
 	com->SetLoadedAndFixedElements();	
 	std::cout << " 80/100 BOUNDARY CONDITIONS SET  " << std::endl;
+	com->PrintMeshSummary();
 	com->PrintDataFilesForFEMT(  );
 	std::cout << " 100/100 PROBLEMA GUARDADO " << std::endl;
 	std::cout << "  Time " << (clock() - t_ini)/((double)CLOCKS_PER_SEC) << std::endl;

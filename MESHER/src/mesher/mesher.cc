@@ -50,6 +50,7 @@ Mesher::Mesher( int argc , char** argv ){
 	input_ = argv[ 1 ];
 	vdb_ = new Vdb( input_ , 1 , 1 , atoi( argv[ 2 ] ) , atoi( argv[ 3 ] ) );
 	resolution_capside_ = atof( argv[ 4 ] );
+	domain_refinement_input_ = 0.0;
 	fold_ = atoi( argv[ 5 ] );
 	fold_index_ = atoi( argv[ 6 ] );
 	Fx_ = atof( argv[ 7 ] );
@@ -83,7 +84,7 @@ Mesher::Mesher( int argc , char** argv ){
 
 	//printf("--------------------------------------- \n");
 	printf(" Will look for structure in file: %s \n", input_);
-	printf(" Will generate a mesh with resolution of: %f nm \n", resolution_capside_);
+	printf(" Will generate a mesh with resolution of: %f angstrom \n", resolution_capside_);
 	printf(" Will align vector: %f %f %f to Z \n", Fx_, Fy_, Fz_);
 	printf(" Will configure nanoindentation on the aligned vector \n");
 	//printf(" Will configure nanoindentation on the %d-fold id %d \n", fold_, fold_index_);
@@ -993,6 +994,7 @@ void Mesher::CalculateRefinementAndPercentage(){
 	//Getting the domain in the mesh
 	double domain;
 	domain = vdb_->CalculateMaximumDomain();
+	domain_refinement_input_ = domain;
 
 	//Starting to look for the refinement and the percentage
 	bool flag = false;
@@ -1005,6 +1007,82 @@ void Mesher::CalculateRefinementAndPercentage(){
 			r_level_++;
 		}
 	}
+}
+
+void Mesher::PrintMeshSummary(){
+	size_t n_nodes = this->GetNNodesInFinalMesh();
+	size_t n_elements = this->GetNElementsInFinalMesh();
+
+	OctreeCell_vector leaves;
+	this->GetAllLocalRootLeaves( leaves );
+	bool found_mesh = false;
+	double elem = 0.0;
+	double mesh_min[ 3 ] = { 0.0 , 0.0 , 0.0 };
+	double mesh_max[ 3 ] = { 0.0 , 0.0 , 0.0 };
+	for( size_t i_leaf = 0 ; i_leaf < leaves.size() ; i_leaf++ ){
+		OctreeCell* cell = leaves[ i_leaf ];
+		DataInsideOctreeCell* data = cell->pGetData();
+		if( data->_GetIsMesh() == 1 ){
+			double min_point[ 3 ];
+			double max_point[ 3 ];
+			cell->GetMinPointNormalized( min_point );
+			cell->GetMaxPointNormalized( max_point );
+			if( !found_mesh ){
+				elem = max_point[ 0 ] - min_point[ 0 ];
+				for( int i_dim = 0 ; i_dim < 3 ; i_dim++ ){
+					mesh_min[ i_dim ] = min_point[ i_dim ];
+					mesh_max[ i_dim ] = max_point[ i_dim ];
+				}
+				found_mesh = true;
+			}else{
+				for( int i_dim = 0 ; i_dim < 3 ; i_dim++ ){
+					if( min_point[ i_dim ] < mesh_min[ i_dim ] ) mesh_min[ i_dim ] = min_point[ i_dim ];
+					if( max_point[ i_dim ] > mesh_max[ i_dim ] ) mesh_max[ i_dim ] = max_point[ i_dim ];
+				}
+			}
+		}
+	}
+
+	double bbox_mesh[ 3 ] = { 0.0 , 0.0 , 0.0 };
+	if( found_mesh ){
+		for( int i_dim = 0 ; i_dim < 3 ; i_dim++ ){
+			bbox_mesh[ i_dim ] = mesh_max[ i_dim ] - mesh_min[ i_dim ];
+		}
+	}
+
+	double octree_min[ 3 ];
+	double octree_max[ 3 ];
+	local_root_->GetMinPointNormalized( octree_min );
+	local_root_->GetMaxPointNormalized( octree_max );
+	double bbox_octree[ 3 ];
+	for( int i_dim = 0 ; i_dim < 3 ; i_dim++ ){
+		bbox_octree[ i_dim ] = octree_max[ i_dim ] - octree_min[ i_dim ];
+	}
+
+	double span_mesh[ 3 ] = { 0.0 , 0.0 , 0.0 };
+	double span_octree[ 3 ] = { 0.0 , 0.0 , 0.0 };
+	if( elem > 0.0 ){
+		for( int i_dim = 0 ; i_dim < 3 ; i_dim++ ){
+			span_mesh[ i_dim ] = bbox_mesh[ i_dim ] / elem;
+			span_octree[ i_dim ] = bbox_octree[ i_dim ] / elem;
+		}
+	}
+
+	printf("%s\n", " -- Mesh summary --");
+	printf(" # nodes:  %lu\n", n_nodes);
+	printf(" # elements:  %lu\n", n_elements);
+	printf("%s\n", " units = angstrom");
+	printf(" elem = %.6f\n", elem);
+	printf("%s\n", " elem_source = first_meshed_leaf");
+	printf(" bbox_mesh_cells = (%.6f, %.6f, %.6f)\n", bbox_mesh[ 0 ], bbox_mesh[ 1 ], bbox_mesh[ 2 ]);
+	printf(" bbox_octree_domain = (%.6f, %.6f, %.6f)\n", bbox_octree[ 0 ], bbox_octree[ 1 ], bbox_octree[ 2 ]);
+	printf(" cells_span_mesh_cells = (%.6f, %.6f, %.6f)\n", span_mesh[ 0 ], span_mesh[ 1 ], span_mesh[ 2 ]);
+	printf(" cells_span_octree_domain = (%.6f, %.6f, %.6f)\n", span_octree[ 0 ], span_octree[ 1 ], span_octree[ 2 ]);
+	printf(" percentage_ = %.6f\n", percentage_);
+	printf(" domain_refinement_input = %.6f\n", domain_refinement_input_);
+	printf(" domain_scaled_octree_xyz = (%.6f, %.6f, %.6f)\n", bbox_octree[ 0 ], bbox_octree[ 1 ], bbox_octree[ 2 ]);
+	printf(" r_level_ = %d\n", r_level_);
+	printf(" resolution_ = %.6f\n", resolution_);
 }
 
 /**
