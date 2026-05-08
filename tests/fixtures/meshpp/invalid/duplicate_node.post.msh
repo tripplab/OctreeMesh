@@ -1,0 +1,8 @@
+MESH "hex" dimension 3 ElemType Hexahedra Nnode 8
+Coordinates
+1 0 0 0
+1 1 0 0
+End Coordinates
+Elements
+1 1 1 1 1 1 1 1 1
+End Elements
