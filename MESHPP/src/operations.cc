@@ -130,7 +130,10 @@ class StatsOperation : public MeshOperation {
     const double dz = max_z - min_z;
     const double diag = std::sqrt(dx * dx + dy * dy + dz * dz);
 
-    std::cout << std::setprecision(17);
+    const std::streamsize old_precision = std::cout.precision();
+    const auto old_flags = std::cout.flags();
+    std::cout << std::fixed << std::setprecision(6);
+
     std::cout << "mesh.stats.nodes=" << mesh->nodes.size() << "\n";
     std::cout << "mesh.stats.elements=" << mesh->elements.size() << "\n";
     std::cout << "mesh.stats.min.x=" << min_x << "\n";
@@ -147,6 +150,8 @@ class StatsOperation : public MeshOperation {
     std::cout << "mesh.stats.bbox.dz=" << dz << "\n";
     std::cout << "mesh.stats.bbox.diag=" << diag << "\n";
 
+    std::cout.flags(old_flags);
+    std::cout.precision(old_precision);
     return report;
   }
 };

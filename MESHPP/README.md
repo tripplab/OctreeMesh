@@ -29,7 +29,7 @@ make
 Supported operations:
 - `scale:<factor>`
 - `translate:<dx>,<dy>,<dz>`
-- `--mesh_stats` appends a reporting operation that prints deterministic mesh summary keys (`mesh.stats.*`) without mutating geometry
+- `--mesh_stats` appends a reporting operation that prints deterministic mesh summary keys (`mesh.stats.*`) without mutating geometry (fixed 6-decimal formatting for floating-point fields)
 - optional operation form remains available for advanced pipelines: `--op mesh_stats` and `--op mesh_stats:format=text`
 - `--perf_stats` prints pipeline stage timings and node/element counts
 
