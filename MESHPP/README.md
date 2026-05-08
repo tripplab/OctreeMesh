@@ -14,21 +14,24 @@ make
 ### 1) Roundtrip validation
 
 ```bash
-./meshpp_roundtrip <input.post.msh> <output.post.msh> [--validate] [--stats]
+./meshpp_roundtrip <input.post.msh> <output.post.msh> [--validate] [--perf_stats]
 ```
 
 - `--validate`: prints node/element counts
-- `--stats`: prints stage timings (`read`, `validate`, `write`)
+- `--perf_stats`: prints stage timings (`read`, `validate`, `write`)
 
 ### 2) Apply operation pipeline
 
 ```bash
-./meshpp_apply --in <input.post.msh> --out <output.post.msh> --op <spec> [--op <spec> ...] [--stats]
+./meshpp_apply --in <input.post.msh> --out <output.post.msh> --op <spec> [--op <spec> ...] [--mesh_stats] [--perf_stats]
 ```
 
 Supported operations:
 - `scale:<factor>`
 - `translate:<dx>,<dy>,<dz>`
+- `--mesh_stats` appends a reporting operation that prints deterministic mesh summary keys (`mesh.stats.*`) without mutating geometry
+- optional operation form remains available for advanced pipelines: `--op mesh_stats` and `--op mesh_stats:format=text`
+- `--perf_stats` prints pipeline stage timings and node/element counts
 
 Operations are applied in the exact order provided.
 

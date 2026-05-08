@@ -27,4 +27,9 @@ expect_code 3 "$ROUNDTRIP_BIN" "$FIX/duplicate_node.post.msh" "$TMP_DIR/out.post
 expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op nope
 expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op translate:1,2
 
+expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op mesh_stats:format=xml
+expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op mesh_stats:foo=bar
+expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op mesh_stats:format=json
+
+
 echo "meshpp negative checks: PASS"

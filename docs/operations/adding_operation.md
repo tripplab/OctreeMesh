@@ -34,3 +34,13 @@ cd MESHPP
 ```
 
 Check stage timings (`stats.*`) for regressions.
+
+## 6) Reporting-only operations
+
+Operations may also report derived metrics without mutating geometry (for example `stats`).
+For report outputs, keep key order and formatting deterministic so tests and tooling remain stable.
+
+
+## 7) CLI shortcut flags
+
+For reporting operations, prefer distinct CLI flags when possible (for example `--mesh_stats`) to avoid ambiguity with performance/timing flags such as `--perf_stats`.
