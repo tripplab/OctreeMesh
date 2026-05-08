@@ -16,4 +16,30 @@ OUT="$TMP_DIR/out_scaled_translated.post.msh"
 rg -q "nodes: 8" /tmp/meshpp_apply_validate.txt
 rg -q "elements: 1" /tmp/meshpp_apply_validate.txt
 
+
+STATS_OUT="$TMP_DIR/stats_stdout.txt"
+"$BIN" --in "$FIX" --out "$TMP_DIR/out_stats.post.msh" --mesh_stats >"$STATS_OUT"
+rg -n "^mesh\.stats\.nodes=8$" "$STATS_OUT"
+rg -n "^mesh\.stats\.elements=1$" "$STATS_OUT"
+rg -n "^mesh\.stats\.min\.x=0\.000000$" "$STATS_OUT"
+rg -n "^mesh\.stats\.max\.z=1\.000000$" "$STATS_OUT"
+
+TRANSFORM_STATS_OUT="$TMP_DIR/transform_stats_stdout.txt"
+"$BIN" --in "$FIX" --out "$TMP_DIR/out_transform_stats.post.msh" --op scale:2 --op translate:1,0,-1 --mesh_stats >"$TRANSFORM_STATS_OUT"
+rg -n "^mesh\.stats\.min\.x=1\.000000$" "$TRANSFORM_STATS_OUT"
+rg -n "^mesh\.stats\.min\.z=-1\.000000$" "$TRANSFORM_STATS_OUT"
+rg -n "^mesh\.stats\.max\.x=3\.000000$" "$TRANSFORM_STATS_OUT"
+rg -n "^mesh\.stats\.center\.x=2\.000000$" "$TRANSFORM_STATS_OUT"
+rg -n "^mesh\.stats\.bbox\.diag=3\.464102$" "$TRANSFORM_STATS_OUT"
+
+FIRST_LINE=$(sed -n "1p" "$STATS_OUT")
+SECOND_LINE=$(sed -n "2p" "$STATS_OUT")
+THIRD_LINE=$(sed -n "3p" "$STATS_OUT")
+if [[ "$FIRST_LINE" != "mesh.stats.nodes=8" || "$SECOND_LINE" != "mesh.stats.elements=1" || "$THIRD_LINE" != "mesh.stats.min.x=0.000000" ]]; then
+  echo "stats output order changed" >&2
+  cat "$STATS_OUT" >&2
+  exit 1
+fi
+
+
 echo "meshpp operation pipeline checks: PASS"

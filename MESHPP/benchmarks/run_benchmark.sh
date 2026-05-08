@@ -13,7 +13,7 @@ OUT="$TMP_DIR/out_${N_HEX}.post.msh"
 
 python3 "$GEN" "$N_HEX" "$IN"
 if command -v /usr/bin/time >/dev/null 2>&1; then
-  /usr/bin/time -f "wall_s=%e rss_kb=%M" "$BIN" --in "$IN" --out "$OUT" --op scale:1.01 --op translate:0.1,0.2,0.3 --stats
+  /usr/bin/time -f "wall_s=%e rss_kb=%M" "$BIN" --in "$IN" --out "$OUT" --op scale:1.01 --op translate:0.1,0.2,0.3 --perf_stats
 else
-  time "$BIN" --in "$IN" --out "$OUT" --op scale:1.01 --op translate:0.1,0.2,0.3 --stats
+  time "$BIN" --in "$IN" --out "$OUT" --op scale:1.01 --op translate:0.1,0.2,0.3 --perf_stats
 fi

@@ -16,14 +16,14 @@ int ToInt(ExitCode code) { return static_cast<int>(code); }
 
 int main(int argc, char** argv) {
   if (argc < 6) {
-    std::cout << "Usage: meshpp_apply --in <input.post.msh> --out <output.post.msh> --op <spec> [--op <spec> ...] [--stats]\n";
+    std::cout << "Usage: meshpp_apply --in <input.post.msh> --out <output.post.msh> --op <spec> [--op <spec> ...] [--mesh_stats] [--perf_stats]\n";
     return ToInt(ExitCode::kUsageError);
   }
 
   std::string input_path;
   std::string output_path;
   std::vector<std::string> ops;
-  bool stats = false;
+  bool perf_stats = false;
 
   for (int i = 1; i < argc; ++i) {
     std::string arg = argv[i];
@@ -33,8 +33,10 @@ int main(int argc, char** argv) {
       output_path = argv[++i];
     } else if (arg == "--op" && i + 1 < argc) {
       ops.push_back(argv[++i]);
-    } else if (arg == "--stats") {
-      stats = true;
+    } else if (arg == "--mesh_stats") {
+      ops.push_back("mesh_stats");
+    } else if (arg == "--perf_stats") {
+      perf_stats = true;
     } else {
       std::cerr << "E_USAGE: unknown or incomplete option: " << arg << "\n";
       return ToInt(ExitCode::kUsageError);
@@ -98,7 +100,7 @@ int main(int argc, char** argv) {
     }
   }
 
-  if (stats) {
+  if (perf_stats) {
     std::cout << "stats.read_ms=" << perf.read_ms << "\n";
     std::cout << "stats.validate_ms=" << perf.validate_ms << "\n";
     std::cout << "stats.operations_ms=" << perf.operations_ms << "\n";
