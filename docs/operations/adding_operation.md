@@ -44,3 +44,8 @@ For report outputs, keep key order and formatting deterministic so tests and too
 ## 7) CLI shortcut flags
 
 For reporting operations, prefer distinct CLI flags when possible (for example `--mesh_stats`) to avoid ambiguity with performance/timing flags such as `--perf_stats`.
+
+## 8) Filtering operations example (`octet`)
+
+`octet` is a mutating filter operation: it keeps only elements fully contained in one Cartesian octant and then prunes unreferenced nodes.
+Use this pattern when a new operation must change topology while keeping references valid (`node_id_to_index` must be rebuilt).

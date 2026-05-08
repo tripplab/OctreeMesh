@@ -1,9 +1,11 @@
 #include "operations.h"
 
 #include <cmath>
+#include <cctype>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <unordered_set>
 
 namespace meshpp {
 namespace {
@@ -156,6 +158,97 @@ class StatsOperation : public MeshOperation {
   }
 };
 
+class OctetOperation : public MeshOperation {
+ public:
+  const char* Name() const override { return "octet"; }
+
+  ValidationReport Configure(const std::string& spec) override {
+    ValidationReport report;
+    if (spec.size() != 6 || std::tolower(spec[1]) != 'x' || std::tolower(spec[3]) != 'y' || std::tolower(spec[5]) != 'z' ||
+        (spec[0] != '+' && spec[0] != '-') || (spec[2] != '+' && spec[2] != '-') || (spec[4] != '+' && spec[4] != '-')) {
+      report.issues.push_back({ExitCode::kUsageError,
+                               "E_USAGE: octet expects one of (+|-)x(+|-)y(+|-)z (e.g. octet:+x+y+z or octet:+x+y-z)", 0});
+      return report;
+    }
+
+    keep_positive_x_ = spec[0] == '+';
+    keep_positive_y_ = spec[2] == '+';
+    keep_positive_z_ = spec[4] == '+';
+    spec_ = spec;
+    return report;
+  }
+
+  ValidationReport Apply(MeshData* mesh) const override {
+    std::unordered_set<std::size_t> octet_node_ids;
+    octet_node_ids.reserve(mesh->nodes.size());
+
+    auto in_axis = [](double value, bool keep_positive) { return keep_positive ? value >= 0.0 : value < 0.0; };
+
+    for (const auto& node : mesh->nodes) {
+      if (in_axis(node.xyz[0], keep_positive_x_) && in_axis(node.xyz[1], keep_positive_y_) && in_axis(node.xyz[2], keep_positive_z_)) {
+        octet_node_ids.insert(node.id);
+      }
+    }
+
+    std::vector<HexElement> kept_elements;
+    kept_elements.reserve(mesh->elements.size());
+    std::unordered_set<std::size_t> referenced_node_ids;
+
+    for (const auto& element : mesh->elements) {
+      bool keep = true;
+      for (std::size_t node_id : element.node_ids) {
+        if (octet_node_ids.find(node_id) == octet_node_ids.end()) {
+          keep = false;
+          break;
+        }
+      }
+      if (keep) {
+        kept_elements.push_back(element);
+        for (std::size_t node_id : element.node_ids) {
+          referenced_node_ids.insert(node_id);
+        }
+      }
+    }
+
+    std::vector<Node> kept_nodes;
+    kept_nodes.reserve(mesh->nodes.size());
+    for (const auto& node : mesh->nodes) {
+      if (referenced_node_ids.find(node.id) != referenced_node_ids.end()) {
+        kept_nodes.push_back(node);
+      }
+    }
+
+    std::unordered_map<std::size_t, std::size_t> node_id_to_index;
+    node_id_to_index.reserve(kept_nodes.size());
+    for (std::size_t i = 0; i < kept_nodes.size(); ++i) {
+      node_id_to_index[kept_nodes[i].id] = i;
+    }
+
+    const std::size_t original_nodes = mesh->nodes.size();
+    const std::size_t original_elements = mesh->elements.size();
+    mesh->nodes = std::move(kept_nodes);
+    mesh->elements = std::move(kept_elements);
+    mesh->node_id_to_index = std::move(node_id_to_index);
+
+    std::cout << "mesh.octet.spec=" << spec_ << "\n";
+    std::cout << "mesh.octet.nodes.kept=" << mesh->nodes.size() << "\n";
+    std::cout << "mesh.octet.nodes.dropped=" << (original_nodes - mesh->nodes.size()) << "\n";
+    std::cout << "mesh.octet.elements.kept=" << mesh->elements.size() << "\n";
+    std::cout << "mesh.octet.elements.dropped=" << (original_elements - mesh->elements.size()) << "\n";
+    if (mesh->elements.empty()) {
+      std::cout << "mesh.octet.warning=selection produced no elements\n";
+    }
+
+    return {};
+  }
+
+ private:
+  bool keep_positive_x_ = true;
+  bool keep_positive_y_ = true;
+  bool keep_positive_z_ = true;
+  std::string spec_;
+};
+
 }  // namespace
 
 std::unique_ptr<MeshOperation> CreateOperation(const std::string& name) {
@@ -167,6 +260,9 @@ std::unique_ptr<MeshOperation> CreateOperation(const std::string& name) {
   }
   if (name == "mesh_stats") {
     return std::unique_ptr<MeshOperation>(new StatsOperation());
+  }
+  if (name == "octet") {
+    return std::unique_ptr<MeshOperation>(new OctetOperation());
   }
   return nullptr;
 }
