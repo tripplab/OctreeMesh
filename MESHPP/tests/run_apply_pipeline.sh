@@ -32,6 +32,22 @@ rg -n "^mesh\.stats\.max\.x=3\.000000$" "$TRANSFORM_STATS_OUT"
 rg -n "^mesh\.stats\.center\.x=2\.000000$" "$TRANSFORM_STATS_OUT"
 rg -n "^mesh\.stats\.bbox\.diag=3\.464102$" "$TRANSFORM_STATS_OUT"
 
+OCTET_FIX="$ROOT_DIR/tests/fixtures/meshpp/valid/two_hex_x_split.post.msh"
+OCTET_OUT="$TMP_DIR/out_octet_plusx.post.msh"
+OCTET_STDOUT="$TMP_DIR/out_octet_plusx.stdout"
+"$BIN" --in "$OCTET_FIX" --out "$OCTET_OUT" --op octet:+x+y+z >"$OCTET_STDOUT"
+"$ROUNDTRIP" "$OCTET_OUT" "$TMP_DIR/out_octet_plusx_roundtrip.post.msh" --validate >"$TMP_DIR/out_octet_plusx.validate"
+rg -q "nodes: 8" "$TMP_DIR/out_octet_plusx.validate"
+rg -q "elements: 1" "$TMP_DIR/out_octet_plusx.validate"
+rg -n "^mesh\.octet\.spec=\+x\+y\+z$" "$OCTET_STDOUT"
+rg -n "^mesh\.octet\.nodes\.kept=8$" "$OCTET_STDOUT"
+rg -n "^mesh\.octet\.elements\.kept=1$" "$OCTET_STDOUT"
+
+OCTET_EMPTY_OUT="$TMP_DIR/out_octet_minusx_minusy_minusz.post.msh"
+OCTET_EMPTY_STDOUT="$TMP_DIR/out_octet_minusx_minusy_minusz.stdout"
+"$BIN" --in "$FIX" --out "$OCTET_EMPTY_OUT" --op octet:-x-y-z >"$OCTET_EMPTY_STDOUT"
+rg -n "^mesh\.octet\.warning=selection produced no elements$" "$OCTET_EMPTY_STDOUT"
+
 FIRST_LINE=$(sed -n "1p" "$STATS_OUT")
 SECOND_LINE=$(sed -n "2p" "$STATS_OUT")
 THIRD_LINE=$(sed -n "3p" "$STATS_OUT")
