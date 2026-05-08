@@ -13,20 +13,20 @@ int ToInt(ExitCode code) { return static_cast<int>(code); }
 
 int main(int argc, char** argv) {
   if (argc < 3) {
-    std::cout << "Usage: meshpp_roundtrip <input.post.msh> <output.post.msh> [--validate] [--stats]\n";
+    std::cout << "Usage: meshpp_roundtrip <input.post.msh> <output.post.msh> [--validate] [--perf_stats]\n";
     return ToInt(ExitCode::kUsageError);
   }
 
   const std::string input_path = argv[1];
   const std::string output_path = argv[2];
   bool validate = false;
-  bool stats = false;
+  bool perf_stats = false;
   for (int i = 3; i < argc; ++i) {
     const std::string arg = argv[i];
     if (arg == "--validate") {
       validate = true;
-    } else if (arg == "--stats") {
-      stats = true;
+    } else if (arg == "--perf_stats") {
+      perf_stats = true;
     } else {
       std::cerr << "E_USAGE: unknown option: " << arg << "\n";
       return ToInt(ExitCode::kUsageError);
@@ -85,7 +85,7 @@ int main(int argc, char** argv) {
     std::cout << "elements: " << mesh.elements.size() << "\n";
   }
 
-  if (stats) {
+  if (perf_stats) {
     std::cout << "stats.read_ms=" << perf.read_ms << "\n";
     std::cout << "stats.validate_ms=" << perf.validate_ms << "\n";
     std::cout << "stats.write_ms=" << perf.write_ms << "\n";
