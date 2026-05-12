@@ -50,7 +50,7 @@ WORK_DIR_ABS="$(cd "$WORK_DIR" && pwd)"
 #   <capsid>_F<fold>id<fold_id>_R<resolution>_S<seed>_<timestamp>
 DIR_RE='^([A-Za-z0-9]+)_F([0-9]+)id([0-9]+)_R([0-9]+(\.[0-9]+)?)(_S[0-9]+)?_([0-9]{8}T[0-9]{6}Z)$'
 
-summary_header='run_dir\tcapsid\tfold\tfold_id\tresolution\ttimestamp'
+summary_header='run_dir\tcapsid\tfold\tfold_id\tresolution\ttimestamp\tstatus'
 rows=()
 malformed=0
 
@@ -62,7 +62,19 @@ while IFS= read -r run_path; do
     fold_id="${BASH_REMATCH[3]}"
     resolution="${BASH_REMATCH[4]}"
     timestamp="${BASH_REMATCH[7]}"
-    rows+=("${run_name}\t${capsid}\t${fold}\t${fold_id}\t${resolution}\t${timestamp}")
+    status="MISSING_LOG"
+    log_path="$run_path/batch_run.log"
+    if [[ -f "$log_path" ]]; then
+      if grep -q "Selected steps completed successfully!" "$log_path"; then
+        status="COMPLETED"
+      elif grep -q "Step timing summary" "$log_path"; then
+        status="PARTIAL"
+      else
+        status="FAILED_OR_UNKNOWN"
+      fi
+    fi
+
+    rows+=("${run_name}\t${capsid}\t${fold}\t${fold_id}\t${resolution}\t${timestamp}\t${status}")
   else
     echo "WARN malformed run directory name: $run_name"
     ((malformed+=1))
@@ -82,7 +94,15 @@ for row in "${rows[@]}"; do
 done
 
 echo
+echo "# Functional batch result report"
+if (( ${#rows[@]} > 0 )); then
+  printf 'capsid<fold>_<fold_id>\\resolution\\status\n'
+  printf '%s\n' "${rows[@]}" | awk -F'\t' '{printf "%s<F%s>_%s\\%s\\%s\n", $2,$3,$4,$5,$7}'
+else
+  echo "(none)"
+fi
 
+echo
 echo "# Unique capsids"
 if (( ${#rows[@]} > 0 )); then
   printf '%s\n' "${rows[@]}" | awk -F'\t' '{print $2}' | sort -u | sed 's/^/- /'
@@ -116,9 +136,9 @@ fi
 
 if [[ -n "$CSV_OUT" ]]; then
   {
-    echo "run_dir,capsid,fold,fold_id,resolution,timestamp"
+    echo "run_dir,capsid,fold,fold_id,resolution,timestamp,status"
     for row in "${rows[@]}"; do
-      echo "$row" | awk -F'\t' '{printf "%s,%s,%s,%s,%s,%s\n", $1,$2,$3,$4,$5,$6}'
+      echo "$row" | awk -F'\t' '{printf "%s,%s,%s,%s,%s,%s,%s\n", $1,$2,$3,$4,$5,$6,$7}'
     done
   } > "$CSV_OUT"
   echo "Wrote CSV report: $CSV_OUT"
