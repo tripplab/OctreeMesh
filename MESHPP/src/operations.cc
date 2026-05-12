@@ -249,6 +249,91 @@ class OctetOperation : public MeshOperation {
   std::string spec_;
 };
 
+class CylinderOperation : public MeshOperation {
+ public:
+  const char* Name() const override { return "cylinder"; }
+
+  ValidationReport Configure(const std::string& spec) override {
+    ValidationReport report;
+    std::istringstream iss(spec);
+    if (!(iss >> radius_) || !std::isfinite(radius_) || radius_ <= 0.0) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: cylinder expects positive radius in angstroms, e.g. cylinder:35", 0});
+      return report;
+    }
+    char extra = 0;
+    if (iss >> extra) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: cylinder expects positive radius in angstroms, e.g. cylinder:35", 0});
+    }
+    return report;
+  }
+
+  ValidationReport Apply(MeshData* mesh) const override {
+    const double radius2 = radius_ * radius_;
+    std::unordered_set<std::size_t> candidate_node_ids;
+    candidate_node_ids.reserve(mesh->nodes.size());
+
+    for (const auto& node : mesh->nodes) {
+      const double x = node.xyz[0];
+      const double y = node.xyz[1];
+      const double z = node.xyz[2];
+      const double r2 = x * x + y * y;
+      if (r2 <= radius2 && z > 0.0) {
+        candidate_node_ids.insert(node.id);
+      }
+    }
+
+    std::vector<HexElement> kept_elements;
+    kept_elements.reserve(mesh->elements.size());
+    std::unordered_set<std::size_t> referenced_node_ids;
+    referenced_node_ids.reserve(candidate_node_ids.size());
+    for (const auto& element : mesh->elements) {
+      bool keep = true;
+      for (std::size_t node_id : element.node_ids) {
+        if (candidate_node_ids.find(node_id) == candidate_node_ids.end()) {
+          keep = false;
+          break;
+        }
+      }
+      if (keep) {
+        kept_elements.push_back(element);
+        for (std::size_t node_id : element.node_ids) {
+          referenced_node_ids.insert(node_id);
+        }
+      }
+    }
+
+    std::vector<Node> kept_nodes;
+    kept_nodes.reserve(referenced_node_ids.size());
+    for (const auto& node : mesh->nodes) {
+      if (referenced_node_ids.find(node.id) != referenced_node_ids.end()) {
+        kept_nodes.push_back(node);
+      }
+    }
+
+    std::unordered_map<std::size_t, std::size_t> node_id_to_index;
+    node_id_to_index.reserve(kept_nodes.size());
+    for (std::size_t i = 0; i < kept_nodes.size(); ++i) {
+      node_id_to_index[kept_nodes[i].id] = i;
+    }
+
+    const std::size_t original_nodes = mesh->nodes.size();
+    const std::size_t original_elements = mesh->elements.size();
+    mesh->nodes = std::move(kept_nodes);
+    mesh->elements = std::move(kept_elements);
+    mesh->node_id_to_index = std::move(node_id_to_index);
+
+    std::cout << "mesh.cylinder.radius=" << radius_ << "\n";
+    std::cout << "mesh.cylinder.nodes_kept=" << mesh->nodes.size() << "\n";
+    std::cout << "mesh.cylinder.nodes_dropped=" << (original_nodes - mesh->nodes.size()) << "\n";
+    std::cout << "mesh.cylinder.elements_kept=" << mesh->elements.size() << "\n";
+    std::cout << "mesh.cylinder.elements_dropped=" << (original_elements - mesh->elements.size()) << "\n";
+    return {};
+  }
+
+ private:
+  double radius_ = 0.0;
+};
+
 }  // namespace
 
 std::unique_ptr<MeshOperation> CreateOperation(const std::string& name) {
@@ -263,6 +348,9 @@ std::unique_ptr<MeshOperation> CreateOperation(const std::string& name) {
   }
   if (name == "octet") {
     return std::unique_ptr<MeshOperation>(new OctetOperation());
+  }
+  if (name == "cylinder") {
+    return std::unique_ptr<MeshOperation>(new CylinderOperation());
   }
   return nullptr;
 }
