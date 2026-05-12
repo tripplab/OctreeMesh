@@ -49,3 +49,14 @@ For reporting operations, prefer distinct CLI flags when possible (for example `
 
 `octet` is a mutating filter operation: it keeps only elements fully contained in one Cartesian octant and then prunes unreferenced nodes.
 Use this pattern when a new operation must change topology while keeping references valid (`node_id_to_index` must be rebuilt).
+
+## 9) Filtering operations example (`cylinder`)
+
+`cylinder` is also a mutating filter operation and follows the same topology-safety pattern as `octet`:
+- parse and validate the radius in `Configure(...)` (`> 0`, finite)
+- select candidate nodes by geometry
+- keep elements only when all referenced nodes are selected
+- prune unreferenced nodes
+- rebuild `node_id_to_index`
+
+For the current implementation, the cylinder is centered on the global +Z axis through origin, node inclusion is `x^2 + y^2 <= r^2` with `z > 0`, and element policy is strict containment.

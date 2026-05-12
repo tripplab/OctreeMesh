@@ -48,6 +48,27 @@ OCTET_EMPTY_STDOUT="$TMP_DIR/out_octet_minusx_minusy_minusz.stdout"
 "$BIN" --in "$FIX" --out "$OCTET_EMPTY_OUT" --op octet:-x-y-z >"$OCTET_EMPTY_STDOUT"
 rg -n "^mesh\.octet\.warning=selection produced no elements$" "$OCTET_EMPTY_STDOUT"
 
+CYL_BOUNDARY_OUT="$TMP_DIR/out_cylinder_boundary.post.msh"
+CYL_BOUNDARY_STDOUT="$TMP_DIR/out_cylinder_boundary.stdout"
+"$BIN" --in "$FIX" --out "$CYL_BOUNDARY_OUT" --op translate:0,0,1 --op cylinder:1.4142135623730951 >"$CYL_BOUNDARY_STDOUT"
+rg -n "^mesh\.cylinder\.radius=1\.41421" "$CYL_BOUNDARY_STDOUT"
+rg -n "^mesh\.cylinder\.nodes_kept=8$" "$CYL_BOUNDARY_STDOUT"
+rg -n "^mesh\.cylinder\.elements_kept=1$" "$CYL_BOUNDARY_STDOUT"
+
+CYL_STRICT_OUT="$TMP_DIR/out_cylinder_strict.post.msh"
+CYL_STRICT_STDOUT="$TMP_DIR/out_cylinder_strict.stdout"
+"$BIN" --in "$FIX" --out "$CYL_STRICT_OUT" --op translate:0,0,1 --op cylinder:1 >"$CYL_STRICT_STDOUT"
+rg -n "^mesh\.cylinder\.nodes_kept=0$" "$CYL_STRICT_STDOUT"
+rg -n "^mesh\.cylinder\.elements_kept=0$" "$CYL_STRICT_STDOUT"
+
+CYL_ORDER_A_STDOUT="$TMP_DIR/out_cylinder_order_a.stdout"
+"$BIN" --in "$FIX" --out "$TMP_DIR/out_cylinder_order_a.post.msh" --op translate:0,0,1 --op cylinder:1.4142135623730951 >"$CYL_ORDER_A_STDOUT"
+rg -n "^mesh\.cylinder\.elements_kept=1$" "$CYL_ORDER_A_STDOUT"
+
+CYL_ORDER_B_STDOUT="$TMP_DIR/out_cylinder_order_b.stdout"
+"$BIN" --in "$FIX" --out "$TMP_DIR/out_cylinder_order_b.post.msh" --op cylinder:1 --op translate:0,0,1 >"$CYL_ORDER_B_STDOUT"
+rg -n "^mesh\.cylinder\.elements_kept=0$" "$CYL_ORDER_B_STDOUT"
+
 FIRST_LINE=$(sed -n "1p" "$STATS_OUT")
 SECOND_LINE=$(sed -n "2p" "$STATS_OUT")
 THIRD_LINE=$(sed -n "3p" "$STATS_OUT")
