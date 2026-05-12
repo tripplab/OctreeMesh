@@ -74,7 +74,7 @@ while IFS= read -r run_path; do
       fi
     fi
 
-    rows+=("${run_name}\t${capsid}\t${fold}\t${fold_id}\t${resolution}\t${timestamp}\t${status}")
+    rows+=("${run_name}"$'\t'"${capsid}"$'\t'"${fold}"$'\t'"${fold_id}"$'\t'"${resolution}"$'\t'"${timestamp}"$'\t'"${status}")
   else
     echo "WARN malformed run directory name: $run_name"
     ((malformed+=1))
