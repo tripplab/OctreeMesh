@@ -12,11 +12,37 @@ using meshpp::ExitCode;
 
 namespace {
 int ToInt(ExitCode code) { return static_cast<int>(code); }
+
+void PrintHelp() {
+  std::cout << "meshpp_apply - Apply operation pipeline to GiD .post.msh meshes\n\n";
+  std::cout << "Usage:\n";
+  std::cout << "  meshpp_apply --in <input.post.msh> --out <output.post.msh> --op <spec> [--op <spec> ...] [--mesh_stats] [--perf_stats]\n";
+  std::cout << "  meshpp_apply -h\n\n";
+  std::cout << "Available operations (for --op <spec>):\n";
+  std::cout << "  scale:<factor>                  Multiply node coordinates by <factor>.\n";
+  std::cout << "  translate:<dx>,<dy>,<dz>        Add offsets to node coordinates.\n";
+  std::cout << "  mesh_stats[:format=text]        Print mesh metrics to stdout.\n";
+  std::cout << "  octet:(+|-)x(+|-)y(+|-)z        Keep elements in one octant only.\n";
+  std::cout << "  cylinder:<radius>               Keep elements with all nodes in r<=radius and z>0.\n\n";
+  std::cout << "Convenience flags:\n";
+  std::cout << "  --mesh_stats                    Same as adding --op mesh_stats.\n";
+  std::cout << "  --perf_stats                    Print timing and mesh size counters.\n\n";
+  std::cout << "Examples:\n";
+  std::cout << "  meshpp_apply --in in.post.msh --out out.post.msh --op scale:2.0\n";
+  std::cout << "  meshpp_apply --in in.post.msh --out out.post.msh --op translate:1,2,3 --op mesh_stats\n";
+  std::cout << "  meshpp_apply --in in.post.msh --out octant.post.msh --op octet:+x+y-z\n";
+  std::cout << "  meshpp_apply --in in.post.msh --out cyl.post.msh --op cylinder:35 --mesh_stats --perf_stats\n";
+}
 }
 
 int main(int argc, char** argv) {
+  if (argc == 2 && std::string(argv[1]) == "-h") {
+    PrintHelp();
+    return ToInt(ExitCode::kSuccess);
+  }
+
   if (argc < 6) {
-    std::cout << "Usage: meshpp_apply --in <input.post.msh> --out <output.post.msh> --op <spec> [--op <spec> ...] [--mesh_stats] [--perf_stats]\n";
+    PrintHelp();
     return ToInt(ExitCode::kUsageError);
   }
 
