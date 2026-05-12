@@ -50,7 +50,7 @@ WORK_DIR_ABS="$(cd "$WORK_DIR" && pwd)"
 #   <capsid>_F<fold>id<fold_id>_R<resolution>_S<seed>_<timestamp>
 DIR_RE='^([A-Za-z0-9]+)_F([0-9]+)id([0-9]+)_R([0-9]+(\.[0-9]+)?)(_S[0-9]+)?_([0-9]{8}T[0-9]{6}Z)$'
 
-summary_header='run_dir\tcapsid\tfold\tfold_id\tresolution\ttimestamp\tstatus'
+summary_header=$'run_dir\tcapsid\tfold\tfold_id\tresolution\tstatus\tresult'
 rows=()
 malformed=0
 
@@ -61,7 +61,6 @@ while IFS= read -r run_path; do
     fold="${BASH_REMATCH[2]}"
     fold_id="${BASH_REMATCH[3]}"
     resolution="${BASH_REMATCH[4]}"
-    timestamp="${BASH_REMATCH[7]}"
     status="MISSING_LOG"
     log_path="$run_path/batch_run.log"
     if [[ -f "$log_path" ]]; then
@@ -74,7 +73,15 @@ while IFS= read -r run_path; do
       fi
     fi
 
-    rows+=("${run_name}"$'\t'"${capsid}"$'\t'"${fold}"$'\t'"${fold_id}"$'\t'"${resolution}"$'\t'"${timestamp}"$'\t'"${status}")
+    result="MISSING_RESULT"
+    res_file="$run_path/octreemesh.post.res"
+    msh_file="$run_path/octreemesh.post.msh"
+    solver_out_file="$run_path/octreemesh_solver.out"
+    if [[ -s "$res_file" && -s "$msh_file" && -s "$solver_out_file" ]]; then
+      result="COMPLETED"
+    fi
+
+    rows+=("${run_name}"$'\t'"${capsid}"$'\t'"${fold}"$'\t'"${fold_id}"$'\t'"${resolution}"$'\t'"${status}"$'\t'"${result}")
   else
     echo "WARN malformed run directory name: $run_name"
     ((malformed+=1))
@@ -89,17 +96,11 @@ echo "malformed: $malformed"
 echo
 
 echo "$summary_header"
-for row in "${rows[@]}"; do
-  echo -e "$row"
-done
-
-echo
-echo "# Functional batch result report"
 if (( ${#rows[@]} > 0 )); then
-  printf 'capsid<fold>_<fold_id>\\resolution\\status\n'
-  printf '%s\n' "${rows[@]}" | awk -F'\t' '{printf "%s<F%s>_%s\\%s\\%s\n", $2,$3,$4,$5,$7}'
-else
-  echo "(none)"
+  printf '%s\n' "${rows[@]}" \
+    | awk -F'\t' '{printf "%s\t%d\t%d\t%.15g\t%s\n", $2, $3, $4, $5 + 0, $0}' \
+    | sort -s -t$'\t' -k1,1 -k2,2n -k3,3n -k4,4g \
+    | cut -f5-
 fi
 
 echo
@@ -126,20 +127,27 @@ fi
 
 if [[ -n "$TSV_OUT" ]]; then
   {
-    echo -e "$summary_header"
-    for row in "${rows[@]}"; do
-      echo -e "$row"
-    done
+    echo "$summary_header"
+    if (( ${#rows[@]} > 0 )); then
+      printf '%s\n' "${rows[@]}" \
+        | awk -F'\t' '{printf "%s\t%d\t%d\t%.15g\t%s\n", $2, $3, $4, $5 + 0, $0}' \
+        | sort -s -t$'\t' -k1,1 -k2,2n -k3,3n -k4,4g \
+        | cut -f5-
+    fi
   } > "$TSV_OUT"
   echo "Wrote TSV report: $TSV_OUT"
 fi
 
 if [[ -n "$CSV_OUT" ]]; then
   {
-    echo "run_dir,capsid,fold,fold_id,resolution,timestamp,status"
-    for row in "${rows[@]}"; do
-      echo "$row" | awk -F'\t' '{printf "%s,%s,%s,%s,%s,%s,%s\n", $1,$2,$3,$4,$5,$6,$7}'
-    done
+    echo "run_dir,capsid,fold,fold_id,resolution,status,result"
+    if (( ${#rows[@]} > 0 )); then
+      printf '%s\n' "${rows[@]}" \
+        | awk -F'\t' '{printf "%s\t%d\t%d\t%.15g\t%s\n", $2, $3, $4, $5 + 0, $0}' \
+        | sort -s -t$'\t' -k1,1 -k2,2n -k3,3n -k4,4g \
+        | cut -f5- \
+        | awk -F'\t' '{printf "%s,%s,%s,%s,%s,%s,%s\n", $1,$2,$3,$4,$5,$6,$7}'
+    fi
   } > "$CSV_OUT"
   echo "Wrote CSV report: $CSV_OUT"
 fi
