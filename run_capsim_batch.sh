@@ -3,7 +3,7 @@ set -u
 
 usage() {
   cat <<USAGE
-Usage: $0 --pdb LIST --folds LIST --res SPEC --threads N --bin PATH --vdb-dir DIR [--strict-skips] [--smoke]
+Usage: $0 --pdb LIST --folds LIST --res SPEC --threads N --bin PATH --vdb-dir DIR [--patch-radius R] [--strict-skips] [--smoke]
 
 Required:
   --pdb         Comma list of pdb IDs (allowed: 1cwp,3j4u,3izg,4g93)
@@ -13,8 +13,9 @@ Required:
   --bin         Path to OctreeMesh bin directory
   --vdb-dir     Directory where <vdb>.vdb is expected first (fallback: cwd)
 Optional:
-  --strict-skips  Missing VDB skips trigger non-zero exit
-  --smoke         Build/validate/summarize only, do not run simulations
+  --patch-radius R  Patch radius in Å; computes cone angle per PDB diameter
+  --strict-skips    Missing VDB skips trigger non-zero exit
+  --smoke           Build/validate/summarize only, do not run simulations
 USAGE
   exit 1
 }
@@ -25,7 +26,7 @@ done
 
 ORIG_ARGS=("$@")
 
-PDB_LIST=""; FOLD_LIST=""; RES_SPEC=""; THREADS=""; BIN_PATH=""; VDB_DIR=""; STRICT_SKIPS=0; SMOKE=0
+PDB_LIST=""; FOLD_LIST=""; RES_SPEC=""; THREADS=""; BIN_PATH=""; VDB_DIR=""; PATCH_RADIUS=""; STRICT_SKIPS=0; SMOKE=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -35,6 +36,7 @@ while [[ $# -gt 0 ]]; do
     --threads) THREADS="$2"; shift 2 ;;
     --bin) BIN_PATH="$2"; shift 2 ;;
     --vdb-dir) VDB_DIR="$2"; shift 2 ;;
+    --patch-radius) PATCH_RADIUS="$2"; shift 2 ;;
     --strict-skips) STRICT_SKIPS=1; shift ;;
     --smoke) SMOKE=1; shift ;;
     -h|--help) usage ;;
@@ -47,6 +49,9 @@ done
 (( THREADS >= 1 && THREADS <= 30 )) || { echo "--threads must be in [1,30]"; exit 1; }
 [[ -d "$BIN_PATH" ]] || { echo "--bin directory not found: $BIN_PATH"; exit 1; }
 [[ -d "$VDB_DIR" ]] || { echo "--vdb-dir not found: $VDB_DIR"; exit 1; }
+if [[ -n "$PATCH_RADIUS" ]]; then
+  awk -v v="$PATCH_RADIUS" 'BEGIN { exit ((v+0 > 0 && v !~ /[^0-9.]/ && v !~ /\..*\./) ? 0 : 1) }' || { echo "--patch-radius must be a positive number in Å"; exit 1; }
+fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_CONFIG="$SCRIPT_DIR/capsim_config.sh"
@@ -83,7 +88,7 @@ csv_file="${out_prefix}.csv"
 work_dir="$SCRIPT_DIR/runs/batch_${ts}_$$"
 mkdir -p "$work_dir/tmp_configs"
 
-echo -e "status\texit_code\truntime_sec\tpdb\tvdb\tres\tyoung\tfold_type\tfold_index\tthreads\trun_dir" > "$tsv_file"
+echo -e "status\texit_code\truntime_sec\tpdb\tvdb\tres\tyoung\tfold_type\tfold_index\tthreads\tpatch_radius\tcapsid_diameter\tcone_deg\trun_dir" > "$tsv_file"
 echo "job_name,total_proteins,total_atoms,nodes,elements,mesh_volume,volume_loaded,octree_mesh_sec,meshsolver_sec,mesh2pdb_sec" > "$csv_file"
 
 young_for_pdb() {
@@ -94,6 +99,30 @@ young_for_pdb() {
     4g93) echo "0.0147" ;;
     *) return 1 ;;
   esac
+}
+
+diameter_for_pdb() {
+  case "$1" in
+    1cwp) echo "280" ;;
+    4g93) echo "344" ;;
+    3izg) echo "527" ;;
+    3j4u) echo "631" ;;
+    *) return 1 ;;
+  esac
+}
+
+cone_for_patch_radius() {
+  local patch_radius="$1"
+  local capsid_diameter="$2"
+  awk -v r="$patch_radius" -v d="$capsid_diameter" '
+    BEGIN {
+      x = 2*r/d
+      if (x <= 0 || x > 1) exit 2
+      pi = atan2(0, -1)
+      theta = atan2(x, sqrt(1 - x*x)) * 180 / pi
+      printf "%.6f\n", theta
+    }
+  '
 }
 
 normalize_num() { echo "$1" | tr -d ','; }
@@ -168,6 +197,18 @@ for pdb_l in "${pdb_arr[@]}"; do
   pdb_u="$(echo "$pdb_l" | tr '[:lower:]' '[:upper:]')"
   vdb="${pdb_l}_full"
   young="$(young_for_pdb "$pdb_l")"
+  patch_radius_tsv="NA"
+  capsid_diameter_tsv="NA"
+  cone_deg_tsv="NA"
+  if [[ -n "$PATCH_RADIUS" ]]; then
+    capsid_diameter_tsv="$(diameter_for_pdb "$pdb_l")"
+    awk -v r="$PATCH_RADIUS" -v d="$capsid_diameter_tsv" 'BEGIN { exit (2*r <= d ? 0 : 1) }' || {
+      echo "--patch-radius $PATCH_RADIUS Å is too large for $pdb_l diameter $capsid_diameter_tsv Å; must be <= $(awk -v d="$capsid_diameter_tsv" 'BEGIN { printf "%.6g", d/2 }') Å"
+      exit 1
+    }
+    cone_deg_tsv="$(cone_for_patch_radius "$PATCH_RADIUS" "$capsid_diameter_tsv")"
+    patch_radius_tsv="$PATCH_RADIUS"
+  fi
   for fold in "${fold_arr[@]}"; do
     fold_type="${fold%_*}"; fold_index="${fold#*_}"
     for res_i in "${uniq_res[@]}"; do
@@ -200,6 +241,9 @@ for pdb_l in "${pdb_arr[@]}"; do
         sed -i -E "s|^FOLD_INDEX=.*$|FOLD_INDEX=${fold_index}|" "$cfg"
         sed -i -E "s|^SOLVER_THREADS=.*$|SOLVER_THREADS=${THREADS}|" "$cfg"
         sed -i -E "s|^BIN=.*$|BIN=${BIN_PATH}|" "$cfg"
+        if [[ -n "$PATCH_RADIUS" ]]; then
+          sed -i -E "s|^cone=.*$|cone=${cone_deg_tsv}|" "$cfg"
+        fi
 
         if (( SMOKE == 0 )); then
           pre_ckpt=$(find "$SCRIPT_DIR/runs" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort)
@@ -257,8 +301,8 @@ for pdb_l in "${pdb_arr[@]}"; do
         fi
       fi
 
-      printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
-        "$status" "$exit_code" "$runtime" "$pdb_u" "$vdb" "$res_f" "$young" "$fold_type" "$fold_index" "$THREADS" "$run_dir" >> "$tsv_file"
+      printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
+        "$status" "$exit_code" "$runtime" "$pdb_u" "$vdb" "$res_f" "$young" "$fold_type" "$fold_index" "$THREADS" "$patch_radius_tsv" "$capsid_diameter_tsv" "$cone_deg_tsv" "$run_dir" >> "$tsv_file"
       echo "${job_name},${tp},${ta},${nodes},${elems},${mv},${vl},${t2},${t3},${t4}" >> "$csv_file"
     done
   done
