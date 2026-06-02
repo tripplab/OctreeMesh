@@ -52,6 +52,43 @@ chmod u+x run_capsim.sh
 
 ./run_capsim.sh
 
+## Extract simulation result statistics
+
+After the solver writes a GiD post result file such as `octreemesh.post.res`, use
+`TOOLS/extract_sim_data.py` to summarize nodal displacement and Von Mises stress
+values:
+
+```bash
+python TOOLS/extract_sim_data.py octreemesh.post.res
+```
+
+The default report includes displacement component statistics, displacement
+magnitude statistics, Von Mises statistics, configurable percentiles, and the
+node or element/Gauss-point locations of extrema. The tool has no third-party
+Python dependencies.
+
+Use `-h` or `--help` to display the full command-line usage guide and examples:
+
+```bash
+python TOOLS/extract_sim_data.py -h
+```
+
+Common options:
+
+```bash
+# Write machine-readable JSON
+python TOOLS/extract_sim_data.py octreemesh.post.res --format json --output sim_stats.json
+
+# Write spreadsheet-friendly CSV
+python TOOLS/extract_sim_data.py octreemesh.post.res --format csv --output sim_stats.csv
+
+# Change reported percentile cutoffs
+python TOOLS/extract_sim_data.py octreemesh.post.res --percentiles 1,5,50,95,99
+
+# Treat malformed data rows as fatal errors
+python TOOLS/extract_sim_data.py octreemesh.post.res --strict
+```
+
 
 
 ### 1. Configure your simulation
