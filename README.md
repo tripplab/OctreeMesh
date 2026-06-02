@@ -250,6 +250,126 @@ Notes:
 - missing fields are written as `NA`
 - timings are read from `.checkpoints/timings.ts` for `octree_mesh`, `meshsolver`, `mesh2pdb`
 
+
+## Analyze batch directories with `TOOLS/anal_capsim_batch.sh`
+
+Use `TOOLS/anal_capsim_batch.sh` to inspect a work directory containing Stage 1
+capsim run directories. The script summarizes valid run-directory names,
+reports discovered capsids/folds/resolutions, and can optionally extract
+completed simulation results into a cross-run CSV.
+
+### Basic analysis
+
+```bash
+TOOLS/anal_capsim_batch.sh --work_dir sims_constant_angle
+```
+
+The script expects immediate child directories named like:
+
+```text
+<capsid>_F<fold>id<fold_id>_R<resolution>_<time_stamp>
+<capsid>_F<fold>id<fold_id>_R<resolution>_S<seed>_<time_stamp>
+```
+
+Example:
+
+```text
+3J4U_F5id0_R16.00_S0_20260511T041629Z
+```
+
+Directories named `batch_*` are ignored without malformed-directory warnings.
+Other non-matching directory names are reported as malformed unless they are
+excluded from the work directory.
+
+### Optional analysis reports
+
+```bash
+TOOLS/anal_capsim_batch.sh \
+  --work_dir sims_constant_angle \
+  --tsv capsim_runs.tsv \
+  --csv capsim_runs.csv
+```
+
+The TSV/CSV analysis reports contain:
+
+```text
+run_dir,capsid,fold,fold_id,resolution,status,result
+```
+
+`status=COMPLETED` is detected from `batch_run.log`. The existing
+`result=COMPLETED` definition is preserved: all three files must exist and be
+non-empty in the run directory:
+
+- `octreemesh.post.res`
+- `octreemesh.post.msh`
+- `octreemesh_solver.out`
+
+### Extract and accumulate simulation data
+
+Add `--extract_sim_data` to create or reuse each completed run's
+`extracted_sim_data.json` and write one accumulated CSV:
+
+```bash
+TOOLS/anal_capsim_batch.sh \
+  --work_dir sims_constant_angle \
+  --extract_sim_data
+```
+
+By default, the accumulated CSV is written to:
+
+```text
+<work_dir>/extracted_sim_data_summary.csv
+```
+
+Use `--extract_sim_data_csv` to choose another path:
+
+```bash
+TOOLS/anal_capsim_batch.sh \
+  --work_dir sims_constant_angle \
+  --extract_sim_data \
+  --extract_sim_data_csv sim_displacement_max.csv
+```
+
+The accumulated extraction CSV contains:
+
+```text
+run_dir,capsid,fold,fold_id,resolution,Displacement:magnitude:max
+```
+
+`run_dir` is included so repeated runs with the same capsid/fold/resolution can
+be distinguished.
+
+Extraction eligibility requires both `status=COMPLETED` and `result=COMPLETED`.
+For each eligible run, the script executes the equivalent of this command from
+inside that run directory when `extracted_sim_data.json` is missing:
+
+```bash
+python3 /path/to/OctreeMesh/TOOLS/extract_sim_data.py \
+  octreemesh.post.res \
+  --format json \
+  --output extracted_sim_data.json
+```
+
+Existing `extracted_sim_data.json` files are reused by default. Add
+`--force_extract_sim_data` to regenerate them:
+
+```bash
+TOOLS/anal_capsim_batch.sh \
+  --work_dir sims_constant_angle \
+  --extract_sim_data \
+  --force_extract_sim_data
+```
+
+If extraction or JSON parsing fails for an otherwise completed run, the row is
+still written and `Displacement:magnitude:max` is set to `NaN`. With `--strict`,
+malformed entries or extraction failures make the script exit non-zero.
+
+Use `-h` or `--help` for the full command-line reference:
+
+```bash
+TOOLS/anal_capsim_batch.sh -h
+```
+
 ### 4. Pipeline Steps
 
 | Step | Name | Description |
