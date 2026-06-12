@@ -2,6 +2,47 @@
 #include <stdlib.h>
 #include "mesher.h"
 
+namespace {
+
+void PrintBoundaryConditionSelectionError( const char* side , const char* virus , int fold ,
+			double resolution_capside , double cone_amplitude , double prop_variation ,
+			double base_prop , double target_prop , double actual_prop ,
+			double cell_prop , size_t n_positions , size_t n_leaves , double tot_vol ,
+			double* vertex , double* direction ){
+	double cone_degrees = cone_amplitude * 180.0 / 3.14159265358979323846264338327950;
+	double shortfall = target_prop - actual_prop;
+	double max_safe_variation = actual_prop - base_prop;
+
+	fprintf( stderr , "\n" );
+	fprintf( stderr , "ERROR: Unable to set %s elements for boundary conditions.\n" , side );
+	fprintf( stderr , "Reason: the %s cone does not contain enough mesh cells to reach the requested loaded-volume proportion.\n" , side );
+	fprintf( stderr , "\n" );
+	fprintf( stderr , "Boundary-condition selection details:\n" );
+	fprintf( stderr , "  Side                         : %s\n" , side );
+	fprintf( stderr , "  Virus                        : %s\n" , virus );
+	fprintf( stderr , "  Fold                         : %d\n" , fold );
+	fprintf( stderr , "  Resolution                   : %.6f\n" , resolution_capside );
+	fprintf( stderr , "  Cone angle                   : %.6f degrees\n" , cone_degrees );
+	fprintf( stderr , "  Cone vertex                  : (%.6f, %.6f, %.6f)\n" , vertex[ 0 ] , vertex[ 1 ] , vertex[ 2 ] );
+	fprintf( stderr , "  Cone direction               : (%.6f, %.6f, %.6f)\n" , direction[ 0 ] , direction[ 1 ] , direction[ 2 ] );
+	fprintf( stderr , "  Base loaded proportion       : %.12f\n" , base_prop );
+	fprintf( stderr , "  load_ele / prop variation    : %.12f\n" , prop_variation );
+	fprintf( stderr , "  Target loaded proportion     : %.12f\n" , target_prop );
+	fprintf( stderr , "  Available cone proportion    : %.12f\n" , actual_prop );
+	fprintf( stderr , "  Shortfall                    : %.12f\n" , shortfall );
+	fprintf( stderr , "  Cone-selected mesh elements  : %zu\n" , n_positions );
+	fprintf( stderr , "  Total local octree leaves    : %zu\n" , n_leaves );
+	fprintf( stderr , "  Cell proportion              : %.12f\n" , cell_prop );
+	fprintf( stderr , "  Total mesh volume            : %.12f\n" , tot_vol );
+	fprintf( stderr , "\n" );
+	fprintf( stderr , "Suggested action if the cone angle must remain fixed:\n" );
+	fprintf( stderr , "  Set load_ele <= %.12f for this mesh/cone selection, preferably with a small extra negative margin.\n" , max_safe_variation );
+	fprintf( stderr , "\n" );
+	fflush( stderr );
+}
+
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////
 //                                   COMUNICATOR METHODS                                //
 //CONSTRUCTOR AND DESTRUCTOR
@@ -617,14 +658,18 @@ bool Mesher::SetLoadedElements( double tot_vol , double prop_vol , double* verte
 	ShellSortSizeTDouble( leaf_index , v_dist , n_positions );
 
 	//Actualizing loaded proportion aplying the prop_variation_
+	double base_prop_vol = prop_vol;
 	prop_vol += prop_variation_;
 
 	//Erasing cells in order to accomplish the total proportion
 	double actual_prop = cell_prop * n_positions;
 	if(  actual_prop < prop_vol  ){
+		PrintBoundaryConditionSelectionError( "loaded" , virus_ , fold_ , resolution_capside_ ,
+				cone_amplitude_ , prop_variation_ , base_prop_vol , prop_vol , actual_prop ,
+				cell_prop , n_positions , n_leaves , tot_vol , vertex , direction );
 		assert( 0 );
 		return true;
-	}	
+	}
 
 	for(  size_t i_pos = 0  ;  i_pos < n_positions  ;  i_pos++  ){
 		if(  actual_prop > prop_vol  ){
@@ -699,11 +744,15 @@ bool Mesher::SetFixedElements( double tot_vol , double prop_vol , double* vertex
 	ShellSortSizeTDouble( leaf_index , v_dist , n_positions );
 
 	//Actualizing loaded proportion aplying the prop_variation_
+	double base_prop_vol = prop_vol;
 	prop_vol += prop_variation_;
 
 	//Erasing cells in order to accomplish the total proportion
 	double actual_prop = cell_prop * n_positions;
 	if(  actual_prop < prop_vol  ){
+		PrintBoundaryConditionSelectionError( "fixed" , virus_ , fold_ , resolution_capside_ ,
+				cone_amplitude_ , prop_variation_ , base_prop_vol , prop_vol , actual_prop ,
+				cell_prop , n_positions , n_leaves , tot_vol , vertex , direction );
 		assert( 0 );
 		return true;
 	}
