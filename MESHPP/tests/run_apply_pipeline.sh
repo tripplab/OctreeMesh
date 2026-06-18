@@ -235,6 +235,36 @@ if awk '/^Elements$/{in_elements=1; next} /^End Elements$/{in_elements=0} in_ele
   exit 1
 fi
 
+ALIGN_KABSCH_OUT="$TMP_DIR/out_align_axes_kabsch.post.msh"
+ALIGN_KABSCH_STDOUT="$TMP_DIR/out_align_axes_kabsch.stdout"
+"$BIN" --in "$FIX" --out "$ALIGN_KABSCH_OUT" --op rotate:0,0,1,30 --op align_axes:kabsch --mesh_stats >"$ALIGN_KABSCH_STDOUT"
+rg -n "^mesh\.align_axes\.method=kabsch$" "$ALIGN_KABSCH_STDOUT"
+rg -n "^mesh\.align_axes\.L=1\.000000000000$" "$ALIGN_KABSCH_STDOUT"
+rg -n "^mesh\.align_axes\.det=1\.000000000000$" "$ALIGN_KABSCH_STDOUT"
+rg -n "^mesh\.align_axes\.ortho_err_max=0\.000000000000$" "$ALIGN_KABSCH_STDOUT"
+rg -n "^mesh\.align_axes\.rmsd=0\.000000000000$" "$ALIGN_KABSCH_STDOUT"
+rg -n "^mesh\.align_axes\.corner\.1\.bits=000$" "$ALIGN_KABSCH_STDOUT"
+rg -n "^mesh\.align_axes\.corner\.5\.bits=100$" "$ALIGN_KABSCH_STDOUT"
+rg -n "^mesh\.align_axes\.corner\.2\.bits=010$" "$ALIGN_KABSCH_STDOUT"
+rg -n "^mesh\.align_axes\.corner\.4\.bits=001$" "$ALIGN_KABSCH_STDOUT"
+"$ROUNDTRIP" "$ALIGN_KABSCH_OUT" "$TMP_DIR/out_align_axes_kabsch_roundtrip.post.msh" --validate >"$TMP_DIR/out_align_axes_kabsch.validate"
+rg -q "nodes: 8" "$TMP_DIR/out_align_axes_kabsch.validate"
+rg -q "elements: 1" "$TMP_DIR/out_align_axes_kabsch.validate"
+
+ALIGN_KABSCH_MANY_OUT="$TMP_DIR/out_align_axes_kabsch_many.post.msh"
+ALIGN_KABSCH_MANY_STDOUT="$TMP_DIR/out_align_axes_kabsch_many.stdout"
+"$BIN" --in "$ALIGN_SIMPLE_FIX" --out "$ALIGN_KABSCH_MANY_OUT" --op align_axes:kabsch --mesh_stats >"$ALIGN_KABSCH_MANY_STDOUT"
+rg -n "^mesh\.align_axes\.method=kabsch$" "$ALIGN_KABSCH_MANY_STDOUT"
+rg -n "^mesh\.align_axes\.elements\.exported=10$" "$ALIGN_KABSCH_MANY_STDOUT"
+rg -n "^mesh\.align_axes\.elements\.dropped=2$" "$ALIGN_KABSCH_MANY_STDOUT"
+rg -n "^mesh\.align_axes\.nodes\.exported=80$" "$ALIGN_KABSCH_MANY_STDOUT"
+rg -n "^mesh\.align_axes\.nodes\.dropped=16$" "$ALIGN_KABSCH_MANY_STDOUT"
+rg -n "^mesh\.stats\.nodes=80$" "$ALIGN_KABSCH_MANY_STDOUT"
+rg -n "^mesh\.stats\.elements=10$" "$ALIGN_KABSCH_MANY_STDOUT"
+"$ROUNDTRIP" "$ALIGN_KABSCH_MANY_OUT" "$TMP_DIR/out_align_axes_kabsch_many_roundtrip.post.msh" --validate >"$TMP_DIR/out_align_axes_kabsch_many.validate"
+rg -q "nodes: 80" "$TMP_DIR/out_align_axes_kabsch_many.validate"
+rg -q "elements: 10" "$TMP_DIR/out_align_axes_kabsch_many.validate"
+
 FIRST_LINE=$(sed -n "1p" "$STATS_OUT")
 SECOND_LINE=$(sed -n "2p" "$STATS_OUT")
 THIRD_LINE=$(sed -n "3p" "$STATS_OUT")
