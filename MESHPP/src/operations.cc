@@ -1,5 +1,7 @@
 #include "operations.h"
 
+#include <algorithm>
+#include <array>
 #include <cmath>
 #include <cctype>
 #include <iomanip>
@@ -9,6 +11,96 @@
 
 namespace meshpp {
 namespace {
+
+
+struct EigenSystem3x3 {
+  std::array<double, 3> values;
+  std::array<std::array<double, 3>, 3> vectors;
+};
+
+double Dot(const std::array<double, 3>& a, const std::array<double, 3>& b) {
+  return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
+
+double DeterminantColumns(const std::array<double, 3>& c0, const std::array<double, 3>& c1, const std::array<double, 3>& c2) {
+  return c0[0] * (c1[1] * c2[2] - c1[2] * c2[1]) - c1[0] * (c0[1] * c2[2] - c0[2] * c2[1]) +
+         c2[0] * (c0[1] * c1[2] - c0[2] * c1[1]);
+}
+
+void NormalizeSign(std::array<double, 3>* v) {
+  std::size_t max_index = 0;
+  double max_abs = std::fabs((*v)[0]);
+  for (std::size_t i = 1; i < v->size(); ++i) {
+    const double candidate = std::fabs((*v)[i]);
+    if (candidate > max_abs) {
+      max_abs = candidate;
+      max_index = i;
+    }
+  }
+  if ((*v)[max_index] < 0.0) {
+    for (double& component : *v) {
+      component = -component;
+    }
+  }
+}
+
+EigenSystem3x3 JacobiEigenDecomposition(std::array<std::array<double, 3>, 3> a) {
+  EigenSystem3x3 result{{a[0][0], a[1][1], a[2][2]}, {{{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}}}};
+
+  for (int sweep = 0; sweep < 64; ++sweep) {
+    int p = 0;
+    int q = 1;
+    double max_offdiag = std::fabs(a[0][1]);
+    if (std::fabs(a[0][2]) > max_offdiag) {
+      max_offdiag = std::fabs(a[0][2]);
+      p = 0;
+      q = 2;
+    }
+    if (std::fabs(a[1][2]) > max_offdiag) {
+      max_offdiag = std::fabs(a[1][2]);
+      p = 1;
+      q = 2;
+    }
+    if (max_offdiag < 1e-12) {
+      break;
+    }
+
+    const double app = a[p][p];
+    const double aqq = a[q][q];
+    const double apq = a[p][q];
+    const double tau = (aqq - app) / (2.0 * apq);
+    const double t = (tau >= 0.0 ? 1.0 : -1.0) / (std::fabs(tau) + std::sqrt(1.0 + tau * tau));
+    const double c = 1.0 / std::sqrt(1.0 + t * t);
+    const double s = t * c;
+
+    for (int k = 0; k < 3; ++k) {
+      if (k == p || k == q) {
+        continue;
+      }
+      const double akp = a[k][p];
+      const double akq = a[k][q];
+      a[k][p] = c * akp - s * akq;
+      a[p][k] = a[k][p];
+      a[k][q] = s * akp + c * akq;
+      a[q][k] = a[k][q];
+    }
+
+    a[p][p] = c * c * app - 2.0 * s * c * apq + s * s * aqq;
+    a[q][q] = s * s * app + 2.0 * s * c * apq + c * c * aqq;
+    a[p][q] = 0.0;
+    a[q][p] = 0.0;
+
+    for (int k = 0; k < 3; ++k) {
+      const double vkp = result.vectors[k][p];
+      const double vkq = result.vectors[k][q];
+      result.vectors[k][p] = c * vkp - s * vkq;
+      result.vectors[k][q] = s * vkp + c * vkq;
+    }
+  }
+
+  result.values = {a[0][0], a[1][1], a[2][2]};
+  return result;
+}
 
 class ScaleOperation : public MeshOperation {
  public:
@@ -64,6 +156,172 @@ class TranslateOperation : public MeshOperation {
   double dx_ = 0;
   double dy_ = 0;
   double dz_ = 0;
+};
+
+class RotateOperation : public MeshOperation {
+ public:
+  const char* Name() const override { return "rotate"; }
+
+  ValidationReport Configure(const std::string& spec) override {
+    ValidationReport report;
+    std::istringstream iss(spec);
+    char comma1 = 0;
+    char comma2 = 0;
+    char comma3 = 0;
+    if (!(iss >> ux_ >> comma1 >> uy_ >> comma2 >> uz_ >> comma3 >> angle_degrees_) || comma1 != ',' || comma2 != ',' || comma3 != ',') {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: rotate expects ux,uy,uz,degrees (e.g. rotate:0,0,1,90)", 0});
+      return report;
+    }
+    char extra = 0;
+    if (iss >> extra) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: rotate expects ux,uy,uz,degrees (e.g. rotate:0,0,1,90)", 0});
+      return report;
+    }
+    if (!std::isfinite(ux_) || !std::isfinite(uy_) || !std::isfinite(uz_) || !std::isfinite(angle_degrees_)) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: rotate values must be finite numbers", 0});
+      return report;
+    }
+
+    const double axis_length = std::sqrt(ux_ * ux_ + uy_ * uy_ + uz_ * uz_);
+    if (!std::isfinite(axis_length)) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: rotate axis vector length must be finite", 0});
+      return report;
+    }
+    if (axis_length == 0.0) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: rotate axis vector must be non-zero", 0});
+      return report;
+    }
+
+    ux_ /= axis_length;
+    uy_ /= axis_length;
+    uz_ /= axis_length;
+    return report;
+  }
+
+  ValidationReport Apply(MeshData* mesh) const override {
+    constexpr double kPi = 3.141592653589793238462643383279502884;
+    const double radians = angle_degrees_ * kPi / 180.0;
+    const double c = std::cos(radians);
+    const double s = std::sin(radians);
+    const double one_minus_c = 1.0 - c;
+
+    for (auto& node : mesh->nodes) {
+      const double x = node.xyz[0];
+      const double y = node.xyz[1];
+      const double z = node.xyz[2];
+      const double dot = ux_ * x + uy_ * y + uz_ * z;
+      const double cross_x = uy_ * z - uz_ * y;
+      const double cross_y = uz_ * x - ux_ * z;
+      const double cross_z = ux_ * y - uy_ * x;
+
+      node.xyz[0] = x * c + cross_x * s + ux_ * dot * one_minus_c;
+      node.xyz[1] = y * c + cross_y * s + uy_ * dot * one_minus_c;
+      node.xyz[2] = z * c + cross_z * s + uz_ * dot * one_minus_c;
+    }
+    return {};
+  }
+
+ private:
+  double ux_ = 0.0;
+  double uy_ = 0.0;
+  double uz_ = 1.0;
+  double angle_degrees_ = 0.0;
+};
+
+
+class AlignAxesOperation : public MeshOperation {
+ public:
+  const char* Name() const override { return "align_axes"; }
+
+  ValidationReport Configure(const std::string& spec) override {
+    ValidationReport report;
+    if (spec != "pca") {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes expects pca (e.g. align_axes:pca)", 0});
+    }
+    return report;
+  }
+
+  ValidationReport Apply(MeshData* mesh) const override {
+    ValidationReport report;
+    if (mesh->nodes.size() < 3) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:pca requires at least three nodes", 0});
+      return report;
+    }
+
+    std::array<double, 3> center{0.0, 0.0, 0.0};
+    for (const auto& node : mesh->nodes) {
+      center[0] += node.xyz[0];
+      center[1] += node.xyz[1];
+      center[2] += node.xyz[2];
+    }
+    const double node_count = static_cast<double>(mesh->nodes.size());
+    center[0] /= node_count;
+    center[1] /= node_count;
+    center[2] /= node_count;
+
+    std::array<std::array<double, 3>, 3> covariance{{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}}};
+    for (const auto& node : mesh->nodes) {
+      const std::array<double, 3> d{node.xyz[0] - center[0], node.xyz[1] - center[1], node.xyz[2] - center[2]};
+      for (std::size_t r = 0; r < 3; ++r) {
+        for (std::size_t c = r; c < 3; ++c) {
+          covariance[r][c] += d[r] * d[c] / node_count;
+        }
+      }
+    }
+    covariance[1][0] = covariance[0][1];
+    covariance[2][0] = covariance[0][2];
+    covariance[2][1] = covariance[1][2];
+
+    EigenSystem3x3 eigen = JacobiEigenDecomposition(covariance);
+    std::array<int, 3> order{0, 1, 2};
+    std::sort(order.begin(), order.end(), [&](int lhs, int rhs) { return eigen.values[lhs] > eigen.values[rhs]; });
+
+    const double largest_abs = std::max(std::fabs(eigen.values[order[0]]), 1.0);
+    if ((std::fabs(eigen.values[order[0]] - eigen.values[order[1]]) / largest_abs) < 1e-9 ||
+        (std::fabs(eigen.values[order[1]] - eigen.values[order[2]]) / largest_abs) < 1e-9) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:pca principal axes are ambiguous for this mesh", 0});
+      return report;
+    }
+
+    std::array<double, 3> v0{eigen.vectors[0][order[0]], eigen.vectors[1][order[0]], eigen.vectors[2][order[0]]};
+    std::array<double, 3> v1{eigen.vectors[0][order[1]], eigen.vectors[1][order[1]], eigen.vectors[2][order[1]]};
+    std::array<double, 3> v2{eigen.vectors[0][order[2]], eigen.vectors[1][order[2]], eigen.vectors[2][order[2]]};
+    NormalizeSign(&v0);
+    NormalizeSign(&v1);
+    NormalizeSign(&v2);
+
+    // Column order maps the dominant PCA axis v0 to global Z, v1 to global X, and v2 to global Y.
+    std::array<std::array<double, 3>, 3> basis{{v1, v2, v0}};
+    if (DeterminantColumns(basis[0], basis[1], basis[2]) < 0.0) {
+      for (double& component : basis[2]) {
+        component = -component;
+      }
+    }
+
+    std::array<std::array<double, 3>, 3> rotation{{{basis[0][0], basis[0][1], basis[0][2]},
+                                                   {basis[1][0], basis[1][1], basis[1][2]},
+                                                   {basis[2][0], basis[2][1], basis[2][2]}}};
+
+    for (auto& node : mesh->nodes) {
+      const std::array<double, 3> p{node.xyz[0], node.xyz[1], node.xyz[2]};
+      node.xyz[0] = Dot(rotation[0], p);
+      node.xyz[1] = Dot(rotation[1], p);
+      node.xyz[2] = Dot(rotation[2], p);
+    }
+
+    const std::streamsize old_precision = std::cout.precision();
+    const auto old_flags = std::cout.flags();
+    std::cout << std::fixed << std::setprecision(6);
+    std::cout << "mesh.align_axes.method=pca\n";
+    for (std::size_t r = 0; r < 3; ++r) {
+      for (std::size_t c = 0; c < 3; ++c) {
+        std::cout << "mesh.align_axes.matrix.r" << r << c << "=" << rotation[r][c] << "\n";
+      }
+    }
+    std::cout.flags(old_flags);
+    std::cout.precision(old_precision);
+    return report;
+  }
 };
 
 class StatsOperation : public MeshOperation {
@@ -342,6 +600,12 @@ std::unique_ptr<MeshOperation> CreateOperation(const std::string& name) {
   }
   if (name == "translate") {
     return std::unique_ptr<MeshOperation>(new TranslateOperation());
+  }
+  if (name == "rotate") {
+    return std::unique_ptr<MeshOperation>(new RotateOperation());
+  }
+  if (name == "align_axes") {
+    return std::unique_ptr<MeshOperation>(new AlignAxesOperation());
   }
   if (name == "mesh_stats") {
     return std::unique_ptr<MeshOperation>(new StatsOperation());
