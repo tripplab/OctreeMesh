@@ -206,11 +206,30 @@ ALIGN_SIMPLE_STDOUT="$TMP_DIR/out_align_axes_simple.stdout"
 rg -n "^mesh\.align_axes\.method=simple$" "$ALIGN_SIMPLE_STDOUT"
 rg -n "^mesh\.align_axes\.elements\.exported=10$" "$ALIGN_SIMPLE_STDOUT"
 rg -n "^mesh\.align_axes\.elements\.dropped=2$" "$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.align_axes\.p0\.id=1$" "$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.align_axes\.p1\.id=2$" "$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.align_axes\.p2\.id=4$" "$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.align_axes\.p3\.id=5$" "$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.align_axes\.u1_cross_u2\.z=1\.000000$" "$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.align_axes\.R_u1\.x=1\.000000$" "$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.align_axes\.R_u2\.y=1\.000000$" "$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.align_axes\.R_u3\.z=1\.000000$" "$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.align_axes\.det=1\.000000$" "$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.align_axes\.u1_dot_u2=0\.000000$" "$ALIGN_SIMPLE_STDOUT"
 rg -n "^mesh\.stats\.nodes=80$" "$ALIGN_SIMPLE_STDOUT"
 rg -n "^mesh\.stats\.elements=10$" "$ALIGN_SIMPLE_STDOUT"
 "$ROUNDTRIP" "$ALIGN_SIMPLE_OUT" "$TMP_DIR/out_align_axes_simple_roundtrip.post.msh" --validate >"$TMP_DIR/out_align_axes_simple.validate"
 rg -q "nodes: 80" "$TMP_DIR/out_align_axes_simple.validate"
 rg -q "elements: 10" "$TMP_DIR/out_align_axes_simple.validate"
+
+ALIGN_SIMPLE_ROTATED_OUT="$TMP_DIR/out_align_axes_simple_rotated.post.msh"
+ALIGN_SIMPLE_ROTATED_STDOUT="$TMP_DIR/out_align_axes_simple_rotated.stdout"
+"$BIN" --in "$ALIGN_SIMPLE_FIX" --out "$ALIGN_SIMPLE_ROTATED_OUT" --op rotate:0,0,1,90 --op align_axes:simple >"$ALIGN_SIMPLE_ROTATED_STDOUT"
+rg -n "^mesh\.align_axes\.R_u1\.x=1\.000000$" "$ALIGN_SIMPLE_ROTATED_STDOUT"
+assert_node_xyz "$ALIGN_SIMPLE_ROTATED_OUT" 1 2 0 0
+assert_node_xyz "$ALIGN_SIMPLE_ROTATED_OUT" 2 3 0 0
+assert_node_xyz "$ALIGN_SIMPLE_ROTATED_OUT" 4 2 1 0
+assert_node_xyz "$ALIGN_SIMPLE_ROTATED_OUT" 5 2 0 1
 if awk '/^Elements$/{in_elements=1; next} /^End Elements$/{in_elements=0} in_elements && ($1 == 11 || $1 == 12){found=1} END{exit found ? 0 : 1}' "$ALIGN_SIMPLE_OUT"; then
   echo "align_axes:simple exported more than ten elements" >&2
   exit 1
