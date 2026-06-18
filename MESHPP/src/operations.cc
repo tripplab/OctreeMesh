@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
+#include <unordered_map>
 #include <unordered_set>
 
 namespace meshpp {
@@ -235,13 +236,69 @@ class AlignAxesOperation : public MeshOperation {
 
   ValidationReport Configure(const std::string& spec) override {
     ValidationReport report;
-    if (spec != "pca") {
-      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes expects pca (e.g. align_axes:pca)", 0});
+    if (spec == "pca") {
+      method_ = Method::kPca;
+    } else if (spec == "simple") {
+      method_ = Method::kSimple;
+    } else {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes expects pca or simple (e.g. align_axes:pca or align_axes:simple)", 0});
     }
     return report;
   }
 
   ValidationReport Apply(MeshData* mesh) const override {
+    if (method_ == Method::kSimple) {
+      return ApplySimple(mesh);
+    }
+    return ApplyPca(mesh);
+  }
+
+ private:
+  enum class Method { kPca, kSimple };
+
+  ValidationReport ApplySimple(MeshData* mesh) const {
+    constexpr std::size_t kMaxElements = 10;
+    const std::size_t original_nodes = mesh->nodes.size();
+    const std::size_t original_elements = mesh->elements.size();
+
+    if (mesh->elements.size() > kMaxElements) {
+      mesh->elements.resize(kMaxElements);
+    }
+
+    std::unordered_set<std::size_t> referenced_node_ids;
+    referenced_node_ids.reserve(mesh->elements.size() * 8);
+    for (const auto& element : mesh->elements) {
+      for (std::size_t node_id : element.node_ids) {
+        referenced_node_ids.insert(node_id);
+      }
+    }
+
+    std::vector<Node> kept_nodes;
+    kept_nodes.reserve(referenced_node_ids.size());
+    for (const auto& node : mesh->nodes) {
+      if (referenced_node_ids.find(node.id) != referenced_node_ids.end()) {
+        kept_nodes.push_back(node);
+      }
+    }
+
+    std::unordered_map<std::size_t, std::size_t> node_id_to_index;
+    node_id_to_index.reserve(kept_nodes.size());
+    for (std::size_t i = 0; i < kept_nodes.size(); ++i) {
+      node_id_to_index[kept_nodes[i].id] = i;
+    }
+
+    mesh->nodes = std::move(kept_nodes);
+    mesh->node_id_to_index = std::move(node_id_to_index);
+
+    std::cout << "mesh.align_axes.method=simple\n";
+    std::cout << "mesh.align_axes.elements.exported=" << mesh->elements.size() << "\n";
+    std::cout << "mesh.align_axes.elements.dropped=" << (original_elements - mesh->elements.size()) << "\n";
+    std::cout << "mesh.align_axes.nodes.exported=" << mesh->nodes.size() << "\n";
+    std::cout << "mesh.align_axes.nodes.dropped=" << (original_nodes - mesh->nodes.size()) << "\n";
+    return {};
+  }
+
+  ValidationReport ApplyPca(MeshData* mesh) const {
     ValidationReport report;
     if (mesh->nodes.size() < 3) {
       report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:pca requires at least three nodes", 0});
@@ -330,6 +387,8 @@ class AlignAxesOperation : public MeshOperation {
     std::cout.precision(old_precision);
     return report;
   }
+
+  Method method_ = Method::kPca;
 };
 
 class StatsOperation : public MeshOperation {
