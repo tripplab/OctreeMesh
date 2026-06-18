@@ -50,6 +50,14 @@ void PrintPointReport(const std::string& name, const Node& node) {
   PrintVectorReport(name, node.xyz);
 }
 
+void PrintMatrixReport(const std::string& name, const std::array<std::array<double, 3>, 3>& matrix) {
+  for (std::size_t r = 0; r < 3; ++r) {
+    for (std::size_t c = 0; c < 3; ++c) {
+      std::cout << "mesh.align_axes." << name << ".r" << r << c << "=" << matrix[r][c] << "\n";
+    }
+  }
+}
+
 double DeterminantColumns(const std::array<double, 3>& c0, const std::array<double, 3>& c1, const std::array<double, 3>& c2) {
   return c0[0] * (c1[1] * c2[2] - c1[2] * c2[1]) - c1[0] * (c0[1] * c2[2] - c0[2] * c2[1]) +
          c2[0] * (c0[1] * c1[2] - c0[2] * c1[1]);
@@ -364,13 +372,50 @@ class AlignAxesOperation : public MeshOperation {
     const double u1_u3 = Dot(u1, u3);
     const double u2_u3 = Dot(u2, u3);
     const double cross_alignment = Norm(Subtract(u3, u1_cross_u2));
+    const std::array<std::array<double, 3>, 3> rotation{{u1, u2, u3}};
+    const std::array<double, 3> ru1{Dot(rotation[0], u1), Dot(rotation[1], u1), Dot(rotation[2], u1)};
+    const std::array<double, 3> ru2{Dot(rotation[0], u2), Dot(rotation[1], u2), Dot(rotation[2], u2)};
+    const std::array<double, 3> ru3{Dot(rotation[0], u3), Dot(rotation[1], u3), Dot(rotation[2], u3)};
+    const double determinant = DeterminantColumns(rotation[0], rotation[1], rotation[2]);
+
+    const std::streamsize old_precision = std::cout.precision();
+    const auto old_flags = std::cout.flags();
+    std::cout << std::fixed << std::setprecision(6);
+    std::cout << "mesh.align_axes.method=simple\n";
+    PrintPointReport("p0", p0_node);
+    PrintPointReport("p1", p1_node);
+    PrintPointReport("p2", p2_node);
+    PrintPointReport("p3", p3_node);
+    std::cout << "mesh.align_axes.e1.length=" << e1_length << "\n";
+    std::cout << "mesh.align_axes.e2.length=" << e2_length << "\n";
+    std::cout << "mesh.align_axes.e3.length=" << e3_length << "\n";
+    PrintVectorReport("e1", e1);
+    PrintVectorReport("e2", e2);
+    PrintVectorReport("e3", e3);
+    std::cout << "mesh.align_axes.u1.length=" << Norm(u1) << "\n";
+    std::cout << "mesh.align_axes.u2.length=" << Norm(u2) << "\n";
+    std::cout << "mesh.align_axes.u3.length=" << Norm(u3) << "\n";
+    PrintVectorReport("u1", u1);
+    PrintVectorReport("u2", u2);
+    PrintVectorReport("u3", u3);
+    PrintVectorReport("u1_cross_u2", u1_cross_u2);
+    PrintMatrixReport("matrix", rotation);
+    PrintVectorReport("R_u1", ru1);
+    PrintVectorReport("R_u2", ru2);
+    PrintVectorReport("R_u3", ru3);
+    std::cout << "mesh.align_axes.det=" << determinant << "\n";
+    std::cout << "mesh.align_axes.u1_dot_u2=" << u1_u2 << "\n";
+    std::cout << "mesh.align_axes.u1_dot_u3=" << u1_u3 << "\n";
+    std::cout << "mesh.align_axes.u2_dot_u3=" << u2_u3 << "\n";
+    std::cout.flush();
+    std::cout.flags(old_flags);
+    std::cout.precision(old_precision);
+
     if (std::fabs(u1_u2) > kTolerance || std::fabs(u1_u3) > kTolerance || std::fabs(u2_u3) > kTolerance || cross_alignment > kTolerance) {
       report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:simple edge neighbors do not form an orthonormal right-handed frame", 0});
       return report;
     }
 
-    const std::array<std::array<double, 3>, 3> rotation{{u1, u2, u3}};
-    const double determinant = DeterminantColumns(rotation[0], rotation[1], rotation[2]);
     if (std::fabs(determinant - 1.0) > kTolerance) {
       report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:simple rotation matrix determinant is not +1", 0});
       return report;
@@ -405,49 +450,15 @@ class AlignAxesOperation : public MeshOperation {
     mesh->nodes = std::move(kept_nodes);
     mesh->node_id_to_index = std::move(node_id_to_index);
 
-    const std::array<double, 3> ru1{Dot(rotation[0], u1), Dot(rotation[1], u1), Dot(rotation[2], u1)};
-    const std::array<double, 3> ru2{Dot(rotation[0], u2), Dot(rotation[1], u2), Dot(rotation[2], u2)};
-    const std::array<double, 3> ru3{Dot(rotation[0], u3), Dot(rotation[1], u3), Dot(rotation[2], u3)};
-
-    const std::streamsize old_precision = std::cout.precision();
-    const auto old_flags = std::cout.flags();
+    const std::streamsize old_export_precision = std::cout.precision();
+    const auto old_export_flags = std::cout.flags();
     std::cout << std::fixed << std::setprecision(6);
-    std::cout << "mesh.align_axes.method=simple\n";
-    PrintPointReport("p0", p0_node);
-    PrintPointReport("p1", p1_node);
-    PrintPointReport("p2", p2_node);
-    PrintPointReport("p3", p3_node);
-    PrintVectorReport("e1", e1);
-    PrintVectorReport("e2", e2);
-    PrintVectorReport("e3", e3);
-    std::cout << "mesh.align_axes.e1.length=" << e1_length << "\n";
-    std::cout << "mesh.align_axes.e2.length=" << e2_length << "\n";
-    std::cout << "mesh.align_axes.e3.length=" << e3_length << "\n";
-    PrintVectorReport("u1", u1);
-    PrintVectorReport("u2", u2);
-    PrintVectorReport("u3", u3);
-    std::cout << "mesh.align_axes.u1.length=" << Norm(u1) << "\n";
-    std::cout << "mesh.align_axes.u2.length=" << Norm(u2) << "\n";
-    std::cout << "mesh.align_axes.u3.length=" << Norm(u3) << "\n";
-    PrintVectorReport("u1_cross_u2", u1_cross_u2);
-    for (std::size_t r = 0; r < 3; ++r) {
-      for (std::size_t c = 0; c < 3; ++c) {
-        std::cout << "mesh.align_axes.matrix.r" << r << c << "=" << rotation[r][c] << "\n";
-      }
-    }
-    PrintVectorReport("R_u1", ru1);
-    PrintVectorReport("R_u2", ru2);
-    PrintVectorReport("R_u3", ru3);
-    std::cout << "mesh.align_axes.det=" << determinant << "\n";
-    std::cout << "mesh.align_axes.u1_dot_u2=" << u1_u2 << "\n";
-    std::cout << "mesh.align_axes.u1_dot_u3=" << u1_u3 << "\n";
-    std::cout << "mesh.align_axes.u2_dot_u3=" << u2_u3 << "\n";
     std::cout << "mesh.align_axes.elements.exported=" << mesh->elements.size() << "\n";
     std::cout << "mesh.align_axes.elements.dropped=" << (original_elements - mesh->elements.size()) << "\n";
     std::cout << "mesh.align_axes.nodes.exported=" << mesh->nodes.size() << "\n";
     std::cout << "mesh.align_axes.nodes.dropped=" << (original_nodes - mesh->nodes.size()) << "\n";
-    std::cout.flags(old_flags);
-    std::cout.precision(old_precision);
+    std::cout.flags(old_export_flags);
+    std::cout.precision(old_export_precision);
     return {};
   }
 
