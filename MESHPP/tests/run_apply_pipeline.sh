@@ -157,8 +157,18 @@ ALIGN_ROTATED_OUT="$TMP_DIR/out_align_axes_rotated.post.msh"
 ALIGN_STDOUT="$TMP_DIR/out_align_axes.stdout"
 "$BIN" --in "$RECT_FIX" --out "$ALIGN_ROTATED_OUT" --op rotate:0,0,1,30 --op align_axes:pca --mesh_stats >"$ALIGN_STDOUT"
 rg -n "^mesh\.align_axes\.method=pca$" "$ALIGN_STDOUT"
+rg -n "^mesh\.align_axes\.eigenvalue\.0=" "$ALIGN_STDOUT"
+rg -n "^mesh\.align_axes\.eigenvector\.0\.x=" "$ALIGN_STDOUT"
+rg -n "^mesh\.align_axes\.eigenvector\.2\.z=" "$ALIGN_STDOUT"
 rg -n "^mesh\.align_axes\.matrix\.r00=" "$ALIGN_STDOUT"
 rg -n "^mesh\.align_axes\.matrix\.r22=" "$ALIGN_STDOUT"
+METHOD_LINE=$(rg -n "^mesh\.align_axes\.method=pca$" "$ALIGN_STDOUT" | cut -d: -f1)
+EIGEN_LINE=$(rg -n "^mesh\.align_axes\.eigenvalue\.0=" "$ALIGN_STDOUT" | cut -d: -f1)
+MATRIX_LINE=$(rg -n "^mesh\.align_axes\.matrix\.r00=" "$ALIGN_STDOUT" | cut -d: -f1)
+if (( METHOD_LINE >= EIGEN_LINE || EIGEN_LINE >= MATRIX_LINE )); then
+  echo "align_axes PCA report order changed" >&2
+  exit 1
+fi
 rg -n "^mesh\.stats\.nodes=8$" "$ALIGN_STDOUT"
 rg -n "^mesh\.stats\.elements=1$" "$ALIGN_STDOUT"
 rg -n "^mesh\.stats\.bbox\.dx=2\.000000$" "$ALIGN_STDOUT"

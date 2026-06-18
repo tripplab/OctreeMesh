@@ -30,7 +30,7 @@ Supported operations:
 - `scale:<factor>`
 - `translate:<dx>,<dy>,<dz>`
 - `rotate:<ux>,<uy>,<uz>,<degrees>` rotates all node coordinates around the world origin using an arbitrary axis vector; the axis is normalized internally and positive angles use the right-hand rule
-- `align_axes:pca` computes PCA principal directions from all nodes, rotates the mesh around the world origin so the second/third/first principal directions align with X/Y/Z respectively, and prints the rotation matrix used
+- `align_axes:pca` computes PCA principal directions from all nodes, rotates the mesh around the world origin so the second/third/first principal directions align with X/Y/Z respectively, and prints the PCA eigenvalues, PCA eigenvectors, and rotation matrix used
 - `octet:<spec>` where `<spec>` is one of `+x+y+z`, `+x+y-z`, `+x-y+z`, `+x-y-z`, `-x+y+z`, `-x+y-z`, `-x-y+z`, `-x-y-z`
 - `cylinder:<radius_ang>` keeps only content in a cylinder around the +Z axis through origin; node rule is `x^2 + y^2 <= radius^2` and `z > 0`, and elements are kept only when all element nodes are kept (strict containment)
 - `--mesh_stats` appends a reporting operation that prints deterministic mesh summary keys (`mesh.stats.*`) without mutating geometry (fixed 6-decimal formatting for floating-point fields)
