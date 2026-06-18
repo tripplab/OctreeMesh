@@ -23,6 +23,33 @@ double Dot(const std::array<double, 3>& a, const std::array<double, 3>& b) {
   return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
+std::array<double, 3> Cross(const std::array<double, 3>& a, const std::array<double, 3>& b) {
+  return {a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]};
+}
+
+double Norm(const std::array<double, 3>& v) {
+  return std::sqrt(Dot(v, v));
+}
+
+std::array<double, 3> Subtract(const std::array<double, 3>& a, const std::array<double, 3>& b) {
+  return {a[0] - b[0], a[1] - b[1], a[2] - b[2]};
+}
+
+std::array<double, 3> ScaleVector(const std::array<double, 3>& v, double scale) {
+  return {v[0] * scale, v[1] * scale, v[2] * scale};
+}
+
+void PrintVectorReport(const std::string& name, const std::array<double, 3>& v) {
+  std::cout << "mesh.align_axes." << name << ".x=" << v[0] << "\n";
+  std::cout << "mesh.align_axes." << name << ".y=" << v[1] << "\n";
+  std::cout << "mesh.align_axes." << name << ".z=" << v[2] << "\n";
+}
+
+void PrintPointReport(const std::string& name, const Node& node) {
+  std::cout << "mesh.align_axes." << name << ".id=" << node.id << "\n";
+  PrintVectorReport(name, node.xyz);
+}
+
 double DeterminantColumns(const std::array<double, 3>& c0, const std::array<double, 3>& c1, const std::array<double, 3>& c2) {
   return c0[0] * (c1[1] * c2[2] - c1[2] * c2[1]) - c1[0] * (c0[1] * c2[2] - c0[2] * c2[1]) +
          c2[0] * (c0[1] * c1[2] - c0[2] * c1[1]);
@@ -258,11 +285,95 @@ class AlignAxesOperation : public MeshOperation {
 
   ValidationReport ApplySimple(MeshData* mesh) const {
     constexpr std::size_t kMaxElements = 10;
+    constexpr double kTolerance = 1e-9;
+    ValidationReport report;
     const std::size_t original_nodes = mesh->nodes.size();
     const std::size_t original_elements = mesh->elements.size();
 
+    if (mesh->elements.empty()) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:simple requires at least one element", 0});
+      return report;
+    }
+
     if (mesh->elements.size() > kMaxElements) {
       mesh->elements.resize(kMaxElements);
+    }
+
+    const HexElement first_element = mesh->elements.front();
+    const auto p0_it = mesh->node_id_to_index.find(first_element.node_ids[0]);
+    if (p0_it == mesh->node_id_to_index.end()) {
+      report.issues.push_back({ExitCode::kTopologyError, "E_TOPOLOGY: align_axes:simple first element references missing first node", 0});
+      return report;
+    }
+    const Node p0_node = mesh->nodes[p0_it->second];
+
+    struct NeighborCandidate {
+      std::size_t element_offset;
+      Node node;
+      double distance;
+    };
+
+    std::vector<NeighborCandidate> candidates;
+    candidates.reserve(first_element.node_ids.size() - 1);
+    for (std::size_t i = 1; i < first_element.node_ids.size(); ++i) {
+      const auto node_it = mesh->node_id_to_index.find(first_element.node_ids[i]);
+      if (node_it == mesh->node_id_to_index.end()) {
+        report.issues.push_back({ExitCode::kTopologyError, "E_TOPOLOGY: align_axes:simple first element references missing neighbor node", 0});
+        return report;
+      }
+      const Node candidate_node = mesh->nodes[node_it->second];
+      candidates.push_back({i, candidate_node, Norm(Subtract(candidate_node.xyz, p0_node.xyz))});
+    }
+
+    std::stable_sort(candidates.begin(), candidates.end(), [](const NeighborCandidate& lhs, const NeighborCandidate& rhs) {
+      if (lhs.distance != rhs.distance) {
+        return lhs.distance < rhs.distance;
+      }
+      return lhs.element_offset < rhs.element_offset;
+    });
+
+    if (candidates.size() < 3 || candidates[0].distance <= kTolerance || candidates[1].distance <= kTolerance || candidates[2].distance <= kTolerance) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:simple requires three non-zero edge neighbors", 0});
+      return report;
+    }
+
+    Node p1_node = candidates[0].node;
+    Node p2_node = candidates[1].node;
+    Node p3_node = candidates[2].node;
+    std::array<double, 3> e1 = Subtract(p1_node.xyz, p0_node.xyz);
+    std::array<double, 3> e2 = Subtract(p2_node.xyz, p0_node.xyz);
+    std::array<double, 3> e3 = Subtract(p3_node.xyz, p0_node.xyz);
+    double e1_length = Norm(e1);
+    double e2_length = Norm(e2);
+    double e3_length = Norm(e3);
+    std::array<double, 3> u1 = ScaleVector(e1, 1.0 / e1_length);
+    std::array<double, 3> u2 = ScaleVector(e2, 1.0 / e2_length);
+    std::array<double, 3> u3 = ScaleVector(e3, 1.0 / e3_length);
+
+    std::array<double, 3> u1_cross_u2 = Cross(u1, u2);
+    if (Dot(u1_cross_u2, u3) < 0.0) {
+      std::swap(p2_node, p3_node);
+      std::swap(e2, e3);
+      std::swap(e2_length, e3_length);
+      u2 = ScaleVector(e2, 1.0 / e2_length);
+      u3 = ScaleVector(e3, 1.0 / e3_length);
+      u1_cross_u2 = Cross(u1, u2);
+    }
+
+    const double u1_u2 = Dot(u1, u2);
+    const double u1_u3 = Dot(u1, u3);
+    const double u2_u3 = Dot(u2, u3);
+    const double cross_alignment = Norm(Subtract(u3, u1_cross_u2));
+    if (std::fabs(u1_u2) > kTolerance || std::fabs(u1_u3) > kTolerance || std::fabs(u2_u3) > kTolerance || cross_alignment > kTolerance) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:simple edge neighbors do not form an orthonormal right-handed frame", 0});
+      return report;
+    }
+
+    const std::array<std::array<double, 3>, 3> rotation{{u1, u2, u3}};
+    const double determinant = DeterminantColumns(rotation[0], rotation[1], rotation[2]);
+    if (std::fabs(determinant - 1.0) > kTolerance) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:simple rotation matrix determinant is not +1", 0});
+      return report;
     }
 
     std::unordered_set<std::size_t> referenced_node_ids;
@@ -275,8 +386,12 @@ class AlignAxesOperation : public MeshOperation {
 
     std::vector<Node> kept_nodes;
     kept_nodes.reserve(referenced_node_ids.size());
-    for (const auto& node : mesh->nodes) {
+    for (auto node : mesh->nodes) {
       if (referenced_node_ids.find(node.id) != referenced_node_ids.end()) {
+        const std::array<double, 3> p{node.xyz[0], node.xyz[1], node.xyz[2]};
+        node.xyz[0] = Dot(rotation[0], p);
+        node.xyz[1] = Dot(rotation[1], p);
+        node.xyz[2] = Dot(rotation[2], p);
         kept_nodes.push_back(node);
       }
     }
@@ -290,11 +405,49 @@ class AlignAxesOperation : public MeshOperation {
     mesh->nodes = std::move(kept_nodes);
     mesh->node_id_to_index = std::move(node_id_to_index);
 
+    const std::array<double, 3> ru1{Dot(rotation[0], u1), Dot(rotation[1], u1), Dot(rotation[2], u1)};
+    const std::array<double, 3> ru2{Dot(rotation[0], u2), Dot(rotation[1], u2), Dot(rotation[2], u2)};
+    const std::array<double, 3> ru3{Dot(rotation[0], u3), Dot(rotation[1], u3), Dot(rotation[2], u3)};
+
+    const std::streamsize old_precision = std::cout.precision();
+    const auto old_flags = std::cout.flags();
+    std::cout << std::fixed << std::setprecision(6);
     std::cout << "mesh.align_axes.method=simple\n";
+    PrintPointReport("p0", p0_node);
+    PrintPointReport("p1", p1_node);
+    PrintPointReport("p2", p2_node);
+    PrintPointReport("p3", p3_node);
+    PrintVectorReport("e1", e1);
+    PrintVectorReport("e2", e2);
+    PrintVectorReport("e3", e3);
+    std::cout << "mesh.align_axes.e1.length=" << e1_length << "\n";
+    std::cout << "mesh.align_axes.e2.length=" << e2_length << "\n";
+    std::cout << "mesh.align_axes.e3.length=" << e3_length << "\n";
+    PrintVectorReport("u1", u1);
+    PrintVectorReport("u2", u2);
+    PrintVectorReport("u3", u3);
+    std::cout << "mesh.align_axes.u1.length=" << Norm(u1) << "\n";
+    std::cout << "mesh.align_axes.u2.length=" << Norm(u2) << "\n";
+    std::cout << "mesh.align_axes.u3.length=" << Norm(u3) << "\n";
+    PrintVectorReport("u1_cross_u2", u1_cross_u2);
+    for (std::size_t r = 0; r < 3; ++r) {
+      for (std::size_t c = 0; c < 3; ++c) {
+        std::cout << "mesh.align_axes.matrix.r" << r << c << "=" << rotation[r][c] << "\n";
+      }
+    }
+    PrintVectorReport("R_u1", ru1);
+    PrintVectorReport("R_u2", ru2);
+    PrintVectorReport("R_u3", ru3);
+    std::cout << "mesh.align_axes.det=" << determinant << "\n";
+    std::cout << "mesh.align_axes.u1_dot_u2=" << u1_u2 << "\n";
+    std::cout << "mesh.align_axes.u1_dot_u3=" << u1_u3 << "\n";
+    std::cout << "mesh.align_axes.u2_dot_u3=" << u2_u3 << "\n";
     std::cout << "mesh.align_axes.elements.exported=" << mesh->elements.size() << "\n";
     std::cout << "mesh.align_axes.elements.dropped=" << (original_elements - mesh->elements.size()) << "\n";
     std::cout << "mesh.align_axes.nodes.exported=" << mesh->nodes.size() << "\n";
     std::cout << "mesh.align_axes.nodes.dropped=" << (original_nodes - mesh->nodes.size()) << "\n";
+    std::cout.flags(old_flags);
+    std::cout.precision(old_precision);
     return {};
   }
 

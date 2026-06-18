@@ -23,7 +23,7 @@ void PrintHelp() {
   std::cout << "  translate:<dx>,<dy>,<dz>        Add offsets to node coordinates.\n";
   std::cout << "  rotate:<ux>,<uy>,<uz>,<degrees> Rotate node coordinates around an arbitrary axis.\n";
   std::cout << "  align_axes:pca                  Align PCA principal directions with X/Y/Z axes.\n";
-  std::cout << "  align_axes:simple               Export the first ten input elements as GiD mesh output.\n";
+  std::cout << "  align_axes:simple               Export the first ten elements after aligning first-element edge axes to X/Y/Z.\n";
   std::cout << "  mesh_stats[:format=text]        Print mesh metrics to stdout.\n";
   std::cout << "  octet:(+|-)x(+|-)y(+|-)z        Keep elements in one octant only.\n";
   std::cout << "  cylinder:<radius>               Keep elements with all nodes in r<=radius and z>0.\n\n";
