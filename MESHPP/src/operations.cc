@@ -313,6 +313,14 @@ class AlignAxesOperation : public MeshOperation {
     const auto old_flags = std::cout.flags();
     std::cout << std::fixed << std::setprecision(6);
     std::cout << "mesh.align_axes.method=pca\n";
+    const std::array<double, 3> sorted_eigenvalues{eigen.values[order[0]], eigen.values[order[1]], eigen.values[order[2]]};
+    const std::array<std::array<double, 3>, 3> sorted_eigenvectors{v0, v1, v2};
+    for (std::size_t i = 0; i < sorted_eigenvalues.size(); ++i) {
+      std::cout << "mesh.align_axes.eigenvalue." << i << "=" << sorted_eigenvalues[i] << "\n";
+      std::cout << "mesh.align_axes.eigenvector." << i << ".x=" << sorted_eigenvectors[i][0] << "\n";
+      std::cout << "mesh.align_axes.eigenvector." << i << ".y=" << sorted_eigenvectors[i][1] << "\n";
+      std::cout << "mesh.align_axes.eigenvector." << i << ".z=" << sorted_eigenvectors[i][2] << "\n";
+    }
     for (std::size_t r = 0; r < 3; ++r) {
       for (std::size_t c = 0; c < 3; ++c) {
         std::cout << "mesh.align_axes.matrix.r" << r << c << "=" << rotation[r][c] << "\n";
