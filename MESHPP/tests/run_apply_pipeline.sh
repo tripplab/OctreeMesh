@@ -178,6 +178,44 @@ rg -n "^mesh\.stats\.bbox\.dz=4\.000000$" "$ALIGN_STDOUT"
 rg -q "nodes: 8" "$TMP_DIR/out_align_axes.validate"
 rg -q "elements: 1" "$TMP_DIR/out_align_axes.validate"
 
+ALIGN_SIMPLE_FIX="$TMP_DIR/align_axes_simple_many.post.msh"
+python3 - <<'PY' >"$ALIGN_SIMPLE_FIX"
+print('MESH "many" dimension 3 ElemType Hexahedra Nnode 8')
+print()
+print('Coordinates')
+node_id = 1
+elements = []
+for element_id in range(1, 13):
+    x0 = element_id * 2
+    ids = []
+    for dx, dy, dz in ((0, 0, 0), (1, 0, 0), (1, 1, 0), (0, 1, 0), (0, 0, 1), (1, 0, 1), (1, 1, 1), (0, 1, 1)):
+        ids.append(node_id)
+        print(node_id, x0 + dx, dy, dz)
+        node_id += 1
+    elements.append((element_id, ids))
+print('End Coordinates')
+print('Elements')
+for element_id, ids in elements:
+    print(element_id, *ids)
+print('End Elements')
+PY
+
+ALIGN_SIMPLE_OUT="$TMP_DIR/out_align_axes_simple.post.msh"
+ALIGN_SIMPLE_STDOUT="$TMP_DIR/out_align_axes_simple.stdout"
+"$BIN" --in "$ALIGN_SIMPLE_FIX" --out "$ALIGN_SIMPLE_OUT" --op align_axes:simple --mesh_stats >"$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.align_axes\.method=simple$" "$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.align_axes\.elements\.exported=10$" "$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.align_axes\.elements\.dropped=2$" "$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.stats\.nodes=80$" "$ALIGN_SIMPLE_STDOUT"
+rg -n "^mesh\.stats\.elements=10$" "$ALIGN_SIMPLE_STDOUT"
+"$ROUNDTRIP" "$ALIGN_SIMPLE_OUT" "$TMP_DIR/out_align_axes_simple_roundtrip.post.msh" --validate >"$TMP_DIR/out_align_axes_simple.validate"
+rg -q "nodes: 80" "$TMP_DIR/out_align_axes_simple.validate"
+rg -q "elements: 10" "$TMP_DIR/out_align_axes_simple.validate"
+if awk '/^Elements$/{in_elements=1; next} /^End Elements$/{in_elements=0} in_elements && ($1 == 11 || $1 == 12){found=1} END{exit found ? 0 : 1}' "$ALIGN_SIMPLE_OUT"; then
+  echo "align_axes:simple exported more than ten elements" >&2
+  exit 1
+fi
+
 FIRST_LINE=$(sed -n "1p" "$STATS_OUT")
 SECOND_LINE=$(sed -n "2p" "$STATS_OUT")
 THIRD_LINE=$(sed -n "3p" "$STATS_OUT")
