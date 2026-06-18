@@ -11,39 +11,47 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include <Eigen/Dense>
-#include <Eigen/SVD>
-
 namespace meshpp {
 namespace {
 
+using Vec3 = std::array<double, 3>;
+using Vec3i = std::array<int, 3>;
+using Mat3 = std::array<std::array<double, 3>, 3>;
 
-struct EigenSystem3x3 {
-  std::array<double, 3> values;
-  std::array<std::array<double, 3>, 3> vectors;
+struct SymmetricSpectralSystem3x3 {
+  Vec3 values;
+  Mat3 vectors;
 };
 
-double Dot(const std::array<double, 3>& a, const std::array<double, 3>& b) {
+double Dot(const Vec3& a, const Vec3& b) {
   return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
 }
 
-std::array<double, 3> Cross(const std::array<double, 3>& a, const std::array<double, 3>& b) {
+Vec3 Cross(const Vec3& a, const Vec3& b) {
   return {a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]};
 }
 
-double Norm(const std::array<double, 3>& v) {
+double Norm(const Vec3& v) {
   return std::sqrt(Dot(v, v));
 }
 
-std::array<double, 3> Subtract(const std::array<double, 3>& a, const std::array<double, 3>& b) {
+Vec3 Add(const Vec3& a, const Vec3& b) {
+  return {a[0] + b[0], a[1] + b[1], a[2] + b[2]};
+}
+
+Vec3 Subtract(const Vec3& a, const Vec3& b) {
   return {a[0] - b[0], a[1] - b[1], a[2] - b[2]};
 }
 
-std::array<double, 3> ScaleVector(const std::array<double, 3>& v, double scale) {
+Vec3 ScaleVector(const Vec3& v, double scale) {
   return {v[0] * scale, v[1] * scale, v[2] * scale};
 }
 
-void PrintVectorReport(const std::string& name, const std::array<double, 3>& v) {
+Vec3 Normalize(const Vec3& v) {
+  return ScaleVector(v, 1.0 / Norm(v));
+}
+
+void PrintVectorReport(const std::string& name, const Vec3& v) {
   std::cout << "mesh.align_axes." << name << ".x=" << v[0] << "\n";
   std::cout << "mesh.align_axes." << name << ".y=" << v[1] << "\n";
   std::cout << "mesh.align_axes." << name << ".z=" << v[2] << "\n";
@@ -54,7 +62,7 @@ void PrintPointReport(const std::string& name, const Node& node) {
   PrintVectorReport(name, node.xyz);
 }
 
-void PrintMatrixReport(const std::string& name, const std::array<std::array<double, 3>, 3>& matrix) {
+void PrintMatrixReport(const std::string& name, const Mat3& matrix) {
   for (std::size_t r = 0; r < 3; ++r) {
     for (std::size_t c = 0; c < 3; ++c) {
       std::cout << "mesh.align_axes." << name << ".r" << r << c << "=" << matrix[r][c] << "\n";
@@ -62,12 +70,98 @@ void PrintMatrixReport(const std::string& name, const std::array<std::array<doub
   }
 }
 
-double DeterminantColumns(const std::array<double, 3>& c0, const std::array<double, 3>& c1, const std::array<double, 3>& c2) {
+double DeterminantColumns(const Vec3& c0, const Vec3& c1, const Vec3& c2) {
   return c0[0] * (c1[1] * c2[2] - c1[2] * c2[1]) - c1[0] * (c0[1] * c2[2] - c0[2] * c2[1]) +
          c2[0] * (c0[1] * c1[2] - c0[2] * c1[1]);
 }
 
-void NormalizeSign(std::array<double, 3>* v) {
+Mat3 IdentityMatrix() {
+  return {{{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}}};
+}
+
+Mat3 ZeroMatrix() {
+  return {{{0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}}};
+}
+
+Vec3 MatrixColumn(const Mat3& m, std::size_t c) {
+  return {m[0][c], m[1][c], m[2][c]};
+}
+
+void SetMatrixColumn(Mat3* m, std::size_t c, const Vec3& v) {
+  for (std::size_t r = 0; r < 3; ++r) {
+    (*m)[r][c] = v[r];
+  }
+}
+
+Mat3 Transpose(const Mat3& m) {
+  Mat3 result = ZeroMatrix();
+  for (std::size_t r = 0; r < 3; ++r) {
+    for (std::size_t c = 0; c < 3; ++c) {
+      result[r][c] = m[c][r];
+    }
+  }
+  return result;
+}
+
+Mat3 Multiply(const Mat3& a, const Mat3& b) {
+  Mat3 result = ZeroMatrix();
+  for (std::size_t r = 0; r < 3; ++r) {
+    for (std::size_t c = 0; c < 3; ++c) {
+      for (std::size_t k = 0; k < 3; ++k) {
+        result[r][c] += a[r][k] * b[k][c];
+      }
+    }
+  }
+  return result;
+}
+
+Vec3 Multiply(const Mat3& m, const Vec3& v) {
+  return {Dot(m[0], v), Dot(m[1], v), Dot(m[2], v)};
+}
+
+Mat3 OuterProduct(const Vec3& a, const Vec3& b) {
+  Mat3 result = ZeroMatrix();
+  for (std::size_t r = 0; r < 3; ++r) {
+    for (std::size_t c = 0; c < 3; ++c) {
+      result[r][c] = a[r] * b[c];
+    }
+  }
+  return result;
+}
+
+void AddMatrixInPlace(Mat3* a, const Mat3& b) {
+  for (std::size_t r = 0; r < 3; ++r) {
+    for (std::size_t c = 0; c < 3; ++c) {
+      (*a)[r][c] += b[r][c];
+    }
+  }
+}
+
+double Determinant(const Mat3& m) {
+  return DeterminantColumns(MatrixColumn(m, 0), MatrixColumn(m, 1), MatrixColumn(m, 2));
+}
+
+double MaxAbsCoeff(const Mat3& m) {
+  double result = 0.0;
+  for (const auto& row : m) {
+    for (double value : row) {
+      result = std::max(result, std::fabs(value));
+    }
+  }
+  return result;
+}
+
+Mat3 Subtract(const Mat3& a, const Mat3& b) {
+  Mat3 result = ZeroMatrix();
+  for (std::size_t r = 0; r < 3; ++r) {
+    for (std::size_t c = 0; c < 3; ++c) {
+      result[r][c] = a[r][c] - b[r][c];
+    }
+  }
+  return result;
+}
+
+void NormalizeSign(Vec3* v) {
   std::size_t max_index = 0;
   double max_abs = std::fabs((*v)[0]);
   for (std::size_t i = 1; i < v->size(); ++i) {
@@ -84,8 +178,8 @@ void NormalizeSign(std::array<double, 3>* v) {
   }
 }
 
-EigenSystem3x3 JacobiEigenDecomposition(std::array<std::array<double, 3>, 3> a) {
-  EigenSystem3x3 result{{a[0][0], a[1][1], a[2][2]}, {{{1.0, 0.0, 0.0}, {0.0, 1.0, 0.0}, {0.0, 0.0, 1.0}}}};
+SymmetricSpectralSystem3x3 JacobiEigenDecomposition(Mat3 a) {
+  SymmetricSpectralSystem3x3 result{{a[0][0], a[1][1], a[2][2]}, IdentityMatrix()};
 
   for (int sweep = 0; sweep < 64; ++sweep) {
     int p = 0;
@@ -140,6 +234,54 @@ EigenSystem3x3 JacobiEigenDecomposition(std::array<std::array<double, 3>, 3> a) 
 
   result.values = {a[0][0], a[1][1], a[2][2]};
   return result;
+}
+
+Mat3 OrthonormalizeColumns(Mat3 m) {
+  Vec3 c0 = Normalize(MatrixColumn(m, 0));
+  Vec3 c1 = Subtract(MatrixColumn(m, 1), ScaleVector(c0, Dot(MatrixColumn(m, 1), c0)));
+  if (Norm(c1) < 1e-12) {
+    c1 = std::fabs(c0[0]) < 0.9 ? Vec3{1.0, 0.0, 0.0} : Vec3{0.0, 1.0, 0.0};
+    c1 = Subtract(c1, ScaleVector(c0, Dot(c1, c0)));
+  }
+  c1 = Normalize(c1);
+  Vec3 c2 = Cross(c0, c1);
+  if (Dot(c2, MatrixColumn(m, 2)) < 0.0) {
+    c2 = ScaleVector(c2, -1.0);
+  }
+  SetMatrixColumn(&m, 0, c0);
+  SetMatrixColumn(&m, 1, c1);
+  SetMatrixColumn(&m, 2, c2);
+  return m;
+}
+
+Mat3 KabschRotationFromCovariance(const Mat3& h) {
+  Mat3 hth = Multiply(Transpose(h), h);
+  SymmetricSpectralSystem3x3 eigen = JacobiEigenDecomposition(hth);
+  std::array<int, 3> order{0, 1, 2};
+  std::sort(order.begin(), order.end(), [&](int lhs, int rhs) { return eigen.values[lhs] > eigen.values[rhs]; });
+
+  Mat3 v = ZeroMatrix();
+  Mat3 u = ZeroMatrix();
+  for (std::size_t sorted = 0; sorted < order.size(); ++sorted) {
+    const int eig_index = order[sorted];
+    Vec3 v_col{eigen.vectors[0][eig_index], eigen.vectors[1][eig_index], eigen.vectors[2][eig_index]};
+    v_col = Normalize(v_col);
+    SetMatrixColumn(&v, sorted, v_col);
+
+    const double singular_value = std::sqrt(std::max(0.0, eigen.values[eig_index]));
+    if (singular_value > 1e-12) {
+      SetMatrixColumn(&u, sorted, ScaleVector(Multiply(h, v_col), 1.0 / singular_value));
+    }
+  }
+
+  u = OrthonormalizeColumns(u);
+  v = OrthonormalizeColumns(v);
+
+  Mat3 d = IdentityMatrix();
+  if (Determinant(Multiply(v, Transpose(u))) < 0.0) {
+    d[2][2] = -1.0;
+  }
+  return Multiply(Multiply(v, d), Transpose(u));
 }
 
 class ScaleOperation : public MeshOperation {
@@ -301,15 +443,15 @@ class AlignAxesOperation : public MeshOperation {
   enum class Method { kPca, kSimple, kKabsch };
 
   struct KabschResult {
-    Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
-    Eigen::Vector3d centroidP = Eigen::Vector3d::Zero();
-    Eigen::Vector3d centroidQ = Eigen::Vector3d::Zero();
+    Mat3 R = IdentityMatrix();
+    Vec3 centroidP{0.0, 0.0, 0.0};
+    Vec3 centroidQ{0.0, 0.0, 0.0};
     double L = 0.0;
     double rmsd = 0.0;
     double rmsd_norm = 0.0;
     double det = 0.0;
     double ortho_err_max = 0.0;
-    std::array<Eigen::Vector3i, 8> bits;
+    std::array<Vec3i, 8> bits;
     std::array<int, 8> ids{};
     bool ok = false;
   };
@@ -502,7 +644,7 @@ class AlignAxesOperation : public MeshOperation {
     }
 
     const HexElement& first_element = mesh->elements.front();
-    std::array<Eigen::Vector3d, 8> corners;
+    std::array<Vec3, 8> corners;
     std::array<int, 8> ids{};
     for (std::size_t i = 0; i < first_element.node_ids.size(); ++i) {
       const auto node_it = mesh->node_id_to_index.find(first_element.node_ids[i]);
@@ -511,7 +653,7 @@ class AlignAxesOperation : public MeshOperation {
         return report;
       }
       const Node& node = mesh->nodes[node_it->second];
-      corners[i] = Eigen::Vector3d(node.xyz[0], node.xyz[1], node.xyz[2]);
+      corners[i] = Vec3{node.xyz[0], node.xyz[1], node.xyz[2]};
       ids[i] = static_cast<int>(node.id);
     }
 
@@ -533,46 +675,46 @@ class AlignAxesOperation : public MeshOperation {
       return report;
     }
 
-    const Eigen::Vector3d& P0 = corners[idx1];
-    const Eigen::Vector3d e1 = corners[idx5] - P0;
-    const Eigen::Vector3d e2 = corners[idx2] - P0;
-    const Eigen::Vector3d e3 = corners[idx4] - P0;
-    const double e1_norm = e1.norm();
-    const double e2_norm = e2.norm();
-    const double e3_norm = e3.norm();
+    const Vec3& P0 = corners[idx1];
+    const Vec3 e1 = Subtract(corners[idx5], P0);
+    const Vec3 e2 = Subtract(corners[idx2], P0);
+    const Vec3 e3 = Subtract(corners[idx4], P0);
+    const double e1_norm = Norm(e1);
+    const double e2_norm = Norm(e2);
+    const double e3_norm = Norm(e3);
     if (e1_norm < kTolerance || e2_norm < kTolerance || e3_norm < kTolerance) {
       report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch degenerate seed frame (zero-length or parallel edges)", 0});
       return report;
     }
 
-    const Eigen::Vector3d w1 = e1.normalized();
-    if (std::fabs(w1.dot(e2.normalized())) > 0.999) {
+    const Vec3 w1 = Normalize(e1);
+    if (std::fabs(Dot(w1, Normalize(e2))) > 0.999) {
       report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch degenerate seed frame (zero-length or parallel edges)", 0});
       return report;
     }
-    const Eigen::Vector3d w2_seed = e2 - e2.dot(w1) * w1;
-    if (w2_seed.norm() < kTolerance) {
+    const Vec3 w2_seed = Subtract(e2, ScaleVector(w1, Dot(e2, w1)));
+    if (Norm(w2_seed) < kTolerance) {
       report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch degenerate seed frame (zero-length or parallel edges)", 0});
       return report;
     }
-    const Eigen::Vector3d w2 = w2_seed.normalized();
-    const Eigen::Vector3d w3 = w1.cross(w2);
+    const Vec3 w2 = Normalize(w2_seed);
+    const Vec3 w3 = Cross(w1, w2);
 
     KabschResult result;
     result.L = (e1_norm + e2_norm + e3_norm) / 3.0;
     result.ids = ids;
 
-    std::array<Eigen::Vector3d, 8> P;
-    std::array<Eigen::Vector3d, 8> Q;
+    std::array<Vec3, 8> P;
+    std::array<Vec3, 8> Q;
     std::set<std::array<int, 3>> seen;
     for (std::size_t i = 0; i < corners.size(); ++i) {
-      const Eigen::Vector3d r = corners[i] - P0;
-      const int bx = (r.dot(w1) > 0.5 * result.L) ? 1 : 0;
-      const int by = (r.dot(w2) > 0.5 * result.L) ? 1 : 0;
-      const int bz = (r.dot(w3) > 0.5 * result.L) ? 1 : 0;
-      result.bits[i] = Eigen::Vector3i(bx, by, bz);
+      const Vec3 r = Subtract(corners[i], P0);
+      const int bx = (Dot(r, w1) > 0.5 * result.L) ? 1 : 0;
+      const int by = (Dot(r, w2) > 0.5 * result.L) ? 1 : 0;
+      const int bz = (Dot(r, w3) > 0.5 * result.L) ? 1 : 0;
+      result.bits[i] = Vec3i{bx, by, bz};
       P[i] = corners[i];
-      Q[i] = Eigen::Vector3d(bx * result.L, by * result.L, bz * result.L);
+      Q[i] = Vec3{bx * result.L, by * result.L, bz * result.L};
       seen.insert({bx, by, bz});
     }
     if (seen.size() != 8) {
@@ -581,32 +723,28 @@ class AlignAxesOperation : public MeshOperation {
     }
 
     for (std::size_t i = 0; i < P.size(); ++i) {
-      result.centroidP += P[i];
-      result.centroidQ += Q[i];
+      result.centroidP = Add(result.centroidP, P[i]);
+      result.centroidQ = Add(result.centroidQ, Q[i]);
     }
-    result.centroidP /= 8.0;
-    result.centroidQ /= 8.0;
+    result.centroidP = ScaleVector(result.centroidP, 1.0 / 8.0);
+    result.centroidQ = ScaleVector(result.centroidQ, 1.0 / 8.0);
 
-    Eigen::Matrix3d H = Eigen::Matrix3d::Zero();
+    Mat3 H = ZeroMatrix();
     for (std::size_t i = 0; i < P.size(); ++i) {
-      H += (P[i] - result.centroidP) * (Q[i] - result.centroidQ).transpose();
+      AddMatrixInPlace(&H, OuterProduct(Subtract(P[i], result.centroidP), Subtract(Q[i], result.centroidQ)));
     }
 
-    Eigen::JacobiSVD<Eigen::Matrix3d> svd(H, Eigen::ComputeFullU | Eigen::ComputeFullV);
-    const Eigen::Matrix3d U = svd.matrixU();
-    const Eigen::Matrix3d V = svd.matrixV();
-    Eigen::Matrix3d D = Eigen::Matrix3d::Identity();
-    D(2, 2) = (V * U.transpose()).determinant() < 0.0 ? -1.0 : 1.0;
-    result.R = V * D * U.transpose();
-    result.det = result.R.determinant();
+    result.R = KabschRotationFromCovariance(H);
+    result.det = Determinant(result.R);
 
     double sse = 0.0;
     for (std::size_t i = 0; i < P.size(); ++i) {
-      sse += (result.R * (P[i] - result.centroidP) - (Q[i] - result.centroidQ)).squaredNorm();
+      const Vec3 error = Subtract(Multiply(result.R, Subtract(P[i], result.centroidP)), Subtract(Q[i], result.centroidQ));
+      sse += Dot(error, error);
     }
     result.rmsd = std::sqrt(sse / 8.0);
     result.rmsd_norm = result.rmsd / result.L;
-    result.ortho_err_max = (result.R * result.R.transpose() - Eigen::Matrix3d::Identity()).cwiseAbs().maxCoeff();
+    result.ortho_err_max = MaxAbsCoeff(Subtract(Multiply(result.R, Transpose(result.R)), IdentityMatrix()));
     result.ok = true;
 
     const std::streamsize old_precision = std::cout.precision();
@@ -614,15 +752,15 @@ class AlignAxesOperation : public MeshOperation {
     std::cout << std::fixed << std::setprecision(12);
     std::cout << "mesh.align_axes.method=kabsch\n";
     std::cout << "mesh.align_axes.L=" << result.L << "\n";
-    std::cout << "mesh.align_axes.centroidP.x=" << result.centroidP.x() << "\n";
-    std::cout << "mesh.align_axes.centroidP.y=" << result.centroidP.y() << "\n";
-    std::cout << "mesh.align_axes.centroidP.z=" << result.centroidP.z() << "\n";
-    std::cout << "mesh.align_axes.centroidQ.x=" << result.centroidQ.x() << "\n";
-    std::cout << "mesh.align_axes.centroidQ.y=" << result.centroidQ.y() << "\n";
-    std::cout << "mesh.align_axes.centroidQ.z=" << result.centroidQ.z() << "\n";
+    std::cout << "mesh.align_axes.centroidP.x=" << result.centroidP[0] << "\n";
+    std::cout << "mesh.align_axes.centroidP.y=" << result.centroidP[1] << "\n";
+    std::cout << "mesh.align_axes.centroidP.z=" << result.centroidP[2] << "\n";
+    std::cout << "mesh.align_axes.centroidQ.x=" << result.centroidQ[0] << "\n";
+    std::cout << "mesh.align_axes.centroidQ.y=" << result.centroidQ[1] << "\n";
+    std::cout << "mesh.align_axes.centroidQ.z=" << result.centroidQ[2] << "\n";
     for (int r = 0; r < 3; ++r) {
       for (int c = 0; c < 3; ++c) {
-        std::cout << "mesh.align_axes.matrix.r" << r << c << "=" << result.R(r, c) << "\n";
+        std::cout << "mesh.align_axes.matrix.r" << r << c << "=" << result.R[r][c] << "\n";
       }
     }
     std::cout << "mesh.align_axes.det=" << result.det << "\n";
@@ -630,7 +768,7 @@ class AlignAxesOperation : public MeshOperation {
     std::cout << "mesh.align_axes.rmsd=" << result.rmsd << "\n";
     std::cout << "mesh.align_axes.rmsd_norm=" << result.rmsd_norm << "\n";
     for (std::size_t i = 0; i < ids.size(); ++i) {
-      std::cout << "mesh.align_axes.corner." << ids[i] << ".bits=" << result.bits[i].x() << result.bits[i].y() << result.bits[i].z() << "\n";
+      std::cout << "mesh.align_axes.corner." << ids[i] << ".bits=" << result.bits[i][0] << result.bits[i][1] << result.bits[i][2] << "\n";
     }
     std::cout.flags(old_flags);
     std::cout.precision(old_precision);
@@ -651,11 +789,11 @@ class AlignAxesOperation : public MeshOperation {
     kept_nodes.reserve(referenced_node_ids.size());
     for (auto node : mesh->nodes) {
       if (referenced_node_ids.find(node.id) != referenced_node_ids.end()) {
-        const Eigen::Vector3d p(node.xyz[0], node.xyz[1], node.xyz[2]);
-        const Eigen::Vector3d rotated = result.R * p;
-        node.xyz[0] = rotated.x();
-        node.xyz[1] = rotated.y();
-        node.xyz[2] = rotated.z();
+        const Vec3 p{node.xyz[0], node.xyz[1], node.xyz[2]};
+        const Vec3 rotated = Multiply(result.R, p);
+        node.xyz[0] = rotated[0];
+        node.xyz[1] = rotated[1];
+        node.xyz[2] = rotated[2];
         kept_nodes.push_back(node);
       }
     }
@@ -712,7 +850,7 @@ class AlignAxesOperation : public MeshOperation {
     covariance[2][0] = covariance[0][2];
     covariance[2][1] = covariance[1][2];
 
-    EigenSystem3x3 eigen = JacobiEigenDecomposition(covariance);
+    SymmetricSpectralSystem3x3 eigen = JacobiEigenDecomposition(covariance);
     std::array<int, 3> order{0, 1, 2};
     std::sort(order.begin(), order.end(), [&](int lhs, int rhs) { return eigen.values[lhs] > eigen.values[rhs]; });
 

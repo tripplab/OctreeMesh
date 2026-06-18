@@ -1,5 +1,5 @@
 CXX ?= g++
-CXXFLAGS ?= -O2 -std=c++17 -Wall -Wextra -pedantic -I/usr/include/eigen3
+CXXFLAGS ?= -O2 -std=c++17 -Wall -Wextra -pedantic
 
 COMMON_SRC = src/post_msh_reader.cc src/post_msh_writer.cc src/operations.cc
 ROUNDTRIP_SRC = src/roundtrip_main.cc
