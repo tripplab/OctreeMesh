@@ -6,9 +6,13 @@
 #include <cctype>
 #include <iomanip>
 #include <iostream>
+#include <set>
 #include <sstream>
 #include <unordered_map>
 #include <unordered_set>
+
+#include <Eigen/Dense>
+#include <Eigen/SVD>
 
 namespace meshpp {
 namespace {
@@ -275,8 +279,10 @@ class AlignAxesOperation : public MeshOperation {
       method_ = Method::kPca;
     } else if (spec == "simple") {
       method_ = Method::kSimple;
+    } else if (spec == "kabsch") {
+      method_ = Method::kKabsch;
     } else {
-      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes expects pca or simple (e.g. align_axes:pca or align_axes:simple)", 0});
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes expects pca, simple, or kabsch (e.g. align_axes:pca, align_axes:simple, or align_axes:kabsch)", 0});
     }
     return report;
   }
@@ -285,11 +291,28 @@ class AlignAxesOperation : public MeshOperation {
     if (method_ == Method::kSimple) {
       return ApplySimple(mesh);
     }
+    if (method_ == Method::kKabsch) {
+      return ApplyKabsch(mesh);
+    }
     return ApplyPca(mesh);
   }
 
  private:
-  enum class Method { kPca, kSimple };
+  enum class Method { kPca, kSimple, kKabsch };
+
+  struct KabschResult {
+    Eigen::Matrix3d R = Eigen::Matrix3d::Identity();
+    Eigen::Vector3d centroidP = Eigen::Vector3d::Zero();
+    Eigen::Vector3d centroidQ = Eigen::Vector3d::Zero();
+    double L = 0.0;
+    double rmsd = 0.0;
+    double rmsd_norm = 0.0;
+    double det = 0.0;
+    double ortho_err_max = 0.0;
+    std::array<Eigen::Vector3i, 8> bits;
+    std::array<int, 8> ids{};
+    bool ok = false;
+  };
 
   ValidationReport ApplySimple(MeshData* mesh) const {
     constexpr std::size_t kMaxElements = 10;
@@ -460,6 +483,202 @@ class AlignAxesOperation : public MeshOperation {
     std::cout.flags(old_export_flags);
     std::cout.precision(old_export_precision);
     return {};
+  }
+
+
+  ValidationReport ApplyKabsch(MeshData* mesh) const {
+    constexpr std::size_t kMaxElements = 10;
+    constexpr double kTolerance = 1e-9;
+    ValidationReport report;
+    const std::size_t original_nodes = mesh->nodes.size();
+    const std::size_t original_elements = mesh->elements.size();
+    if (mesh->elements.empty()) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch fewer than 8 corners supplied", 0});
+      return report;
+    }
+
+    if (mesh->elements.size() > kMaxElements) {
+      mesh->elements.resize(kMaxElements);
+    }
+
+    const HexElement& first_element = mesh->elements.front();
+    std::array<Eigen::Vector3d, 8> corners;
+    std::array<int, 8> ids{};
+    for (std::size_t i = 0; i < first_element.node_ids.size(); ++i) {
+      const auto node_it = mesh->node_id_to_index.find(first_element.node_ids[i]);
+      if (node_it == mesh->node_id_to_index.end()) {
+        report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch fewer than 8 corners supplied", 0});
+        return report;
+      }
+      const Node& node = mesh->nodes[node_it->second];
+      corners[i] = Eigen::Vector3d(node.xyz[0], node.xyz[1], node.xyz[2]);
+      ids[i] = static_cast<int>(node.id);
+    }
+
+    auto idx_of_id = [&](int id) -> int {
+      for (std::size_t i = 0; i < ids.size(); ++i) {
+        if (ids[i] == id) {
+          return static_cast<int>(i);
+        }
+      }
+      return -1;
+    };
+
+    const int idx1 = idx_of_id(1);
+    const int idx5 = idx_of_id(5);
+    const int idx2 = idx_of_id(2);
+    const int idx4 = idx_of_id(4);
+    if (idx1 < 0 || idx5 < 0 || idx2 < 0 || idx4 < 0) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch fewer than 8 corners supplied", 0});
+      return report;
+    }
+
+    const Eigen::Vector3d& P0 = corners[idx1];
+    const Eigen::Vector3d e1 = corners[idx5] - P0;
+    const Eigen::Vector3d e2 = corners[idx2] - P0;
+    const Eigen::Vector3d e3 = corners[idx4] - P0;
+    const double e1_norm = e1.norm();
+    const double e2_norm = e2.norm();
+    const double e3_norm = e3.norm();
+    if (e1_norm < kTolerance || e2_norm < kTolerance || e3_norm < kTolerance) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch degenerate seed frame (zero-length or parallel edges)", 0});
+      return report;
+    }
+
+    const Eigen::Vector3d w1 = e1.normalized();
+    if (std::fabs(w1.dot(e2.normalized())) > 0.999) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch degenerate seed frame (zero-length or parallel edges)", 0});
+      return report;
+    }
+    const Eigen::Vector3d w2_seed = e2 - e2.dot(w1) * w1;
+    if (w2_seed.norm() < kTolerance) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch degenerate seed frame (zero-length or parallel edges)", 0});
+      return report;
+    }
+    const Eigen::Vector3d w2 = w2_seed.normalized();
+    const Eigen::Vector3d w3 = w1.cross(w2);
+
+    KabschResult result;
+    result.L = (e1_norm + e2_norm + e3_norm) / 3.0;
+    result.ids = ids;
+
+    std::array<Eigen::Vector3d, 8> P;
+    std::array<Eigen::Vector3d, 8> Q;
+    std::set<std::array<int, 3>> seen;
+    for (std::size_t i = 0; i < corners.size(); ++i) {
+      const Eigen::Vector3d r = corners[i] - P0;
+      const int bx = (r.dot(w1) > 0.5 * result.L) ? 1 : 0;
+      const int by = (r.dot(w2) > 0.5 * result.L) ? 1 : 0;
+      const int bz = (r.dot(w3) > 0.5 * result.L) ? 1 : 0;
+      result.bits[i] = Eigen::Vector3i(bx, by, bz);
+      P[i] = corners[i];
+      Q[i] = Eigen::Vector3d(bx * result.L, by * result.L, bz * result.L);
+      seen.insert({bx, by, bz});
+    }
+    if (seen.size() != 8) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch corners do not form a cube topology", 0});
+      return report;
+    }
+
+    for (std::size_t i = 0; i < P.size(); ++i) {
+      result.centroidP += P[i];
+      result.centroidQ += Q[i];
+    }
+    result.centroidP /= 8.0;
+    result.centroidQ /= 8.0;
+
+    Eigen::Matrix3d H = Eigen::Matrix3d::Zero();
+    for (std::size_t i = 0; i < P.size(); ++i) {
+      H += (P[i] - result.centroidP) * (Q[i] - result.centroidQ).transpose();
+    }
+
+    Eigen::JacobiSVD<Eigen::Matrix3d> svd(H, Eigen::ComputeFullU | Eigen::ComputeFullV);
+    const Eigen::Matrix3d U = svd.matrixU();
+    const Eigen::Matrix3d V = svd.matrixV();
+    Eigen::Matrix3d D = Eigen::Matrix3d::Identity();
+    D(2, 2) = (V * U.transpose()).determinant() < 0.0 ? -1.0 : 1.0;
+    result.R = V * D * U.transpose();
+    result.det = result.R.determinant();
+
+    double sse = 0.0;
+    for (std::size_t i = 0; i < P.size(); ++i) {
+      sse += (result.R * (P[i] - result.centroidP) - (Q[i] - result.centroidQ)).squaredNorm();
+    }
+    result.rmsd = std::sqrt(sse / 8.0);
+    result.rmsd_norm = result.rmsd / result.L;
+    result.ortho_err_max = (result.R * result.R.transpose() - Eigen::Matrix3d::Identity()).cwiseAbs().maxCoeff();
+    result.ok = true;
+
+    const std::streamsize old_precision = std::cout.precision();
+    const auto old_flags = std::cout.flags();
+    std::cout << std::fixed << std::setprecision(12);
+    std::cout << "mesh.align_axes.method=kabsch\n";
+    std::cout << "mesh.align_axes.L=" << result.L << "\n";
+    std::cout << "mesh.align_axes.centroidP.x=" << result.centroidP.x() << "\n";
+    std::cout << "mesh.align_axes.centroidP.y=" << result.centroidP.y() << "\n";
+    std::cout << "mesh.align_axes.centroidP.z=" << result.centroidP.z() << "\n";
+    std::cout << "mesh.align_axes.centroidQ.x=" << result.centroidQ.x() << "\n";
+    std::cout << "mesh.align_axes.centroidQ.y=" << result.centroidQ.y() << "\n";
+    std::cout << "mesh.align_axes.centroidQ.z=" << result.centroidQ.z() << "\n";
+    for (int r = 0; r < 3; ++r) {
+      for (int c = 0; c < 3; ++c) {
+        std::cout << "mesh.align_axes.matrix.r" << r << c << "=" << result.R(r, c) << "\n";
+      }
+    }
+    std::cout << "mesh.align_axes.det=" << result.det << "\n";
+    std::cout << "mesh.align_axes.ortho_err_max=" << result.ortho_err_max << "\n";
+    std::cout << "mesh.align_axes.rmsd=" << result.rmsd << "\n";
+    std::cout << "mesh.align_axes.rmsd_norm=" << result.rmsd_norm << "\n";
+    for (std::size_t i = 0; i < ids.size(); ++i) {
+      std::cout << "mesh.align_axes.corner." << ids[i] << ".bits=" << result.bits[i].x() << result.bits[i].y() << result.bits[i].z() << "\n";
+    }
+    std::cout.flags(old_flags);
+    std::cout.precision(old_precision);
+
+    if (result.rmsd_norm > 0.02) {
+      std::cerr << "W_QUALITY: align_axes:kabsch input deviates from ideal cube\n";
+    }
+
+    std::unordered_set<std::size_t> referenced_node_ids;
+    referenced_node_ids.reserve(mesh->elements.size() * 8);
+    for (const auto& element : mesh->elements) {
+      for (std::size_t node_id : element.node_ids) {
+        referenced_node_ids.insert(node_id);
+      }
+    }
+
+    std::vector<Node> kept_nodes;
+    kept_nodes.reserve(referenced_node_ids.size());
+    for (auto node : mesh->nodes) {
+      if (referenced_node_ids.find(node.id) != referenced_node_ids.end()) {
+        const Eigen::Vector3d p(node.xyz[0], node.xyz[1], node.xyz[2]);
+        const Eigen::Vector3d rotated = result.R * p;
+        node.xyz[0] = rotated.x();
+        node.xyz[1] = rotated.y();
+        node.xyz[2] = rotated.z();
+        kept_nodes.push_back(node);
+      }
+    }
+
+    std::unordered_map<std::size_t, std::size_t> node_id_to_index;
+    node_id_to_index.reserve(kept_nodes.size());
+    for (std::size_t i = 0; i < kept_nodes.size(); ++i) {
+      node_id_to_index[kept_nodes[i].id] = i;
+    }
+
+    mesh->nodes = std::move(kept_nodes);
+    mesh->node_id_to_index = std::move(node_id_to_index);
+
+    const std::streamsize old_export_precision = std::cout.precision();
+    const auto old_export_flags = std::cout.flags();
+    std::cout << std::fixed << std::setprecision(6);
+    std::cout << "mesh.align_axes.elements.exported=" << mesh->elements.size() << "\n";
+    std::cout << "mesh.align_axes.elements.dropped=" << (original_elements - mesh->elements.size()) << "\n";
+    std::cout << "mesh.align_axes.nodes.exported=" << mesh->nodes.size() << "\n";
+    std::cout << "mesh.align_axes.nodes.dropped=" << (original_nodes - mesh->nodes.size()) << "\n";
+    std::cout.flags(old_export_flags);
+    std::cout.precision(old_export_precision);
+    return report;
   }
 
   ValidationReport ApplyPca(MeshData* mesh) const {

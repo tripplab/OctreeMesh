@@ -38,6 +38,21 @@ expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_he
 expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op align_axes:foo
 expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op align_axes:pca,extra
 expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op align_axes:pca
+KABSCH_BAD="$TMP_DIR/kabsch_bad_topology.post.msh"
+python3 - <<'PY' >"$KABSCH_BAD"
+print('MESH "bad" dimension 3 ElemType Hexahedra Nnode 8')
+print()
+print('Coordinates')
+coords = [(0,0,0), (1,0,0), (1,0,0), (0,1,0), (0,0,1), (1,0,1), (1,1,1), (0,1,1)]
+for i, xyz in enumerate(coords, 1):
+    print(i, *xyz)
+print('End Coordinates')
+print('Elements')
+print(1, *range(1, 9))
+print('End Elements')
+PY
+expect_code 2 "$APPLY_BIN" --in "$KABSCH_BAD" --out "$TMP_DIR/out_kabsch_bad.post.msh" --op align_axes:kabsch
+
 
 expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op mesh_stats:format=xml
 expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op mesh_stats:foo=bar
