@@ -21,6 +21,8 @@ void PrintHelp() {
   std::cout << "Available operations (for --op <spec>):\n";
   std::cout << "  scale:<factor>                  Multiply node coordinates by <factor>.\n";
   std::cout << "  translate:<dx>,<dy>,<dz>        Add offsets to node coordinates.\n";
+  std::cout << "  rotate:<ux>,<uy>,<uz>,<degrees> Rotate node coordinates around an arbitrary axis.\n";
+  std::cout << "  align_axes:pca                  Align PCA principal directions with X/Y/Z axes.\n";
   std::cout << "  mesh_stats[:format=text]        Print mesh metrics to stdout.\n";
   std::cout << "  octet:(+|-)x(+|-)y(+|-)z        Keep elements in one octant only.\n";
   std::cout << "  cylinder:<radius>               Keep elements with all nodes in r<=radius and z>0.\n\n";
@@ -30,6 +32,8 @@ void PrintHelp() {
   std::cout << "Examples:\n";
   std::cout << "  meshpp_apply --in in.post.msh --out out.post.msh --op scale:2.0\n";
   std::cout << "  meshpp_apply --in in.post.msh --out out.post.msh --op translate:1,2,3 --op mesh_stats\n";
+  std::cout << "  meshpp_apply --in in.post.msh --out rot.post.msh --op rotate:0,0,1,90\n";
+  std::cout << "  meshpp_apply --in in.post.msh --out aligned.post.msh --op align_axes:pca\n";
   std::cout << "  meshpp_apply --in in.post.msh --out octant.post.msh --op octet:+x+y-z\n";
   std::cout << "  meshpp_apply --in in.post.msh --out cyl.post.msh --op cylinder:35 --mesh_stats --perf_stats\n";
 }
