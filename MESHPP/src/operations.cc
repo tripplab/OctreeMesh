@@ -4,6 +4,7 @@
 #include <array>
 #include <cmath>
 #include <cctype>
+#include <cstdint>
 #include <iomanip>
 #include <iostream>
 #include <limits>
@@ -490,6 +491,7 @@ class AlignAxesOperation : public MeshOperation {
     double max_residual = 0.0;
     double max_plane_spread = 0.0;
     int unique_planes = 0;
+    std::vector<double> snapped;
   };
 
   struct SnapResult {
@@ -503,6 +505,7 @@ class AlignAxesOperation : public MeshOperation {
     SnapAxisResult result;
     const std::size_t n = nodes.size();
     result.k.resize(n);
+    result.snapped.resize(n);
 
     double cmin = std::numeric_limits<double>::infinity();
     for (const auto& node : nodes) {
@@ -522,6 +525,7 @@ class AlignAxesOperation : public MeshOperation {
     for (std::size_t i = 0; i < n; ++i) {
       const double coordinate = nodes[i].xyz[axis];
       const double snapped = result.phase + static_cast<double>(result.k[i]) * L;
+      result.snapped[i] = snapped;
       result.max_residual = std::max(result.max_residual, std::fabs(coordinate - snapped));
 
       auto it = bands.find(result.k[i]);
@@ -539,6 +543,50 @@ class AlignAxesOperation : public MeshOperation {
     return result;
   }
 
+
+  static SnapAxisResult SnapAxisVariable(const std::vector<Node>& nodes, int axis, double L) {
+    SnapAxisResult result;
+    const std::size_t n = nodes.size();
+    result.k.resize(n);
+    result.snapped.resize(n);
+    if (n == 0) {
+      return result;
+    }
+
+    std::vector<std::pair<double, std::size_t>> coords;
+    coords.reserve(n);
+    for (std::size_t i = 0; i < n; ++i) {
+      coords.push_back({nodes[i].xyz[axis], i});
+    }
+    std::sort(coords.begin(), coords.end());
+
+    const double split_gap = std::max(1e-12, 0.25 * L);
+    long plane = 0;
+    std::size_t cluster_begin = 0;
+    while (cluster_begin < coords.size()) {
+      std::size_t cluster_end = cluster_begin + 1;
+      double sum = coords[cluster_begin].first;
+      while (cluster_end < coords.size() &&
+             coords[cluster_end].first - coords[cluster_end - 1].first <= split_gap) {
+        sum += coords[cluster_end].first;
+        ++cluster_end;
+      }
+      const double center = sum / static_cast<double>(cluster_end - cluster_begin);
+      const double spread = coords[cluster_end - 1].first - coords[cluster_begin].first;
+      result.max_plane_spread = std::max(result.max_plane_spread, spread);
+      for (std::size_t j = cluster_begin; j < cluster_end; ++j) {
+        const std::size_t node_index = coords[j].second;
+        result.k[node_index] = plane;
+        result.snapped[node_index] = center;
+        result.max_residual = std::max(result.max_residual, std::fabs(nodes[node_index].xyz[axis] - center));
+      }
+      ++plane;
+      cluster_begin = cluster_end;
+    }
+    result.unique_planes = static_cast<int>(plane);
+    return result;
+  }
+
   bool snap_enabled_ = false;
   bool global_refit_ = false;
 
@@ -548,6 +596,7 @@ class AlignAxesOperation : public MeshOperation {
     int iterations = 0;
     int edges_used = 0;
     int last_bucket_changes = 0;
+    bool nonuniform[3] = {false, false, false};
     double resid_mean_deg = 0.0;
     double resid_p95_deg = 0.0;
     double resid_max_deg = 0.0;
@@ -699,12 +748,61 @@ class AlignAxesOperation : public MeshOperation {
     return axis;
   }
 
+  struct Hist {
+    double lo;
+    double hi;
+    int nb;
+    std::vector<uint64_t> bin;
+    uint64_t under = 0;
+    uint64_t over = 0;
+    uint64_t n = 0;
+    double sum = 0.0;
+    double exact_min = 1e300;
+    double exact_max = -1e300;
+
+    Hist(double lo_, double hi_, int nb_) : lo(lo_), hi(hi_), nb(nb_), bin(static_cast<std::size_t>(nb_), 0) {}
+
+    void Add(double x) {
+      ++n;
+      sum += x;
+      exact_min = std::min(exact_min, x);
+      exact_max = std::max(exact_max, x);
+      if (x < lo) {
+        ++under;
+        return;
+      }
+      if (x >= hi) {
+        ++over;
+        return;
+      }
+      int i = static_cast<int>((x - lo) / (hi - lo) * static_cast<double>(nb));
+      if (i < 0) i = 0;
+      if (i >= nb) i = nb - 1;
+      ++bin[static_cast<std::size_t>(i)];
+    }
+
+    double Mean() const { return n ? sum / static_cast<double>(n) : std::numeric_limits<double>::quiet_NaN(); }
+
+    double Quantile(double q) const {
+      if (n == 0) return std::numeric_limits<double>::quiet_NaN();
+      const uint64_t target = static_cast<uint64_t>(std::ceil(q * static_cast<double>(n)));
+      uint64_t cum = under;
+      if (cum >= target) return lo;
+      for (int i = 0; i < nb; ++i) {
+        cum += bin[static_cast<std::size_t>(i)];
+        if (cum >= target) return lo + (hi - lo) * (static_cast<double>(i) + 0.5) / static_cast<double>(nb);
+      }
+      return exact_max;
+    }
+  };
+
   ValidationReport RefineRotationGlobal(const MeshData& mesh, const Mat3& seed_R, double seed_L, RefitResult* result) const {
     constexpr int kRefitMaxIters = 5;
     constexpr double kRefitAngleTolRad = 1e-7;
     constexpr double kEdgeAxisMinDominance = 0.80;
     constexpr double kMinEdgeLen = 1e-9;
-    constexpr int kHexEdges[12][2] = {{0, 1}, {1, 2}, {2, 3}, {3, 0}, {4, 5}, {5, 6}, {6, 7}, {7, 4}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
+    constexpr int kHexEdges[12][2] = {{0, 1}, {1, 2}, {2, 3}, {3, 0}, {4, 5}, {5, 6},
+                                       {6, 7}, {7, 4}, {0, 4}, {1, 5}, {2, 6}, {3, 7}};
 
     ValidationReport report;
     if (mesh.elements.empty()) {
@@ -714,49 +812,50 @@ class AlignAxesOperation : public MeshOperation {
 
     std::cout << "meshpp apply: align_axes:kabsch:global refitting rotation from all cell edge directions\n";
 
-    // The seed rotation is only a bootstrap frame: it tells us which signed
-    // coordinate axis each measured edge is closest to before the global
-    // Wahba/Kabsch solve redistributes orientation error across the full mesh.
+    const std::size_t edge_count = mesh.elements.size() * 12;
+    std::vector<int8_t> curr_axis(edge_count, -1);
+    std::vector<int8_t> prev_axis(edge_count, -1);
     Mat3 rcur = seed_R;
-    std::vector<int> previous_axis_signed(mesh.elements.size() * 12, 99);
+    int iters = 0;
+    int bucket_changes = 0;
+    int edges_used = 0;
+    double min_dom_final = 1.0;
 
-    for (int iter = 1; iter <= kRefitMaxIters; ++iter) {
+    for (int iter = 0; iter < kRefitMaxIters; ++iter) {
       Mat3 H = ZeroMatrix();
-      int used = 0;
-      int bucket_changes = 0;
       double min_dom = 1.0;
-      std::size_t edge_offset = 0;
+      int used = 0;
+      int changes = 0;
 
-      for (const auto& h : mesh.elements) {
-        for (int e = 0; e < 12; ++e, ++edge_offset) {
+      for (std::size_t c = 0; c < mesh.elements.size(); ++c) {
+        const auto& h = mesh.elements[c];
+        for (int e = 0; e < 12; ++e) {
+          const std::size_t idx = c * 12 + static_cast<std::size_t>(e);
           const auto a_it = mesh.node_id_to_index.find(h.node_ids[kHexEdges[e][0]]);
           const auto b_it = mesh.node_id_to_index.find(h.node_ids[kHexEdges[e][1]]);
           if (a_it == mesh.node_id_to_index.end() || b_it == mesh.node_id_to_index.end()) {
+            curr_axis[idx] = -1;
             continue;
           }
           const Vec3 ev = Subtract(mesh.nodes[b_it->second].xyz, mesh.nodes[a_it->second].xyz);
           const double len = Norm(ev);
           if (len < kMinEdgeLen) {
+            curr_axis[idx] = -1;
             continue;
           }
           const Vec3 u = ScaleVector(ev, 1.0 / len);
           const Vec3 f = Multiply(rcur, u);
           const int ax = DominantAxis(f);
-          const double dom = std::fabs(f[ax]) / std::max(Norm(f), kMinEdgeLen);
-          min_dom = std::min(min_dom, dom);
-          const int signed_axis = f[ax] >= 0.0 ? ax + 1 : -(ax + 1);
-          if (previous_axis_signed[edge_offset] != 99 && previous_axis_signed[edge_offset] != signed_axis) {
-            ++bucket_changes;
-          }
-          previous_axis_signed[edge_offset] = signed_axis;
+          min_dom = std::min(min_dom, std::fabs(f[ax]) / std::max(Norm(f), kMinEdgeLen));
+          const double sign = f[ax] >= 0.0 ? 1.0 : -1.0;
           Vec3 target{0.0, 0.0, 0.0};
-          target[ax] = f[ax] >= 0.0 ? 1.0 : -1.0;
-
-          // Accumulate measured unit edge directions against their nearest
-          // signed ideal axes.  There are no centroids here because this is an
-          // orientation-only fit; edge position and distance from the seed do
-          // not affect the solve.
+          target[ax] = sign;
           AddMatrixInPlace(&H, OuterProduct(u, target));
+          const int8_t sid = static_cast<int8_t>(ax + (sign < 0.0 ? 3 : 0));
+          if (iter > 0 && prev_axis[idx] >= 0 && prev_axis[idx] != sid) {
+            ++changes;
+          }
+          curr_axis[idx] = sid;
           ++used;
         }
       }
@@ -765,68 +864,76 @@ class AlignAxesOperation : public MeshOperation {
         report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:global no usable edges", 0});
         return report;
       }
-      if (min_dom < kEdgeAxisMinDominance) {
-        report.issues.push_back({ExitCode::kUsageError,
-                                 "E_USAGE: align_axes:global edges exceed ~37deg off-axis; seed frame too poor or mesh not a coherently-oriented grid",
-                                 0});
-        return report;
-      }
 
       const Mat3 rnew = KabschRotationFromCovariance(H);
       const double dtheta = RotationDeltaRadians(rnew, rcur);
+      prev_axis = curr_axis;
       rcur = rnew;
-      result->iterations = iter;
-      result->edges_used = used;
-      result->last_bucket_changes = bucket_changes;
-      result->min_dominance = min_dom;
-      std::cout << "meshpp apply: align_axes:kabsch:global iteration=" << iter << " edges=" << used << " bucket_changes=" << bucket_changes
+      min_dom_final = min_dom;
+      bucket_changes = changes;
+      edges_used = used;
+      ++iters;
+      std::cout << "meshpp apply: align_axes:kabsch:global iteration=" << (iter + 1) << " edges=" << used << " bucket_changes=" << changes
                 << " dtheta_rad=" << dtheta << "\n";
-      if (dtheta < kRefitAngleTolRad) {
+      if (iter > 0 && dtheta < kRefitAngleTolRad) {
         break;
       }
     }
 
     result->R = rcur;
-    std::array<std::vector<double>, 3> lens;
-    std::vector<double> residual_degrees;
-    result->min_dominance = 1.0;
-    for (const auto& h : mesh.elements) {
+    result->iterations = iters;
+    result->edges_used = edges_used;
+    result->last_bucket_changes = bucket_changes;
+    result->min_dominance = min_dom_final;
+
+    if (min_dom_final < kEdgeAxisMinDominance) {
+      report.issues.push_back({ExitCode::kUsageError,
+                               "E_USAGE: align_axes:global edges exceed ~37deg off-axis after refit; mesh is not a single coherently-oriented grid (multi-orientation/body-fitted input)",
+                               0});
+      return report;
+    }
+
+    Hist hL[3] = {Hist(0.25 * seed_L, 4.0 * seed_L, 4000), Hist(0.25 * seed_L, 4.0 * seed_L, 4000),
+                   Hist(0.25 * seed_L, 4.0 * seed_L, 4000)};
+    Hist hR(0.0, 10.0, 4000);
+
+    for (std::size_t c = 0; c < mesh.elements.size(); ++c) {
+      const auto& h = mesh.elements[c];
       for (int e = 0; e < 12; ++e) {
+        const int8_t sid = curr_axis[c * 12 + static_cast<std::size_t>(e)];
+        if (sid < 0) continue;
+        const int ax = sid % 3;
+        const double sign = sid >= 3 ? -1.0 : 1.0;
         const auto a_it = mesh.node_id_to_index.find(h.node_ids[kHexEdges[e][0]]);
         const auto b_it = mesh.node_id_to_index.find(h.node_ids[kHexEdges[e][1]]);
         if (a_it == mesh.node_id_to_index.end() || b_it == mesh.node_id_to_index.end()) continue;
         const Vec3 ev = Subtract(mesh.nodes[b_it->second].xyz, mesh.nodes[a_it->second].xyz);
         const double len = Norm(ev);
         if (len < kMinEdgeLen) continue;
-        const Vec3 f = Multiply(result->R, ScaleVector(ev, 1.0 / len));
-        const int ax = DominantAxis(f);
-        const double dom = std::fabs(f[ax]) / std::max(Norm(f), kMinEdgeLen);
-        result->min_dominance = std::min(result->min_dominance, dom);
-        lens[ax].push_back(len);
-        residual_degrees.push_back(std::acos(std::max(0.0, std::min(1.0, std::fabs(f[ax])))) * 180.0 / 3.141592653589793238462643383279502884);
+        hL[ax].Add(len);
+        const Vec3 ru = Multiply(result->R, ScaleVector(ev, 1.0 / len));
+        const double d = std::max(-1.0, std::min(1.0, ru[ax] * sign));
+        hR.Add(std::acos(d) * 180.0 / 3.141592653589793238462643383279502884);
       }
     }
+
     for (int a = 0; a < 3; ++a) {
-      auto& v = lens[a];
-      if (v.empty()) {
-        result->L[a] = seed_L;
-      } else {
-        std::sort(v.begin(), v.end());
-        result->L[a] = v[v.size() / 2];
-        const double q1 = v[v.size() / 4];
-        const double q3 = v[(3 * v.size()) / 4];
-        if (result->L[a] > 0.0 && (q3 - q1) / result->L[a] > 0.05) {
-          std::cerr << "W_QUALITY: align_axes:global non-uniform cell sizes; use :snapvar\n";
-        }
+      result->L[a] = hL[a].n ? hL[a].Quantile(0.5) : seed_L;
+    }
+    result->resid_mean_deg = hR.Mean();
+    result->resid_p95_deg = hR.Quantile(0.95);
+    result->resid_max_deg = hR.n ? hR.exact_max : 0.0;
+
+    for (int a = 0; a < 3; ++a) {
+      const double med = hL[a].Quantile(0.5);
+      const double q1 = hL[a].Quantile(0.25);
+      const double q3 = hL[a].Quantile(0.75);
+      result->nonuniform[a] = (med > 0.0) && ((q3 - q1) / med > 0.05);
+      if (result->nonuniform[a]) {
+        std::cerr << "W_QUALITY: align_axes:global non-uniform cell sizes on axis " << a << "; route to :snapvar\n";
       }
     }
-    if (!residual_degrees.empty()) {
-      const double sum = std::accumulate(residual_degrees.begin(), residual_degrees.end(), 0.0);
-      result->resid_mean_deg = sum / static_cast<double>(residual_degrees.size());
-      std::sort(residual_degrees.begin(), residual_degrees.end());
-      result->resid_p95_deg = residual_degrees[std::min(residual_degrees.size() - 1, static_cast<std::size_t>(0.95 * (residual_degrees.size() - 1)))];
-      result->resid_max_deg = residual_degrees.back();
-    }
+
     if (result->resid_max_deg > 1.0) {
       std::cerr << "W_QUALITY: align_axes:global residual max > 1deg\n";
     }
@@ -1078,6 +1185,7 @@ class AlignAxesOperation : public MeshOperation {
     }
     std::cout << "mesh.align_axes.global=" << (global_refit_ ? "on" : "off") << "\n";
     if (global_refit_) {
+      std::cout << "mesh.align_axes.global.model=single_orientation\n";
       std::cout << "mesh.align_axes.global.iterations=" << refit.iterations << "\n";
       std::cout << "mesh.align_axes.global.edges_used=" << refit.edges_used << "\n";
       std::cout << "mesh.align_axes.global.bucket_changes_final=" << refit.last_bucket_changes << "\n";
@@ -1088,6 +1196,9 @@ class AlignAxesOperation : public MeshOperation {
       std::cout << "mesh.align_axes.global.L.x=" << refit.L[0] << "\n";
       std::cout << "mesh.align_axes.global.L.y=" << refit.L[1] << "\n";
       std::cout << "mesh.align_axes.global.L.z=" << refit.L[2] << "\n";
+      std::cout << "mesh.align_axes.global.nonuniform.x=" << (refit.nonuniform[0] ? 1 : 0) << "\n";
+      std::cout << "mesh.align_axes.global.nonuniform.y=" << (refit.nonuniform[1] ? 1 : 0) << "\n";
+      std::cout << "mesh.align_axes.global.nonuniform.z=" << (refit.nonuniform[2] ? 1 : 0) << "\n";
     }
     std::cout.flags(old_flags);
     std::cout.precision(old_precision);
@@ -1131,9 +1242,12 @@ class AlignAxesOperation : public MeshOperation {
       }
 
       // Snap only after the Kabsch rotation has been applied to every exported
-      // node.  The same Kabsch edge length L defines the uniform lattice.
+      // node.  Global refit uses per-axis L values, and non-uniform global
+      // axes route to per-plane clustering instead of phase+k*L.
       for (int axis = 0; axis < 3; ++axis) {
-        snap.axis[axis] = SnapAxis(kept_nodes, axis, refit.L[axis]);
+        snap.axis[axis] = (global_refit_ && refit.nonuniform[axis])
+                              ? SnapAxisVariable(kept_nodes, axis, refit.L[axis])
+                              : SnapAxis(kept_nodes, axis, refit.L[axis]);
       }
 
       const char axis_names[3] = {'x', 'y', 'z'};
@@ -1177,7 +1291,9 @@ class AlignAxesOperation : public MeshOperation {
 
       for (std::size_t i = 0; i < kept_nodes.size(); ++i) {
         for (int axis = 0; axis < 3; ++axis) {
-          kept_nodes[i].xyz[axis] = snap.axis[axis].phase + static_cast<double>(snap.axis[axis].k[i]) * refit.L[axis];
+          kept_nodes[i].xyz[axis] = snap.axis[axis].snapped.empty()
+                                         ? snap.axis[axis].phase + static_cast<double>(snap.axis[axis].k[i]) * refit.L[axis]
+                                         : snap.axis[axis].snapped[i];
         }
       }
       snap.ok = true;
