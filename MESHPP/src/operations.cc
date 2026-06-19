@@ -458,6 +458,9 @@ class AlignAxesOperation : public MeshOperation {
         snap_enabled_ = true;
       } else if (tokens[i] == "global") {
         global_refit_ = true;
+      } else if (tokens[i] == "cube") {
+        cube_cells_ = true;
+        snap_enabled_ = true;
       } else {
         report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes unknown modifier: " + tokens[i], 0});
         return report;
@@ -499,6 +502,26 @@ class AlignAxesOperation : public MeshOperation {
     int cells_collapsed = 0;
     int cells_nonunit = 0;
     bool ok = false;
+  };
+
+  struct CubeAxisGeom {
+    long kmin = 0;
+    long kmax = 0;
+    long n = 0;
+    double center = 0.0;
+    double step = 0.0;
+  };
+
+  struct CubeSnapResult {
+    CubeAxisGeom axis[3];
+    double L_star = 0.0;
+    double anisotropy = 0.0;
+    double span_before[3] = {0.0, 0.0, 0.0};
+    double span_after[3] = {0.0, 0.0, 0.0};
+    double span_ratio[3] = {0.0, 0.0, 0.0};
+    double volume_before = 0.0;
+    double volume_after = 0.0;
+    double max_displacement = 0.0;
   };
 
   static SnapAxisResult SnapAxis(const std::vector<Node>& nodes, int axis, double L) {
@@ -587,8 +610,104 @@ class AlignAxesOperation : public MeshOperation {
     return result;
   }
 
+  static CubeAxisGeom ComputeCubeAxisGeom(const std::vector<Node>& nodes, const std::vector<long>& k, int axis) {
+    CubeAxisGeom geom;
+    std::map<long, std::pair<double, long>> plane_accumulators;
+    for (std::size_t i = 0; i < nodes.size(); ++i) {
+      auto& entry = plane_accumulators[k[i]];
+      entry.first += nodes[i].xyz[axis];
+      entry.second += 1;
+    }
+    if (plane_accumulators.empty()) {
+      return geom;
+    }
+
+    const auto first = plane_accumulators.begin();
+    const auto last = plane_accumulators.rbegin();
+    geom.kmin = first->first;
+    geom.kmax = last->first;
+    geom.n = geom.kmax - geom.kmin;
+
+    const double pmin = first->second.first / static_cast<double>(first->second.second);
+    const double pmax = last->second.first / static_cast<double>(last->second.second);
+    geom.center = 0.5 * (pmin + pmax);
+    geom.step = geom.n > 0 ? (pmax - pmin) / static_cast<double>(geom.n) : 0.0;
+    return geom;
+  }
+
+  static ValidationReport ApplyCubeSnap(const std::vector<std::size_t>& element_node_ids,
+                                        const std::unordered_map<std::size_t, std::size_t>& node_id_to_index,
+                                        const SnapResult& snap,
+                                        std::vector<Node>* nodes,
+                                        CubeSnapResult* cube) {
+    constexpr double kCubeAnisoWarn = 0.02;
+    constexpr double kCubeMaxDispFrac = 0.50;
+    ValidationReport report;
+
+    for (int axis = 0; axis < 3; ++axis) {
+      cube->axis[axis] = ComputeCubeAxisGeom(*nodes, snap.axis[axis].k, axis);
+    }
+
+    const double sx = cube->axis[0].step;
+    const double sy = cube->axis[1].step;
+    const double sz = cube->axis[2].step;
+    cube->L_star = std::cbrt(sx * sy * sz);
+    if (!(cube->L_star > 0.0)) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:snap:cube degenerate step", 0});
+      return report;
+    }
+
+    const double smin = std::min({sx, sy, sz});
+    const double smax = std::max({sx, sy, sz});
+    cube->anisotropy = (smax - smin) / cube->L_star;
+    if (cube->anisotropy > kCubeAnisoWarn) {
+      std::cerr << "W_QUALITY: align_axes:snap:cube forcing isotropy distorts axes by up to "
+                << (cube->anisotropy * 100.0) << "% (cells are not actually cubic at this scale)\n";
+    }
+
+    for (int axis = 0; axis < 3; ++axis) {
+      cube->span_before[axis] = static_cast<double>(cube->axis[axis].n) * cube->axis[axis].step;
+      cube->span_after[axis] = static_cast<double>(cube->axis[axis].n) * cube->L_star;
+      cube->span_ratio[axis] = cube->axis[axis].step > 0.0 ? cube->L_star / cube->axis[axis].step : 0.0;
+      const double kc = 0.5 * static_cast<double>(cube->axis[axis].kmin + cube->axis[axis].kmax);
+      for (std::size_t i = 0; i < nodes->size(); ++i) {
+        const double new_coord = cube->axis[axis].center + (static_cast<double>(snap.axis[axis].k[i]) - kc) * cube->L_star;
+        cube->max_displacement = std::max(cube->max_displacement, std::fabs(new_coord - (*nodes)[i].xyz[axis]));
+        (*nodes)[i].xyz[axis] = new_coord;
+      }
+    }
+    cube->volume_before = cube->span_before[0] * cube->span_before[1] * cube->span_before[2];
+    cube->volume_after = cube->span_after[0] * cube->span_after[1] * cube->span_after[2];
+
+    if (cube->max_displacement > kCubeMaxDispFrac * cube->L_star) {
+      report.issues.push_back({ExitCode::kUsageError,
+                               "E_USAGE: align_axes:snap:cube max node displacement " + std::to_string(cube->max_displacement) +
+                                   " exceeds " + std::to_string(kCubeMaxDispFrac) + "*L* (bad bucketing or L*)",
+                               0});
+      return report;
+    }
+
+    for (std::size_t e = 0; e < element_node_ids.size(); e += 8) {
+      for (int axis = 0; axis < 3; ++axis) {
+        std::set<long> planes;
+        for (std::size_t v = 0; v < 8; ++v) {
+          const auto it = node_id_to_index.find(element_node_ids[e + v]);
+          if (it != node_id_to_index.end()) {
+            planes.insert(snap.axis[axis].k[it->second]);
+          }
+        }
+        if (planes.size() != 2) {
+          report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:snap:cube cell does not span exactly 2 planes on an axis", 0});
+          return report;
+        }
+      }
+    }
+    return report;
+  }
+
   bool snap_enabled_ = false;
   bool global_refit_ = false;
+  bool cube_cells_ = false;
 
   struct RefitResult {
     Mat3 R = IdentityMatrix();
@@ -1235,10 +1354,23 @@ class AlignAxesOperation : public MeshOperation {
     }
 
     SnapResult snap;
+    CubeSnapResult cube;
     if (snap_enabled_) {
       if (result.L <= 0.0) {
         report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:snap requires a valid L from kabsch", 0});
         return report;
+      }
+      if (cube_cells_) {
+        for (int axis = 0; axis < 3; ++axis) {
+          if (global_refit_ && refit.nonuniform[axis]) {
+            report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:snap:cube requires uniform-scale input", 0});
+            return report;
+          }
+        }
+        if (global_refit_ && refit.resid_max_deg > 1.0) {
+          report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:snap:cube requires uniform-scale input", 0});
+          return report;
+        }
       }
 
       // Snap only after the Kabsch rotation has been applied to every exported
@@ -1289,11 +1421,25 @@ class AlignAxesOperation : public MeshOperation {
         std::cerr << "W_QUALITY: align_axes:snap " << snap.cells_nonunit << " cells span >2 planes on an axis\n";
       }
 
-      for (std::size_t i = 0; i < kept_nodes.size(); ++i) {
-        for (int axis = 0; axis < 3; ++axis) {
-          kept_nodes[i].xyz[axis] = snap.axis[axis].snapped.empty()
-                                         ? snap.axis[axis].phase + static_cast<double>(snap.axis[axis].k[i]) * refit.L[axis]
-                                         : snap.axis[axis].snapped[i];
+      if (cube_cells_) {
+        std::vector<std::size_t> element_node_ids;
+        element_node_ids.reserve(mesh->elements.size() * 8);
+        for (const auto& element : mesh->elements) {
+          for (std::size_t node_id : element.node_ids) {
+            element_node_ids.push_back(node_id);
+          }
+        }
+        auto cube_report = ApplyCubeSnap(element_node_ids, node_id_to_index, snap, &kept_nodes, &cube);
+        if (!cube_report.ok()) {
+          return cube_report;
+        }
+      } else {
+        for (std::size_t i = 0; i < kept_nodes.size(); ++i) {
+          for (int axis = 0; axis < 3; ++axis) {
+            kept_nodes[i].xyz[axis] = snap.axis[axis].snapped.empty()
+                                           ? snap.axis[axis].phase + static_cast<double>(snap.axis[axis].k[i]) * refit.L[axis]
+                                           : snap.axis[axis].snapped[i];
+          }
         }
       }
       snap.ok = true;
@@ -1327,6 +1473,31 @@ class AlignAxesOperation : public MeshOperation {
       std::cout << "mesh.align_axes.snap.max_plane_spread.z=" << snap.axis[2].max_plane_spread << "\n";
       std::cout << "mesh.align_axes.snap.cells_collapsed=" << snap.cells_collapsed << "\n";
       std::cout << "mesh.align_axes.snap.cells_nonunit=" << snap.cells_nonunit << "\n";
+      std::cout << "mesh.align_axes.snap.cube=" << (cube_cells_ ? "on" : "off") << "\n";
+      if (cube_cells_) {
+        std::cout << "mesh.align_axes.snap.cube.criterion=volume\n";
+        std::cout << "mesh.align_axes.snap.cube.step.x=" << cube.axis[0].step << "\n";
+        std::cout << "mesh.align_axes.snap.cube.step.y=" << cube.axis[1].step << "\n";
+        std::cout << "mesh.align_axes.snap.cube.step.z=" << cube.axis[2].step << "\n";
+        std::cout << "mesh.align_axes.snap.cube.L_star=" << cube.L_star << "\n";
+        std::cout << "mesh.align_axes.snap.cube.anisotropy=" << cube.anisotropy << "\n";
+        std::cout << "mesh.align_axes.snap.cube.grid_dims=" << cube.axis[0].n << "x" << cube.axis[1].n << "x" << cube.axis[2].n << "\n";
+        std::cout << "mesh.align_axes.snap.cube.center.x=" << cube.axis[0].center << "\n";
+        std::cout << "mesh.align_axes.snap.cube.center.y=" << cube.axis[1].center << "\n";
+        std::cout << "mesh.align_axes.snap.cube.center.z=" << cube.axis[2].center << "\n";
+        std::cout << "mesh.align_axes.snap.cube.span_before.x=" << cube.span_before[0] << "\n";
+        std::cout << "mesh.align_axes.snap.cube.span_before.y=" << cube.span_before[1] << "\n";
+        std::cout << "mesh.align_axes.snap.cube.span_before.z=" << cube.span_before[2] << "\n";
+        std::cout << "mesh.align_axes.snap.cube.span_after.x=" << cube.span_after[0] << "\n";
+        std::cout << "mesh.align_axes.snap.cube.span_after.y=" << cube.span_after[1] << "\n";
+        std::cout << "mesh.align_axes.snap.cube.span_after.z=" << cube.span_after[2] << "\n";
+        std::cout << "mesh.align_axes.snap.cube.span_ratio.x=" << cube.span_ratio[0] << "\n";
+        std::cout << "mesh.align_axes.snap.cube.span_ratio.y=" << cube.span_ratio[1] << "\n";
+        std::cout << "mesh.align_axes.snap.cube.span_ratio.z=" << cube.span_ratio[2] << "\n";
+        std::cout << "mesh.align_axes.snap.cube.volume_before=" << cube.volume_before << "\n";
+        std::cout << "mesh.align_axes.snap.cube.volume_after=" << cube.volume_after << "\n";
+        std::cout << "mesh.align_axes.snap.cube.max_displacement=" << cube.max_displacement << "\n";
+      }
     } else {
       std::cout << "mesh.align_axes.snap=off\n";
     }
