@@ -569,6 +569,117 @@ class AlignAxesOperation : public MeshOperation {
     bool ok = false;
   };
 
+  struct KabschSeed {
+    KabschResult result;
+    std::size_t element_index = 0;
+    std::size_t element_id = 0;
+    std::size_t candidates_checked = 0;
+    std::size_t candidates_rejected = 0;
+    bool ok = false;
+  };
+
+  static bool TryBuildKabschSeed(const MeshData& mesh, const HexElement& element, KabschResult* result) {
+    constexpr double kTolerance = 1e-9;
+    std::array<Vec3, 8> corners;
+    std::array<int, 8> ids{};
+    for (std::size_t i = 0; i < element.node_ids.size(); ++i) {
+      const auto node_it = mesh.node_id_to_index.find(element.node_ids[i]);
+      if (node_it == mesh.node_id_to_index.end()) {
+        return false;
+      }
+      const Node& node = mesh.nodes[node_it->second];
+      corners[i] = Vec3{node.xyz[0], node.xyz[1], node.xyz[2]};
+      ids[i] = static_cast<int>(node.id);
+    }
+
+    const Vec3& P0 = corners[0];
+    const Vec3 e1 = Subtract(corners[4], P0);
+    const Vec3 e2 = Subtract(corners[1], P0);
+    const Vec3 e3 = Subtract(corners[3], P0);
+    const double e1_norm = Norm(e1);
+    const double e2_norm = Norm(e2);
+    const double e3_norm = Norm(e3);
+    if (e1_norm < kTolerance || e2_norm < kTolerance || e3_norm < kTolerance) {
+      return false;
+    }
+
+    const Vec3 w1 = Normalize(e1);
+    if (std::fabs(Dot(w1, Normalize(e2))) > 0.999) {
+      return false;
+    }
+    const Vec3 w2_seed = Subtract(e2, ScaleVector(w1, Dot(e2, w1)));
+    if (Norm(w2_seed) < kTolerance) {
+      return false;
+    }
+    const Vec3 w2 = Normalize(w2_seed);
+    const Vec3 w3 = Cross(w1, w2);
+
+    KabschResult candidate;
+    candidate.L = (e1_norm + e2_norm + e3_norm) / 3.0;
+    candidate.ids = ids;
+
+    std::array<Vec3, 8> P;
+    std::array<Vec3, 8> Q;
+    std::set<std::array<int, 3>> seen;
+    for (std::size_t i = 0; i < corners.size(); ++i) {
+      const Vec3 r = Subtract(corners[i], P0);
+      const int bx = (Dot(r, w1) > 0.5 * candidate.L) ? 1 : 0;
+      const int by = (Dot(r, w2) > 0.5 * candidate.L) ? 1 : 0;
+      const int bz = (Dot(r, w3) > 0.5 * candidate.L) ? 1 : 0;
+      candidate.bits[i] = Vec3i{bx, by, bz};
+      P[i] = corners[i];
+      Q[i] = Vec3{bx * candidate.L, by * candidate.L, bz * candidate.L};
+      seen.insert({bx, by, bz});
+    }
+    if (seen.size() != 8) {
+      return false;
+    }
+
+    for (std::size_t i = 0; i < P.size(); ++i) {
+      candidate.centroidP = Add(candidate.centroidP, P[i]);
+      candidate.centroidQ = Add(candidate.centroidQ, Q[i]);
+    }
+    candidate.centroidP = ScaleVector(candidate.centroidP, 1.0 / 8.0);
+    candidate.centroidQ = ScaleVector(candidate.centroidQ, 1.0 / 8.0);
+
+    Mat3 H = ZeroMatrix();
+    for (std::size_t i = 0; i < P.size(); ++i) {
+      AddMatrixInPlace(&H, OuterProduct(Subtract(P[i], candidate.centroidP), Subtract(Q[i], candidate.centroidQ)));
+    }
+
+    candidate.R = KabschRotationFromCovariance(H);
+    candidate.det = Determinant(candidate.R);
+
+    double sse = 0.0;
+    for (std::size_t i = 0; i < P.size(); ++i) {
+      const Vec3 error = Subtract(Multiply(candidate.R, Subtract(P[i], candidate.centroidP)), Subtract(Q[i], candidate.centroidQ));
+      sse += Dot(error, error);
+    }
+    candidate.rmsd = std::sqrt(sse / 8.0);
+    candidate.rmsd_norm = candidate.rmsd / candidate.L;
+    candidate.ortho_err_max = MaxAbsCoeff(Subtract(Multiply(candidate.R, Transpose(candidate.R)), IdentityMatrix()));
+    candidate.ok = true;
+    *result = candidate;
+    return true;
+  }
+
+  static KabschSeed FindKabschSeed(const MeshData& mesh) {
+    KabschSeed seed;
+    for (std::size_t i = 0; i < mesh.elements.size(); ++i) {
+      ++seed.candidates_checked;
+      KabschResult result;
+      if (TryBuildKabschSeed(mesh, mesh.elements[i], &result)) {
+        seed.result = result;
+        seed.element_index = i;
+        seed.element_id = mesh.elements[i].id;
+        seed.ok = true;
+        return seed;
+      }
+      ++seed.candidates_rejected;
+    }
+    return seed;
+  }
+
 
   static double RotationDeltaRadians(const Mat3& a, const Mat3& b) {
     const Mat3 rel = Multiply(Transpose(a), b);
@@ -898,125 +1009,25 @@ class AlignAxesOperation : public MeshOperation {
 
   ValidationReport ApplyKabsch(MeshData* mesh) const {
     constexpr std::size_t kMaxElements = 10;
-    constexpr double kTolerance = 1e-9;
     ValidationReport report;
     const std::size_t original_nodes = mesh->nodes.size();
     const std::size_t original_elements = mesh->elements.size();
     if (mesh->elements.empty()) {
-      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch fewer than 8 corners supplied", 0});
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch requires at least one element", 0});
       return report;
     }
 
-    if (!global_refit_ && mesh->elements.size() > kMaxElements) {
-      std::cout << "meshpp apply: align_axes:kabsch seed-only export filter keeping first " << kMaxElements << " elements\n";
-      mesh->elements.resize(kMaxElements);
-    } else if (global_refit_) {
+    if (global_refit_) {
       std::cout << "meshpp apply: align_axes:kabsch computing seed rotation, then global refit over " << mesh->elements.size() << " elements\n";
     }
 
-    const HexElement& first_element = mesh->elements.front();
-    std::array<Vec3, 8> corners;
-    std::array<int, 8> ids{};
-    for (std::size_t i = 0; i < first_element.node_ids.size(); ++i) {
-      const auto node_it = mesh->node_id_to_index.find(first_element.node_ids[i]);
-      if (node_it == mesh->node_id_to_index.end()) {
-        report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch fewer than 8 corners supplied", 0});
-        return report;
-      }
-      const Node& node = mesh->nodes[node_it->second];
-      corners[i] = Vec3{node.xyz[0], node.xyz[1], node.xyz[2]};
-      ids[i] = static_cast<int>(node.id);
-    }
-
-    auto idx_of_id = [&](int id) -> int {
-      for (std::size_t i = 0; i < ids.size(); ++i) {
-        if (ids[i] == id) {
-          return static_cast<int>(i);
-        }
-      }
-      return -1;
-    };
-
-    const int idx1 = idx_of_id(1);
-    const int idx5 = idx_of_id(5);
-    const int idx2 = idx_of_id(2);
-    const int idx4 = idx_of_id(4);
-    if (idx1 < 0 || idx5 < 0 || idx2 < 0 || idx4 < 0) {
-      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch fewer than 8 corners supplied", 0});
+    KabschSeed seed = FindKabschSeed(*mesh);
+    if (!seed.ok) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch no usable hexahedral seed found in current mesh", 0});
       return report;
     }
-
-    const Vec3& P0 = corners[idx1];
-    const Vec3 e1 = Subtract(corners[idx5], P0);
-    const Vec3 e2 = Subtract(corners[idx2], P0);
-    const Vec3 e3 = Subtract(corners[idx4], P0);
-    const double e1_norm = Norm(e1);
-    const double e2_norm = Norm(e2);
-    const double e3_norm = Norm(e3);
-    if (e1_norm < kTolerance || e2_norm < kTolerance || e3_norm < kTolerance) {
-      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch degenerate seed frame (zero-length or parallel edges)", 0});
-      return report;
-    }
-
-    const Vec3 w1 = Normalize(e1);
-    if (std::fabs(Dot(w1, Normalize(e2))) > 0.999) {
-      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch degenerate seed frame (zero-length or parallel edges)", 0});
-      return report;
-    }
-    const Vec3 w2_seed = Subtract(e2, ScaleVector(w1, Dot(e2, w1)));
-    if (Norm(w2_seed) < kTolerance) {
-      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch degenerate seed frame (zero-length or parallel edges)", 0});
-      return report;
-    }
-    const Vec3 w2 = Normalize(w2_seed);
-    const Vec3 w3 = Cross(w1, w2);
-
-    KabschResult result;
-    result.L = (e1_norm + e2_norm + e3_norm) / 3.0;
-    result.ids = ids;
-
-    std::array<Vec3, 8> P;
-    std::array<Vec3, 8> Q;
-    std::set<std::array<int, 3>> seen;
-    for (std::size_t i = 0; i < corners.size(); ++i) {
-      const Vec3 r = Subtract(corners[i], P0);
-      const int bx = (Dot(r, w1) > 0.5 * result.L) ? 1 : 0;
-      const int by = (Dot(r, w2) > 0.5 * result.L) ? 1 : 0;
-      const int bz = (Dot(r, w3) > 0.5 * result.L) ? 1 : 0;
-      result.bits[i] = Vec3i{bx, by, bz};
-      P[i] = corners[i];
-      Q[i] = Vec3{bx * result.L, by * result.L, bz * result.L};
-      seen.insert({bx, by, bz});
-    }
-    if (seen.size() != 8) {
-      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:kabsch corners do not form a cube topology", 0});
-      return report;
-    }
-
-    for (std::size_t i = 0; i < P.size(); ++i) {
-      result.centroidP = Add(result.centroidP, P[i]);
-      result.centroidQ = Add(result.centroidQ, Q[i]);
-    }
-    result.centroidP = ScaleVector(result.centroidP, 1.0 / 8.0);
-    result.centroidQ = ScaleVector(result.centroidQ, 1.0 / 8.0);
-
-    Mat3 H = ZeroMatrix();
-    for (std::size_t i = 0; i < P.size(); ++i) {
-      AddMatrixInPlace(&H, OuterProduct(Subtract(P[i], result.centroidP), Subtract(Q[i], result.centroidQ)));
-    }
-
-    result.R = KabschRotationFromCovariance(H);
-    result.det = Determinant(result.R);
-
-    double sse = 0.0;
-    for (std::size_t i = 0; i < P.size(); ++i) {
-      const Vec3 error = Subtract(Multiply(result.R, Subtract(P[i], result.centroidP)), Subtract(Q[i], result.centroidQ));
-      sse += Dot(error, error);
-    }
-    result.rmsd = std::sqrt(sse / 8.0);
-    result.rmsd_norm = result.rmsd / result.L;
-    result.ortho_err_max = MaxAbsCoeff(Subtract(Multiply(result.R, Transpose(result.R)), IdentityMatrix()));
-    result.ok = true;
+    KabschResult result = seed.result;
+    const auto ids = result.ids;
 
     RefitResult refit;
     if (global_refit_) {
@@ -1033,10 +1044,19 @@ class AlignAxesOperation : public MeshOperation {
       refit.L[2] = result.L;
     }
 
+    if (!global_refit_ && mesh->elements.size() > kMaxElements) {
+      std::cout << "meshpp apply: align_axes:kabsch seed-only export filter keeping first " << kMaxElements << " elements\n";
+      mesh->elements.resize(kMaxElements);
+    }
+
     const std::streamsize old_precision = std::cout.precision();
     const auto old_flags = std::cout.flags();
     std::cout << std::fixed << std::setprecision(12);
     std::cout << "mesh.align_axes.method=kabsch\n";
+    std::cout << "mesh.align_axes.seed.element.id=" << seed.element_id << "\n";
+    std::cout << "mesh.align_axes.seed.element.index=" << seed.element_index << "\n";
+    std::cout << "mesh.align_axes.seed.candidates_checked=" << seed.candidates_checked << "\n";
+    std::cout << "mesh.align_axes.seed.candidates_rejected=" << seed.candidates_rejected << "\n";
     std::cout << "mesh.align_axes.L=" << result.L << "\n";
     std::cout << "mesh.align_axes.centroidP.x=" << result.centroidP[0] << "\n";
     std::cout << "mesh.align_axes.centroidP.y=" << result.centroidP[1] << "\n";
@@ -1608,6 +1628,7 @@ ValidationReport ApplyOperationPipeline(const std::vector<std::string>& specs, M
     if (!config_report.ok()) {
       return config_report;
     }
+    std::cerr << "meshpp apply: starting operation " << spec << "\n";
     auto apply_report = op->Apply(mesh);
     if (!apply_report.ok()) {
       return apply_report;

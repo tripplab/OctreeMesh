@@ -9,6 +9,17 @@ using meshpp::ExitCode;
 
 namespace {
 int ToInt(ExitCode code) { return static_cast<int>(code); }
+
+std::streamoff StreamSize(std::ifstream* input) {
+  const std::streampos original = input->tellg();
+  input->seekg(0, std::ios::end);
+  const std::streampos end = input->tellg();
+  input->seekg(original);
+  if (end == std::streampos(-1)) {
+    return 0;
+  }
+  return static_cast<std::streamoff>(end);
+}
 }
 
 int main(int argc, char** argv) {
@@ -45,8 +56,12 @@ int main(int argc, char** argv) {
   meshpp::MeshData mesh;
   meshpp::PostMshReader reader;
   {
+    std::cerr << "meshpp roundtrip: starting read/parse input " << input_path << "\n";
+    meshpp::PostMshReadProgress progress;
+    progress.output = &std::cerr;
+    progress.total_bytes = StreamSize(&input);
     meshpp::ScopedTimer timer(&perf.read_ms);
-    auto report = reader.Read(input, &mesh);
+    auto report = reader.Read(input, &mesh, &progress);
     if (!report.ok()) {
       std::cerr << report.issues.front().message << "\n";
       return ToInt(report.issues.front().code);
@@ -54,6 +69,7 @@ int main(int argc, char** argv) {
   }
 
   {
+    std::cerr << "meshpp roundtrip: starting reference validation\n";
     meshpp::ScopedTimer timer(&perf.validate_ms);
     auto ref = meshpp::ValidateReferences(mesh);
     if (!ref.ok()) {
@@ -63,6 +79,7 @@ int main(int argc, char** argv) {
   }
 
   std::ofstream output(output_path.c_str());
+  std::cerr << "meshpp roundtrip: starting output open " << output_path << "\n";
   static char output_buffer[1 << 20];
   output.rdbuf()->pubsetbuf(output_buffer, sizeof(output_buffer));
   if (!output) {
@@ -70,6 +87,7 @@ int main(int argc, char** argv) {
     return ToInt(ExitCode::kIoError);
   }
   {
+    std::cerr << "meshpp roundtrip: starting write output\n";
     meshpp::ScopedTimer timer(&perf.write_ms);
     meshpp::PostMshWriteOptions options;
     options.mesh_name = "roundtrip";

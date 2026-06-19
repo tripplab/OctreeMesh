@@ -20,9 +20,16 @@ std::string Trim(const std::string& s) {
 
 bool StartsWith(const std::string& line, const std::string& prefix) { return line.rfind(prefix, 0) == 0; }
 
+void EmitProgress(const PostMshReadProgress* progress, int percent) {
+  if (progress == nullptr || progress->output == nullptr) {
+    return;
+  }
+  *progress->output << "meshpp read: progress=" << percent << "%\n";
+}
+
 }  // namespace
 
-ValidationReport PostMshReader::Read(std::istream& input, MeshData* out_mesh) const {
+ValidationReport PostMshReader::Read(std::istream& input, MeshData* out_mesh, const PostMshReadProgress* progress) const {
   ValidationReport report;
   out_mesh->nodes.clear();
   out_mesh->elements.clear();
@@ -34,8 +41,27 @@ ValidationReport PostMshReader::Read(std::istream& input, MeshData* out_mesh) co
 
   std::string line;
   std::size_t line_number = 0;
+  int last_reported_percent = -1;
+  if (progress != nullptr && progress->output != nullptr) {
+    EmitProgress(progress, 0);
+    last_reported_percent = 0;
+  }
   while (std::getline(input, line)) {
     ++line_number;
+    if (progress != nullptr && progress->output != nullptr && progress->total_bytes > 0) {
+      const std::streamoff pos = input.tellg();
+      if (pos >= 0) {
+        int percent = static_cast<int>((pos * 100) / progress->total_bytes);
+        if (percent > 100) {
+          percent = 100;
+        }
+        const int rounded_percent = (percent / 5) * 5;
+        if (rounded_percent > last_reported_percent) {
+          EmitProgress(progress, rounded_percent);
+          last_reported_percent = rounded_percent;
+        }
+      }
+    }
     const std::string t = Trim(line);
     if (t.empty() || StartsWith(t, "#")) {
       continue;
@@ -108,6 +134,9 @@ ValidationReport PostMshReader::Read(std::istream& input, MeshData* out_mesh) co
     return report;
   }
 
+  if (progress != nullptr && progress->output != nullptr && last_reported_percent < 100) {
+    EmitProgress(progress, 100);
+  }
   return report;
 }
 
