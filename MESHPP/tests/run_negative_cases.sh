@@ -38,6 +38,8 @@ expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_he
 expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op align_axes:foo
 expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op align_axes:pca,extra
 expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op align_axes:pca
+expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op align_axes:simple:snap
+expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op align_axes:pca:snap
 KABSCH_BAD="$TMP_DIR/kabsch_bad_topology.post.msh"
 python3 - <<'PY' >"$KABSCH_BAD"
 print('MESH "bad" dimension 3 ElemType Hexahedra Nnode 8')

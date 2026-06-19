@@ -6,6 +6,8 @@
 #include <cctype>
 #include <iomanip>
 #include <iostream>
+#include <limits>
+#include <map>
 #include <set>
 #include <sstream>
 #include <unordered_map>
@@ -68,6 +70,21 @@ void PrintMatrixReport(const std::string& name, const Mat3& matrix) {
       std::cout << "mesh.align_axes." << name << ".r" << r << c << "=" << matrix[r][c] << "\n";
     }
   }
+}
+
+
+std::vector<std::string> SplitColonTokens(const std::string& spec) {
+  std::vector<std::string> tokens;
+  std::size_t start = 0;
+  while (start <= spec.size()) {
+    const std::size_t pos = spec.find(':', start);
+    tokens.push_back(spec.substr(start, pos == std::string::npos ? std::string::npos : pos - start));
+    if (pos == std::string::npos) {
+      break;
+    }
+    start = pos + 1;
+  }
+  return tokens;
 }
 
 double DeterminantColumns(const Vec3& c0, const Vec3& c1, const Vec3& c2) {
@@ -417,14 +434,33 @@ class AlignAxesOperation : public MeshOperation {
 
   ValidationReport Configure(const std::string& spec) override {
     ValidationReport report;
-    if (spec == "pca") {
+    const auto tokens = SplitColonTokens(spec);
+    if (tokens.empty() || tokens[0].empty()) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes expects pca, simple, or kabsch (e.g. align_axes:pca, align_axes:simple, or align_axes:kabsch)", 0});
+      return report;
+    }
+
+    if (tokens[0] == "pca") {
       method_ = Method::kPca;
-    } else if (spec == "simple") {
+    } else if (tokens[0] == "simple") {
       method_ = Method::kSimple;
-    } else if (spec == "kabsch") {
+    } else if (tokens[0] == "kabsch") {
       method_ = Method::kKabsch;
     } else {
       report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes expects pca, simple, or kabsch (e.g. align_axes:pca, align_axes:simple, or align_axes:kabsch)", 0});
+      return report;
+    }
+
+    for (std::size_t i = 1; i < tokens.size(); ++i) {
+      if (tokens[i] == "snap") {
+        snap_enabled_ = true;
+      } else {
+        report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes unknown modifier: " + tokens[i], 0});
+        return report;
+      }
+    }
+    if (snap_enabled_ && method_ != Method::kKabsch) {
+      report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:snap requires a successful rotation (use kabsch)", 0});
     }
     return report;
   }
@@ -441,6 +477,63 @@ class AlignAxesOperation : public MeshOperation {
 
  private:
   enum class Method { kPca, kSimple, kKabsch };
+
+  struct SnapAxisResult {
+    std::vector<long> k;
+    double phase = 0.0;
+    double max_residual = 0.0;
+    double max_plane_spread = 0.0;
+    int unique_planes = 0;
+  };
+
+  struct SnapResult {
+    SnapAxisResult axis[3];
+    int cells_collapsed = 0;
+    int cells_nonunit = 0;
+    bool ok = false;
+  };
+
+  static SnapAxisResult SnapAxis(const std::vector<Node>& nodes, int axis, double L) {
+    SnapAxisResult result;
+    const std::size_t n = nodes.size();
+    result.k.resize(n);
+
+    double cmin = std::numeric_limits<double>::infinity();
+    for (const auto& node : nodes) {
+      cmin = std::min(cmin, node.xyz[axis]);
+    }
+
+    // Assign every rotated coordinate to the nearest uniform plane index, then
+    // average out residual noise into one global lattice phase for this axis.
+    double phase_accumulator = 0.0;
+    for (std::size_t i = 0; i < n; ++i) {
+      result.k[i] = std::lround((nodes[i].xyz[axis] - cmin) / L);
+      phase_accumulator += nodes[i].xyz[axis] - static_cast<double>(result.k[i]) * L;
+    }
+    result.phase = n == 0 ? 0.0 : phase_accumulator / static_cast<double>(n);
+
+    std::map<long, std::pair<double, double>> bands;
+    for (std::size_t i = 0; i < n; ++i) {
+      const double coordinate = nodes[i].xyz[axis];
+      const double snapped = result.phase + static_cast<double>(result.k[i]) * L;
+      result.max_residual = std::max(result.max_residual, std::fabs(coordinate - snapped));
+
+      auto it = bands.find(result.k[i]);
+      if (it == bands.end()) {
+        bands[result.k[i]] = {coordinate, coordinate};
+      } else {
+        it->second.first = std::min(it->second.first, coordinate);
+        it->second.second = std::max(it->second.second, coordinate);
+      }
+    }
+    for (const auto& band : bands) {
+      result.max_plane_spread = std::max(result.max_plane_spread, band.second.second - band.second.first);
+    }
+    result.unique_planes = static_cast<int>(bands.size());
+    return result;
+  }
+
+  bool snap_enabled_ = false;
 
   struct KabschResult {
     Mat3 R = IdentityMatrix();
@@ -618,6 +711,7 @@ class AlignAxesOperation : public MeshOperation {
     const std::streamsize old_export_precision = std::cout.precision();
     const auto old_export_flags = std::cout.flags();
     std::cout << std::fixed << std::setprecision(6);
+    std::cout << "mesh.align_axes.snap=off\n";
     std::cout << "mesh.align_axes.elements.exported=" << mesh->elements.size() << "\n";
     std::cout << "mesh.align_axes.elements.dropped=" << (original_elements - mesh->elements.size()) << "\n";
     std::cout << "mesh.align_axes.nodes.exported=" << mesh->nodes.size() << "\n";
@@ -804,12 +898,94 @@ class AlignAxesOperation : public MeshOperation {
       node_id_to_index[kept_nodes[i].id] = i;
     }
 
+    SnapResult snap;
+    if (snap_enabled_) {
+      if (result.L <= 0.0) {
+        report.issues.push_back({ExitCode::kUsageError, "E_USAGE: align_axes:snap requires a valid L from kabsch", 0});
+        return report;
+      }
+
+      // Snap only after the Kabsch rotation has been applied to every exported
+      // node.  The same Kabsch edge length L defines the uniform lattice.
+      for (int axis = 0; axis < 3; ++axis) {
+        snap.axis[axis] = SnapAxis(kept_nodes, axis, result.L);
+      }
+
+      const double snap_sep = 0.25 * result.L;
+      const char axis_names[3] = {'x', 'y', 'z'};
+      for (int axis = 0; axis < 3; ++axis) {
+        if (snap.axis[axis].max_plane_spread >= snap_sep) {
+          report.issues.push_back({ExitCode::kUsageError,
+                                   std::string("E_USAGE: align_axes:snap axis ") + axis_names[axis] +
+                                       " not separable: intra-plane spread exceeds 0.25*L (mesh is not rectilinear at this L)",
+                                   0});
+          return report;
+        }
+      }
+
+      for (const auto& element : mesh->elements) {
+        for (int axis = 0; axis < 3; ++axis) {
+          std::set<long> planes;
+          for (std::size_t v = 0; v < element.node_ids.size(); ++v) {
+            const auto it = node_id_to_index.find(element.node_ids[v]);
+            if (it != node_id_to_index.end()) {
+              planes.insert(snap.axis[axis].k[it->second]);
+            }
+          }
+          if (planes.size() < 2) {
+            ++snap.cells_collapsed;
+          } else if (planes.size() > 2) {
+            ++snap.cells_nonunit;
+          }
+        }
+      }
+      if (snap.cells_collapsed > 0) {
+        report.issues.push_back({ExitCode::kUsageError,
+                                 "E_USAGE: align_axes:snap would collapse " + std::to_string(snap.cells_collapsed) +
+                                     " cell-faces to zero volume (wrong L or non-grid input)",
+                                 0});
+        return report;
+      }
+      if (snap.cells_nonunit > 0) {
+        std::cerr << "W_QUALITY: align_axes:snap " << snap.cells_nonunit << " cells span >2 planes on an axis\n";
+      }
+
+      for (std::size_t i = 0; i < kept_nodes.size(); ++i) {
+        for (int axis = 0; axis < 3; ++axis) {
+          kept_nodes[i].xyz[axis] = snap.axis[axis].phase + static_cast<double>(snap.axis[axis].k[i]) * result.L;
+        }
+      }
+      snap.ok = true;
+    }
+
     mesh->nodes = std::move(kept_nodes);
     mesh->node_id_to_index = std::move(node_id_to_index);
 
     const std::streamsize old_export_precision = std::cout.precision();
     const auto old_export_flags = std::cout.flags();
     std::cout << std::fixed << std::setprecision(6);
+    if (snap_enabled_) {
+      const double max_residual = std::max(snap.axis[0].max_residual, std::max(snap.axis[1].max_residual, snap.axis[2].max_residual));
+      std::cout << "mesh.align_axes.snap=on\n";
+      std::cout << "mesh.align_axes.snap.L=" << result.L << "\n";
+      std::cout << "mesh.align_axes.snap.phase.x=" << snap.axis[0].phase << "\n";
+      std::cout << "mesh.align_axes.snap.phase.y=" << snap.axis[1].phase << "\n";
+      std::cout << "mesh.align_axes.snap.phase.z=" << snap.axis[2].phase << "\n";
+      std::cout << "mesh.align_axes.snap.unique_planes.x=" << snap.axis[0].unique_planes << "\n";
+      std::cout << "mesh.align_axes.snap.unique_planes.y=" << snap.axis[1].unique_planes << "\n";
+      std::cout << "mesh.align_axes.snap.unique_planes.z=" << snap.axis[2].unique_planes << "\n";
+      std::cout << "mesh.align_axes.snap.max_residual.x=" << snap.axis[0].max_residual << "\n";
+      std::cout << "mesh.align_axes.snap.max_residual.y=" << snap.axis[1].max_residual << "\n";
+      std::cout << "mesh.align_axes.snap.max_residual.z=" << snap.axis[2].max_residual << "\n";
+      std::cout << "mesh.align_axes.snap.max_residual=" << max_residual << "\n";
+      std::cout << "mesh.align_axes.snap.max_plane_spread.x=" << snap.axis[0].max_plane_spread << "\n";
+      std::cout << "mesh.align_axes.snap.max_plane_spread.y=" << snap.axis[1].max_plane_spread << "\n";
+      std::cout << "mesh.align_axes.snap.max_plane_spread.z=" << snap.axis[2].max_plane_spread << "\n";
+      std::cout << "mesh.align_axes.snap.cells_collapsed=" << snap.cells_collapsed << "\n";
+      std::cout << "mesh.align_axes.snap.cells_nonunit=" << snap.cells_nonunit << "\n";
+    } else {
+      std::cout << "mesh.align_axes.snap=off\n";
+    }
     std::cout << "mesh.align_axes.elements.exported=" << mesh->elements.size() << "\n";
     std::cout << "mesh.align_axes.elements.dropped=" << (original_elements - mesh->elements.size()) << "\n";
     std::cout << "mesh.align_axes.nodes.exported=" << mesh->nodes.size() << "\n";
@@ -904,6 +1080,7 @@ class AlignAxesOperation : public MeshOperation {
         std::cout << "mesh.align_axes.matrix.r" << r << c << "=" << rotation[r][c] << "\n";
       }
     }
+    std::cout << "mesh.align_axes.snap=off\n";
     std::cout.flags(old_flags);
     std::cout.precision(old_precision);
     return report;
