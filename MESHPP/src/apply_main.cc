@@ -25,6 +25,8 @@ void PrintHelp() {
   std::cout << "  align_axes:pca                  Align PCA principal directions with X/Y/Z axes.\n";
   std::cout << "  align_axes:simple               Export the first ten elements after aligning first-element edge axes to X/Y/Z.\n";
   std::cout << "  align_axes:kabsch               Export first ten elements after Kabsch corner alignment.\n";
+  std::cout << "  align_axes:kabsch:global        Seed Kabsch, then refit one global rotation from all hex edge directions.\n";
+  std::cout << "  align_axes:kabsch:global:snap   Global Kabsch refit, then snap rotated nodes to the fitted rectilinear lattice.\n";
   std::cout << "  align_axes:kabsch:snap          Kabsch-align, then snap rotated nodes to the fitted uniform rectilinear lattice.\n";
   std::cout << "  mesh_stats[:format=text]        Print mesh metrics to stdout.\n";
   std::cout << "  octet:(+|-)x(+|-)y(+|-)z        Keep elements in one octant only.\n";
@@ -40,6 +42,7 @@ void PrintHelp() {
   std::cout << "  meshpp_apply --in in.post.msh --out first10.post.msh --op align_axes:simple\n";
   std::cout << "  meshpp_apply --in in.post.msh --out aligned.post.msh --op align_axes:kabsch\n";
   std::cout << "  meshpp_apply --in in.post.msh --out snapped.post.msh --op align_axes:kabsch:snap\n";
+  std::cout << "  meshpp_apply --in in.post.msh --out global.post.msh --op align_axes:kabsch:global:snap\n";
   std::cout << "  meshpp_apply --in in.post.msh --out octant.post.msh --op octet:+x+y-z\n";
   std::cout << "  meshpp_apply --in in.post.msh --out cyl.post.msh --op cylinder:35 --mesh_stats --perf_stats\n";
 }
