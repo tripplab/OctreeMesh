@@ -251,6 +251,70 @@ rg -n "^mesh\.align_axes\.corner\.4\.bits=001$" "$ALIGN_KABSCH_STDOUT"
 rg -q "nodes: 8" "$TMP_DIR/out_align_axes_kabsch.validate"
 rg -q "elements: 1" "$TMP_DIR/out_align_axes_kabsch.validate"
 
+ALIGN_KABSCH_ARBITRARY_FIX="$TMP_DIR/align_axes_kabsch_arbitrary_ids.post.msh"
+cat >"$ALIGN_KABSCH_ARBITRARY_FIX" <<'EOF'
+MESH "arbitrary" dimension 3 ElemType Hexahedra Nnode 8
+
+Coordinates
+101 0 0 1
+205 1 0 1
+309 1 1 1
+412 0 1 1
+518 0 0 2
+623 1 0 2
+777 1 1 2
+888 0 1 2
+End Coordinates
+Elements
+42 101 205 309 412 518 623 777 888
+End Elements
+EOF
+ALIGN_KABSCH_FILTERED_OUT="$TMP_DIR/out_align_axes_kabsch_filtered.post.msh"
+ALIGN_KABSCH_FILTERED_STDOUT="$TMP_DIR/out_align_axes_kabsch_filtered.stdout"
+"$BIN" --in "$ALIGN_KABSCH_ARBITRARY_FIX" --out "$ALIGN_KABSCH_FILTERED_OUT" --op cylinder:2 --op align_axes:kabsch:global:snap --mesh_stats >"$ALIGN_KABSCH_FILTERED_STDOUT"
+rg -n "^mesh\.cylinder\.elements_kept=1$" "$ALIGN_KABSCH_FILTERED_STDOUT"
+rg -n "^mesh\.align_axes\.method=kabsch$" "$ALIGN_KABSCH_FILTERED_STDOUT"
+rg -n "^mesh\.align_axes\.seed\.element\.id=42$" "$ALIGN_KABSCH_FILTERED_STDOUT"
+rg -n "^mesh\.align_axes\.corner\.101\.bits=000$" "$ALIGN_KABSCH_FILTERED_STDOUT"
+rg -n "^mesh\.align_axes\.corner\.518\.bits=100$" "$ALIGN_KABSCH_FILTERED_STDOUT"
+rg -n "^mesh\.align_axes\.global=on$" "$ALIGN_KABSCH_FILTERED_STDOUT"
+rg -n "^mesh\.align_axes\.snap=on$" "$ALIGN_KABSCH_FILTERED_STDOUT"
+rg -n "^mesh\.align_axes\.elements\.exported=1$" "$ALIGN_KABSCH_FILTERED_STDOUT"
+rg -n "^mesh\.stats\.elements=1$" "$ALIGN_KABSCH_FILTERED_STDOUT"
+
+ALIGN_KABSCH_SCAN_FIX="$TMP_DIR/align_axes_kabsch_scan_seed.post.msh"
+cat >"$ALIGN_KABSCH_SCAN_FIX" <<'EOF'
+MESH "scan" dimension 3 ElemType Hexahedra Nnode 8
+
+Coordinates
+1 0 0 0
+2 1 0 0
+3 1 0 0
+4 0 1 0
+5 0 0 1
+6 1 0 1
+7 1 1 1
+8 0 1 1
+101 3 0 0
+102 4 0 0
+103 4 1 0
+104 3 1 0
+105 3 0 1
+106 4 0 1
+107 4 1 1
+108 3 1 1
+End Coordinates
+Elements
+1 1 2 3 4 5 6 7 8
+2 101 102 103 104 105 106 107 108
+End Elements
+EOF
+ALIGN_KABSCH_SCAN_STDOUT="$TMP_DIR/out_align_axes_kabsch_scan.stdout"
+"$BIN" --in "$ALIGN_KABSCH_SCAN_FIX" --out "$TMP_DIR/out_align_axes_kabsch_scan.post.msh" --op align_axes:kabsch >"$ALIGN_KABSCH_SCAN_STDOUT"
+rg -n "^mesh\.align_axes\.seed\.element\.id=2$" "$ALIGN_KABSCH_SCAN_STDOUT"
+rg -n "^mesh\.align_axes\.seed\.candidates_checked=2$" "$ALIGN_KABSCH_SCAN_STDOUT"
+rg -n "^mesh\.align_axes\.seed\.candidates_rejected=1$" "$ALIGN_KABSCH_SCAN_STDOUT"
+
 ALIGN_KABSCH_SNAP_OUT="$TMP_DIR/out_align_axes_kabsch_snap.post.msh"
 ALIGN_KABSCH_SNAP_STDOUT="$TMP_DIR/out_align_axes_kabsch_snap.stdout"
 "$BIN" --in "$FIX" --out "$ALIGN_KABSCH_SNAP_OUT" --op rotate:0,0,1,30 --op align_axes:kabsch:snap --mesh_stats >"$ALIGN_KABSCH_SNAP_STDOUT"

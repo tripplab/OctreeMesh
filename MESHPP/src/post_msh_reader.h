@@ -2,7 +2,9 @@
 
 #include <array>
 #include <cstddef>
+#include <ios>
 #include <istream>
+#include <ostream>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -45,9 +47,14 @@ struct ValidationReport {
   bool ok() const { return issues.empty(); }
 };
 
+struct PostMshReadProgress {
+  std::ostream* output = nullptr;
+  std::streamoff total_bytes = 0;
+};
+
 class PostMshReader {
  public:
-  ValidationReport Read(std::istream& input, MeshData* out_mesh) const;
+  ValidationReport Read(std::istream& input, MeshData* out_mesh, const PostMshReadProgress* progress = nullptr) const;
 };
 
 ValidationReport ValidateReferences(const MeshData& mesh);

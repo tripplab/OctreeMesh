@@ -13,6 +13,17 @@ using meshpp::ExitCode;
 namespace {
 int ToInt(ExitCode code) { return static_cast<int>(code); }
 
+std::streamoff StreamSize(std::ifstream* input) {
+  const std::streampos original = input->tellg();
+  input->seekg(0, std::ios::end);
+  const std::streampos end = input->tellg();
+  input->seekg(original);
+  if (end == std::streampos(-1)) {
+    return 0;
+  }
+  return static_cast<std::streamoff>(end);
+}
+
 void PrintHelp() {
   std::cout << "meshpp_apply - Apply operation pipeline to GiD .post.msh meshes\n\n";
   std::cout << "Usage:\n";
@@ -94,8 +105,12 @@ int main(int argc, char** argv) {
   meshpp::MeshData mesh;
   meshpp::PostMshReader reader;
   {
+    std::cerr << "meshpp apply: starting read/parse input " << input_path << "\n";
+    meshpp::PostMshReadProgress progress;
+    progress.output = &std::cerr;
+    progress.total_bytes = StreamSize(&input);
     meshpp::ScopedTimer timer(&perf.read_ms);
-    auto read_report = reader.Read(input, &mesh);
+    auto read_report = reader.Read(input, &mesh, &progress);
     if (!read_report.ok()) {
       std::cerr << read_report.issues.front().message << "\n";
       return ToInt(read_report.issues.front().code);
@@ -103,6 +118,7 @@ int main(int argc, char** argv) {
   }
 
   {
+    std::cerr << "meshpp apply: starting reference validation\n";
     meshpp::ScopedTimer timer(&perf.validate_ms);
     auto ref_report = meshpp::ValidateReferences(mesh);
     if (!ref_report.ok()) {
@@ -112,6 +128,7 @@ int main(int argc, char** argv) {
   }
 
   {
+    std::cerr << "meshpp apply: starting operation pipeline (" << ops.size() << " operations)\n";
     meshpp::ScopedTimer timer(&perf.operations_ms);
     auto op_report = meshpp::ApplyOperationPipeline(ops, &mesh);
     if (!op_report.ok()) {
@@ -121,6 +138,7 @@ int main(int argc, char** argv) {
   }
 
   std::ofstream output(output_path.c_str());
+  std::cerr << "meshpp apply: starting output open " << output_path << "\n";
   static char output_buffer[1 << 20];
   output.rdbuf()->pubsetbuf(output_buffer, sizeof(output_buffer));
   if (!output) {
@@ -129,6 +147,7 @@ int main(int argc, char** argv) {
   }
 
   {
+    std::cerr << "meshpp apply: starting write output\n";
     meshpp::ScopedTimer timer(&perf.write_ms);
     meshpp::PostMshWriteOptions options;
     options.mesh_name = "meshpp_apply";
