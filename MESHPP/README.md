@@ -1,6 +1,8 @@
 # meshpp
 
-`meshpp` is a standalone `.post.msh` processing tool.
+`meshpp` is a standalone mesh processing tool. It reads GiD ASCII
+`.post.msh` meshes and, for `meshpp_apply`, OctreeMesh data files, then writes
+GiD `.post.msh` output.
 
 ## Build
 
@@ -23,8 +25,26 @@ make
 ### 2) Apply operation pipeline
 
 ```bash
-./meshpp_apply --in <input.post.msh> --out <output.post.msh> --op <spec> [--op <spec> ...] [--mesh_stats] [--perf_stats]
+./meshpp_apply --in <input> [--in_format auto|gid|octree] --out <output.post.msh> --op <spec> [--op <spec> ...] [--mesh_stats] [--perf_stats]
 ```
+
+Input formats:
+- `--in_format auto` is the default and auto-detects GiD `.post.msh` input from
+  a `MESH` header or OctreeMesh data input from a `{Nodes}` section.
+- `--in_format gid` forces GiD ASCII `.post.msh` input.
+- `--in_format octree` forces OctreeMesh data input with `{Nodes}` and `{Mesh}`
+  sections. OctreeMesh node rows are assigned sequential 1-based node IDs, and
+  element material IDs are parsed for validation but ignored because
+  `meshpp_apply` currently transforms geometry/topology only.
+- Output remains GiD `.post.msh` for all input formats.
+
+Supported OctreeMesh input subset:
+- dimension must be `3`
+- element type must be `5` / Hexahedra
+- nodes per element must be `8`
+- node rows contain `x y z`
+- element rows contain `material node1 node2 node3 node4 node5 node6 node7 node8`
+- `;` comments, including inline comments, are supported
 
 Supported operations:
 - `scale:<factor>`

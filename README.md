@@ -4,6 +4,22 @@ OCTREEMESH PIPELINE v160326 by trippm@tripplab.com
 
 Some documentation and examples in HOW_TO folder
 
+## meshpp input formats
+
+`MESHPP/meshpp_apply` can apply geometry/topology operations to either GiD
+ASCII `.post.msh` meshes or OctreeMesh data files and always writes GiD
+`.post.msh` output. The input format is auto-detected by default:
+
+```bash
+cd MESHPP
+./meshpp_apply --in input.post.msh --out output.post.msh --op scale:1
+./meshpp_apply --in octreemesh.dat --out output.post.msh --op scale:1
+```
+
+Use `--in_format gid` or `--in_format octree` to force a format. OctreeMesh
+material IDs are accepted but ignored by `meshpp_apply` because the tool
+currently transforms mesh geometry only.
+
 # OctreeMesh Pipeline - User Guide
 
 # Quick Start
