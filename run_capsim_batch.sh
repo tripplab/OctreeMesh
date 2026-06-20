@@ -3,7 +3,7 @@ set -u
 
 usage() {
   cat <<USAGE
-Usage: $0 --pdb LIST --folds LIST --res SPEC --threads N --bin PATH --vdb-dir DIR [--patch-radius R] [--strict-skips] [--smoke]
+Usage: $0 --pdb LIST --folds LIST --res SPEC --threads N --bin PATH --vdb-dir DIR [--steps SPEC] [--cleanup-checkpoints MODE] [--patch-radius R] [--strict-skips] [--smoke]
 
 Required:
   --pdb         Comma list of pdb IDs (allowed: 1cwp,3j4u,3izg,4g93)
@@ -13,6 +13,9 @@ Required:
   --bin         Path to OctreeMesh bin directory
   --vdb-dir     Directory where <vdb>.vdb is expected first (fallback: cwd)
 Optional:
+  --steps SPEC      Steps passed to run_capsim.sh (default: 1-5; e.g. 1-5 or 2,3,4)
+  --cleanup-checkpoints MODE
+                    Checkpoint cleanup mode passed to run_capsim.sh: yes or no (default: no)
   --patch-radius R  Patch radius in Å; computes cone angle per PDB diameter
   --strict-skips    Missing VDB skips trigger non-zero exit
   --smoke           Build/validate/summarize only, do not run simulations
@@ -26,17 +29,28 @@ done
 
 ORIG_ARGS=("$@")
 
-PDB_LIST=""; FOLD_LIST=""; RES_SPEC=""; THREADS=""; BIN_PATH=""; VDB_DIR=""; PATCH_RADIUS=""; STRICT_SKIPS=0; SMOKE=0
+PDB_LIST=""; FOLD_LIST=""; RES_SPEC=""; THREADS=""; BIN_PATH=""; VDB_DIR=""; STEPS_SPEC="1-5"; CLEANUP_CHECKPOINTS="no"; PATCH_RADIUS=""; STRICT_SKIPS=0; SMOKE=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --pdb) PDB_LIST="$2"; shift 2 ;;
+    --pdb=*) PDB_LIST="${1#*=}"; shift ;;
     --folds) FOLD_LIST="$2"; shift 2 ;;
+    --folds=*) FOLD_LIST="${1#*=}"; shift ;;
     --res) RES_SPEC="$2"; shift 2 ;;
+    --res=*) RES_SPEC="${1#*=}"; shift ;;
     --threads) THREADS="$2"; shift 2 ;;
+    --threads=*) THREADS="${1#*=}"; shift ;;
     --bin) BIN_PATH="$2"; shift 2 ;;
+    --bin=*) BIN_PATH="${1#*=}"; shift ;;
     --vdb-dir) VDB_DIR="$2"; shift 2 ;;
+    --vdb-dir=*) VDB_DIR="${1#*=}"; shift ;;
+    --steps) STEPS_SPEC="$2"; shift 2 ;;
+    --steps=*) STEPS_SPEC="${1#*=}"; shift ;;
+    --cleanup-checkpoints) CLEANUP_CHECKPOINTS="$2"; shift 2 ;;
+    --cleanup-checkpoints=*) CLEANUP_CHECKPOINTS="${1#*=}"; shift ;;
     --patch-radius) PATCH_RADIUS="$2"; shift 2 ;;
+    --patch-radius=*) PATCH_RADIUS="${1#*=}"; shift ;;
     --strict-skips) STRICT_SKIPS=1; shift ;;
     --smoke) SMOKE=1; shift ;;
     -h|--help) usage ;;
@@ -47,6 +61,21 @@ done
 [[ -n "$PDB_LIST" && -n "$FOLD_LIST" && -n "$RES_SPEC" && -n "$THREADS" && -n "$BIN_PATH" && -n "$VDB_DIR" ]] || usage
 [[ "$THREADS" =~ ^[0-9]+$ ]] || { echo "--threads must be integer"; exit 1; }
 (( THREADS >= 1 && THREADS <= 30 )) || { echo "--threads must be in [1,30]"; exit 1; }
+[[ "$STEPS_SPEC" =~ ^[0-9]+-[0-9]+$ || "$STEPS_SPEC" =~ ^[0-9]+(,[0-9]+)*$ ]] || { echo "--steps must be a range (e.g. 1-5) or comma list (e.g. 2,3,4)"; exit 1; }
+if [[ "$STEPS_SPEC" == *-* ]]; then
+  step_start="${STEPS_SPEC%-*}"
+  step_end="${STEPS_SPEC#*-}"
+  (( step_start >= 1 && step_start <= step_end && step_end <= 5 )) || { echo "--steps range must be within [1,5]"; exit 1; }
+else
+  IFS=',' read -r -a step_arr <<< "$STEPS_SPEC"
+  for step_i in "${step_arr[@]}"; do
+    (( step_i >= 1 && step_i <= 5 )) || { echo "--steps entries must be within [1,5]"; exit 1; }
+  done
+fi
+case "$CLEANUP_CHECKPOINTS" in
+  yes|no) ;;
+  *) echo "--cleanup-checkpoints must be yes or no"; exit 1 ;;
+esac
 [[ -d "$BIN_PATH" ]] || { echo "--bin directory not found: $BIN_PATH"; exit 1; }
 [[ -d "$VDB_DIR" ]] || { echo "--vdb-dir not found: $VDB_DIR"; exit 1; }
 if [[ -n "$PATCH_RADIUS" ]]; then
@@ -88,7 +117,7 @@ csv_file="${out_prefix}.csv"
 work_dir="$SCRIPT_DIR/runs/batch_${ts}_$$"
 mkdir -p "$work_dir/tmp_configs"
 
-echo -e "status\texit_code\truntime_sec\tpdb\tvdb\tres\tyoung\tfold_type\tfold_index\tthreads\tpatch_radius\tcapsid_diameter\tcone_deg\trun_dir" > "$tsv_file"
+echo -e "status\texit_code\truntime_sec\tpdb\tvdb\tres\tyoung\tfold_type\tfold_index\tthreads\tsteps\tpatch_radius\tcapsid_diameter\tcone_deg\trun_dir" > "$tsv_file"
 echo "job_name,total_proteins,total_atoms,nodes,elements,mesh_volume,volume_loaded,octree_mesh_sec,meshsolver_sec,mesh2pdb_sec" > "$csv_file"
 
 young_for_pdb() {
@@ -249,7 +278,7 @@ for pdb_l in "${pdb_arr[@]}"; do
           pre_ckpt=$(find "$SCRIPT_DIR/runs" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort)
           tmp_log="$work_dir/current_job.log"
           set +e
-          printf 'n\n' | "$RUN_SCRIPT" -c "$cfg" -t "$THREADS" > "$tmp_log" 2>&1
+          "$RUN_SCRIPT" -c "$cfg" -t "$THREADS" --steps "$STEPS_SPEC" --cleanup-checkpoints "$CLEANUP_CHECKPOINTS" > "$tmp_log" 2>&1
           rc=$?
           set -e
           post_ckpt=$(find "$SCRIPT_DIR/runs" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort)
@@ -301,8 +330,8 @@ for pdb_l in "${pdb_arr[@]}"; do
         fi
       fi
 
-      printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
-        "$status" "$exit_code" "$runtime" "$pdb_u" "$vdb" "$res_f" "$young" "$fold_type" "$fold_index" "$THREADS" "$patch_radius_tsv" "$capsid_diameter_tsv" "$cone_deg_tsv" "$run_dir" >> "$tsv_file"
+      printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
+        "$status" "$exit_code" "$runtime" "$pdb_u" "$vdb" "$res_f" "$young" "$fold_type" "$fold_index" "$THREADS" "$STEPS_SPEC" "$patch_radius_tsv" "$capsid_diameter_tsv" "$cone_deg_tsv" "$run_dir" >> "$tsv_file"
       echo "${job_name},${tp},${ta},${nodes},${elems},${mv},${vl},${t2},${t3},${t4}" >> "$csv_file"
     done
   done
