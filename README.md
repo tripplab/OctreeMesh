@@ -145,12 +145,16 @@ View all options:
 # Run specific steps only
 ./run_capsim.sh --steps=2-4        # Steps 2,3,4
 ./run_capsim.sh --steps=1,3,5      # Steps 1,3,5 only
+./run_capsim.sh --steps 2,3,4      # Space-separated option form is also supported
 
 # Use more threads
 ./run_capsim.sh --threads=4
 
 # Combine options
 ./run_capsim.sh --shear --threads=8 --steps=2-5
+
+# Non-interactive checkpoint cleanup control after a full 1-5 run
+./run_capsim.sh --cleanup-checkpoints no
 
 # Use a different config file
 ./run_capsim.sh --config=my_experiment.conf
@@ -177,6 +181,10 @@ Use `run_capsim_batch.sh` to execute many simulations **sequentially** across co
 ```
 
 ### Optional flags
+- `--steps SPEC`: pass a step selection through to `run_capsim.sh`; default is `1-5`. Use a range such as `2-4` or a comma list such as `1,3,5`.
+- `--cleanup-checkpoints MODE`: pass checkpoint cleanup mode to `run_capsim.sh`; batch defaults to `no`, and accepted values are `yes` or `no`.
+- Long options support both `--option value` and `--option=value` forms where the option takes a value.
+- `--patch-radius R`: patch radius in Å; the batch script computes a cone angle per PDB diameter and writes it into each generated config.
 - `--strict-skips`: if any job is skipped because VDB is missing, final batch exit becomes non-zero.
 - `--smoke`: validate/build matrix and summaries without executing simulations.
 
@@ -194,6 +202,8 @@ Use `run_capsim_batch.sh` to execute many simulations **sequentially** across co
 - `--bin` must contain these entries: `extract_ATOM`, `octree_mesh`, `meshsolver`, `mesh2pdb`, and `apply-matrix.awk`.
 - Step 5 is named `rotate_back`, but it is executed through `apply-matrix.awk` (there is no separate `rotate_back` executable requirement).
 - `--threads` is required and must be integer `[1,30]`.
+- `--steps` must be either a range or comma-separated list, and all requested steps must be within `[1,5]`.
+- `--cleanup-checkpoints` must be `yes` or `no` for batch runs; the batch script passes the mode explicitly instead of piping stdin to `run_capsim.sh`.
 - Fold tokens must be from: `2_0,2_1,3_0,3_1,5_0`.
 
 ### VDB existence check (mandatory)
@@ -211,7 +221,7 @@ When invoked, the parent process immediately prints:
 
 Example:
 ```bash
-./run_capsim_batch.sh --pdb 1cwp --folds 2_0 --res 16 --threads 8 --bin "$PWD/bin" --vdb-dir "$PWD"
+./run_capsim_batch.sh --pdb 1cwp --folds 2_0 --res 16 --threads 8 --steps 2-4 --cleanup-checkpoints no --bin "$PWD/bin" --vdb-dir "$PWD"
 # prints:
 # Spawned batch PID: <pid>
 # Master log: runs/batch_<UTC_TS>_<PID>.log
@@ -220,7 +230,7 @@ Example:
 
 ### Smoke mode example
 ```bash
-./run_capsim_batch.sh   --pdb 1cwp,3j4u   --folds 2_0,5_0   --res 4-6   --threads 12   --bin /path/to/OctreeMesh/bin   --vdb-dir /path/to/vdbs   --smoke
+./run_capsim_batch.sh   --pdb 1cwp,3j4u   --folds 2_0,5_0   --res 4-6   --threads 12   --steps 1-2   --bin /path/to/OctreeMesh/bin   --vdb-dir /path/to/vdbs   --smoke
 ```
 Expected behavior:
 - still detaches
@@ -241,7 +251,7 @@ Final batch exit code:
 
 ### CSV/TSV contents
 - TSV columns:
-  - `status, exit_code, runtime_sec, pdb, vdb, res, young, fold_type, fold_index, threads, run_dir`
+  - `status, exit_code, runtime_sec, pdb, vdb, res, young, fold_type, fold_index, threads, steps, patch_radius, capsid_diameter, cone_deg, run_dir`
 - CSV columns:
   - `job_name, total_proteins, total_atoms, nodes, elements, mesh_volume, volume_loaded, octree_mesh_sec, meshsolver_sec, mesh2pdb_sec`
 
@@ -388,6 +398,7 @@ After successful completion:
 - `*.solver.out` - Solver output log
 - `*.post.res` - Results for GID visualization
 - `*.post.msh` - Mesh for GID visualization
+- `capsid_rotated.pdb` - Rotated intermediate PDB retained for inspection/reuse
 - `*_back.pdb` - PDB file with results (for VMD)
 
 ### 6. Resuming Interrupted Runs
@@ -410,6 +421,7 @@ The pipeline creates checkpoints automatically. To resume:
 | `-s, --steps STEPS` | Steps to run (e.g., 1-5, 2,3,4) |
 | `--shear` | Enable shear force simulation |
 | `-t, --threads N` | Set number of FEM threads |
+| `--cleanup-checkpoints MODE` | Checkpoint cleanup mode after a full 1-5 run (`ask`, `yes`, or `no`; default `ask`) |
 | `-l, --list` | List available indentation points |
 | `-h, --help` | Show help message |
 
@@ -706,5 +718,3 @@ These are different:
 
 Compile parallelism (faster build): make -jN and solver submake PARALLEL=4.
 Runtime thread count (OpenMP execution): set env vars like SOLVER_THREADS when running solver tools/scripts.
-
-

@@ -7,7 +7,7 @@ usage() {
     echo "Usage: $0 [OPTIONS]"
     echo "Options:"
     echo "  -c, --config FILE    Configuration file (default: capsim_config.sh)"
-    echo "  -s, --steps STEPS     Steps to run (comma-separated or range)"
+    echo "  -s, --steps STEPS     Steps to run (comma-separated or range; default: 1-5)"
     echo "                        Available steps:"
     echo "                        1: extract_ATOM"
     echo "                        2: octree_mesh"
@@ -17,6 +17,8 @@ usage() {
     echo "                        Examples: 1-5 (all steps), 2,3,4 (specific steps)"
     echo "  --shear               Enable shear force simulation (adds rotation step after mesh)"
     echo "  -t, --threads N       Number of threads for FEM solver (overrides config)"
+    echo "  --cleanup-checkpoints MODE"
+    echo "                        Checkpoint cleanup after full 1-5 completion: ask, yes, or no (default: ask)"
     echo "  -l, --list            List available fold configurations"
     echo "  -h, --help            Display this help message"
     exit 1
@@ -190,6 +192,7 @@ CONFIG_FILE="capsim_config.sh"
 STEPS_SPEC="1-5"  # Default: run all steps
 SHEAR_MODE=0
 CLI_THREADS=""
+CLEANUP_CHECKPOINTS="ask"
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -198,9 +201,17 @@ while [[ $# -gt 0 ]]; do
             CONFIG_FILE="$2"
             shift 2
             ;;
+        --config=*)
+            CONFIG_FILE="${1#*=}"
+            shift
+            ;;
         -s|--steps)
             STEPS_SPEC="$2"
             shift 2
+            ;;
+        --steps=*)
+            STEPS_SPEC="${1#*=}"
+            shift
             ;;
         --shear)
             SHEAR_MODE=1
@@ -209,6 +220,18 @@ while [[ $# -gt 0 ]]; do
         -t|--threads)
             CLI_THREADS="$2"
             shift 2
+            ;;
+        --threads=*)
+            CLI_THREADS="${1#*=}"
+            shift
+            ;;
+        --cleanup-checkpoints)
+            CLEANUP_CHECKPOINTS="$2"
+            shift 2
+            ;;
+        --cleanup-checkpoints=*)
+            CLEANUP_CHECKPOINTS="${1#*=}"
+            shift
             ;;
         -l|--list)
             list_folds
@@ -223,6 +246,15 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+case "$CLEANUP_CHECKPOINTS" in
+    ask|yes|no) ;;
+    *)
+        echo "Error: Invalid --cleanup-checkpoints value '$CLEANUP_CHECKPOINTS'"
+        echo "Valid options: ask, yes, no"
+        exit 1
+        ;;
+esac
 
 # Load configuration
 if [[ ! -f "$CONFIG_FILE" ]]; then
@@ -542,7 +574,6 @@ if should_run 4; then
             "${BIN}/mesh2pdb" "$(basename "$CAPR")" "$(basename "$MSH2")" "$(basename "$POST")" "$(basename "$PDB_results")" "${ref_lev}"
         )
         step_rc=$?
-        rm -f "${CAPR}"  # Clean up rotated file
         step_elapsed="$(elapsed_seconds "$step_start" "$(now_epoch)")"
         if [[ $step_rc -eq 0 ]]; then
             touch "${CHECKPOINT_DIR}/step4_done"
@@ -634,12 +665,23 @@ if $all_completed; then
     
     # Ask about checkpoint cleanup if all steps in full pipeline were run
     if [[ ${#STEPS_TO_RUN[@]} -eq 5 ]] && [[ $all_completed == true ]]; then
-        echo ""
-        read -p "Clean up checkpoints? (y/n): " -n 1 -r
-        echo ""
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
+        cleanup_reply="$CLEANUP_CHECKPOINTS"
+        if [[ "$cleanup_reply" == "ask" ]]; then
+            echo ""
+            read -p "Clean up checkpoints? (y/n): " -n 1 -r
+            echo ""
+            if [[ $REPLY =~ ^[Yy]$ ]]; then
+                cleanup_reply="yes"
+            else
+                cleanup_reply="no"
+            fi
+        fi
+
+        if [[ "$cleanup_reply" == "yes" ]]; then
             find "$CHECKPOINT_DIR" -mindepth 1 -delete
             echo "Checkpoints cleaned up (timing history preserved in $TIMING_FILE)."
+        else
+            echo "Checkpoints preserved in $CHECKPOINT_DIR."
         fi
     fi
 else
