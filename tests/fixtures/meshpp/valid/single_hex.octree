@@ -1,0 +1,21 @@
+; Geometry file
+
+{Nodes}
+3 ; Dimension
+8 ; Nodes count
+; X1 X2 X3
+0 0 0
+1 0 0
+1 1 0
+0 1 0
+0 0 1
+1 0 1
+1 1 1
+0 1 1
+
+{Mesh}
+5 ; Element type (2=Triangle, 3=Quadrilateral, 4=Tetrahedra, 5=Hexahedra)
+8 ; Nodes per element
+1 ; Elements count
+; Material Node1 Node2 ...
+7 1 2 3 4 5 6 7 8

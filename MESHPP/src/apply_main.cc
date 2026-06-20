@@ -1,8 +1,10 @@
 #include "operations.h"
+#include "octreemesh_reader.h"
 #include "post_msh_reader.h"
 #include "post_msh_writer.h"
 #include "perf.h"
 
+#include <cctype>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -12,6 +14,12 @@ using meshpp::ExitCode;
 
 namespace {
 int ToInt(ExitCode code) { return static_cast<int>(code); }
+
+enum class InputFormat {
+  kAuto,
+  kGid,
+  kOctree,
+};
 
 std::streamoff StreamSize(std::ifstream* input) {
   const std::streampos original = input->tellg();
@@ -24,11 +32,104 @@ std::streamoff StreamSize(std::ifstream* input) {
   return static_cast<std::streamoff>(end);
 }
 
+std::string Trim(const std::string& s) {
+  std::size_t start = 0;
+  while (start < s.size() && std::isspace(static_cast<unsigned char>(s[start]))) {
+    ++start;
+  }
+  std::size_t end = s.size();
+  while (end > start && std::isspace(static_cast<unsigned char>(s[end - 1]))) {
+    --end;
+  }
+  return s.substr(start, end - start);
+}
+
+std::string StripAutodetectComment(const std::string& line) {
+  std::string candidate = line;
+  const std::size_t octree_comment = candidate.find(';');
+  if (octree_comment != std::string::npos) {
+    candidate = candidate.substr(0, octree_comment);
+  }
+  return Trim(candidate);
+}
+
+bool StartsWith(const std::string& line, const std::string& prefix) { return line.rfind(prefix, 0) == 0; }
+
+bool ParseInputFormat(const std::string& value, InputFormat* format) {
+  if (value == "auto") {
+    *format = InputFormat::kAuto;
+    return true;
+  }
+  if (value == "gid") {
+    *format = InputFormat::kGid;
+    return true;
+  }
+  if (value == "octree") {
+    *format = InputFormat::kOctree;
+    return true;
+  }
+  return false;
+}
+
+const char* InputFormatName(InputFormat format) {
+  switch (format) {
+    case InputFormat::kAuto:
+      return "auto";
+    case InputFormat::kGid:
+      return "gid";
+    case InputFormat::kOctree:
+      return "octree";
+  }
+  return "unknown";
+}
+
+meshpp::ValidationReport DetectInputFormat(std::ifstream* input, InputFormat* detected) {
+  meshpp::ValidationReport report;
+  input->clear();
+  input->seekg(0);
+
+  std::string line;
+  std::size_t line_number = 0;
+  while (std::getline(*input, line)) {
+    ++line_number;
+    const std::string t = StripAutodetectComment(line);
+    if (t.empty() || StartsWith(t, "#")) {
+      continue;
+    }
+    if (StartsWith(t, "MESH")) {
+      *detected = InputFormat::kGid;
+      input->clear();
+      input->seekg(0);
+      return report;
+    }
+    if (t == "{Nodes}") {
+      *detected = InputFormat::kOctree;
+      input->clear();
+      input->seekg(0);
+      return report;
+    }
+    report.issues.push_back({ExitCode::kParseError, "E_PARSE: cannot auto-detect input format; expected GiD MESH header or OctreeMesh {Nodes} section", line_number});
+    input->clear();
+    input->seekg(0);
+    return report;
+  }
+
+  report.issues.push_back({ExitCode::kParseError, "E_PARSE: cannot auto-detect input format from empty input", line_number});
+  input->clear();
+  input->seekg(0);
+  return report;
+}
+
 void PrintHelp() {
-  std::cout << "meshpp_apply - Apply operation pipeline to GiD .post.msh meshes\n\n";
+  std::cout << "meshpp_apply - Apply operation pipeline to mesh files and write GiD .post.msh output\n\n";
   std::cout << "Usage:\n";
-  std::cout << "  meshpp_apply --in <input.post.msh> --out <output.post.msh> --op <spec> [--op <spec> ...] [--mesh_stats] [--perf_stats]\n";
+  std::cout << "  meshpp_apply --in <input> [--in_format auto|gid|octree] --out <output.post.msh> --op <spec> [--op <spec> ...] [--mesh_stats] [--perf_stats]\n";
   std::cout << "  meshpp_apply -h\n\n";
+  std::cout << "Input formats:\n";
+  std::cout << "  --in_format auto                Auto-detect GiD .post.msh or OctreeMesh data input (default).\n";
+  std::cout << "  --in_format gid                 Read GiD ASCII .post.msh input.\n";
+  std::cout << "  --in_format octree              Read OctreeMesh data input with {Nodes}/{Mesh} sections.\n";
+  std::cout << "                                  OctreeMesh material ids are ignored; output remains GiD .post.msh.\n\n";
   std::cout << "Available operations (for --op <spec>):\n";
   std::cout << "  scale:<factor>                  Multiply node coordinates by <factor>.\n";
   std::cout << "  translate:<dx>,<dy>,<dz>        Add offsets to node coordinates.\n";
@@ -49,6 +150,7 @@ void PrintHelp() {
   std::cout << "  --perf_stats                    Print timing and mesh size counters.\n\n";
   std::cout << "Examples:\n";
   std::cout << "  meshpp_apply --in in.post.msh --out out.post.msh --op scale:2.0\n";
+  std::cout << "  meshpp_apply --in octreemesh.dat --in_format octree --out out.post.msh --op scale:2.0\n";
   std::cout << "  meshpp_apply --in in.post.msh --out out.post.msh --op translate:1,2,3 --op mesh_stats\n";
   std::cout << "  meshpp_apply --in in.post.msh --out rot.post.msh --op rotate:0,0,1,90\n";
   std::cout << "  meshpp_apply --in in.post.msh --out aligned.post.msh --op align_axes:pca\n";
@@ -77,6 +179,7 @@ int main(int argc, char** argv) {
   std::string output_path;
   std::vector<std::string> ops;
   bool perf_stats = false;
+  InputFormat input_format = InputFormat::kAuto;
 
   for (int i = 1; i < argc; ++i) {
     std::string arg = argv[i];
@@ -84,6 +187,12 @@ int main(int argc, char** argv) {
       input_path = argv[++i];
     } else if (arg == "--out" && i + 1 < argc) {
       output_path = argv[++i];
+    } else if (arg == "--in_format" && i + 1 < argc) {
+      const std::string value = argv[++i];
+      if (!ParseInputFormat(value, &input_format)) {
+        std::cerr << "E_USAGE: unsupported --in_format: " << value << " (expected auto, gid, or octree)\n";
+        return ToInt(ExitCode::kUsageError);
+      }
     } else if (arg == "--op" && i + 1 < argc) {
       ops.push_back(argv[++i]);
     } else if (arg == "--mesh_stats") {
@@ -106,14 +215,29 @@ int main(int argc, char** argv) {
 
   meshpp::PerfStats perf;
   meshpp::MeshData mesh;
-  meshpp::PostMshReader reader;
   {
-    std::cerr << "meshpp apply: starting read/parse input " << input_path << "\n";
+    InputFormat resolved_format = input_format;
+    if (resolved_format == InputFormat::kAuto) {
+      auto detect_report = DetectInputFormat(&input, &resolved_format);
+      if (!detect_report.ok()) {
+        std::cerr << detect_report.issues.front().message << "\n";
+        return ToInt(detect_report.issues.front().code);
+      }
+    }
+
+    std::cerr << "meshpp apply: starting read/parse input " << input_path << " (format=" << InputFormatName(resolved_format) << ")\n";
     meshpp::PostMshReadProgress progress;
     progress.output = &std::cerr;
     progress.total_bytes = StreamSize(&input);
     meshpp::ScopedTimer timer(&perf.read_ms);
-    auto read_report = reader.Read(input, &mesh, &progress);
+    meshpp::ValidationReport read_report;
+    if (resolved_format == InputFormat::kOctree) {
+      meshpp::OctreeMeshReader reader;
+      read_report = reader.Read(input, &mesh, &progress);
+    } else {
+      meshpp::PostMshReader reader;
+      read_report = reader.Read(input, &mesh, &progress);
+    }
     if (!read_report.ok()) {
       std::cerr << read_report.issues.front().message << "\n";
       return ToInt(read_report.issues.front().code);

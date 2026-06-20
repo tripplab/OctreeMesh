@@ -24,6 +24,44 @@ rg -n "^mesh\.stats\.elements=1$" "$STATS_OUT"
 rg -n "^mesh\.stats\.min\.x=0\.000000$" "$STATS_OUT"
 rg -n "^mesh\.stats\.max\.z=1\.000000$" "$STATS_OUT"
 
+OCTREE_FIX="$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.octree"
+OCTREE_OUT="$TMP_DIR/out_octree_auto.post.msh"
+OCTREE_STATS_OUT="$TMP_DIR/out_octree_auto.stdout"
+"$BIN" --in "$OCTREE_FIX" --out "$OCTREE_OUT" --mesh_stats >"$OCTREE_STATS_OUT"
+rg -n "^mesh\.stats\.nodes=8$" "$OCTREE_STATS_OUT"
+rg -n "^mesh\.stats\.elements=1$" "$OCTREE_STATS_OUT"
+rg -n "^mesh\.stats\.min\.x=0\.000000$" "$OCTREE_STATS_OUT"
+rg -n "^mesh\.stats\.max\.z=1\.000000$" "$OCTREE_STATS_OUT"
+"$ROUNDTRIP" "$OCTREE_OUT" "$TMP_DIR/out_octree_auto_roundtrip.post.msh" --validate >"$TMP_DIR/out_octree_auto.validate"
+rg -q "nodes: 8" "$TMP_DIR/out_octree_auto.validate"
+rg -q "elements: 1" "$TMP_DIR/out_octree_auto.validate"
+
+OCTREE_EXPLICIT_OUT="$TMP_DIR/out_octree_explicit.post.msh"
+"$BIN" --in "$OCTREE_FIX" --in_format octree --out "$OCTREE_EXPLICIT_OUT" --op scale:2 >/tmp/meshpp_octree_explicit_stdout.txt
+assert_octree_scaled() {
+  local mesh_file="$1"
+  python3 - "$mesh_file" <<'PY'
+import sys
+mesh_file = sys.argv[1]
+in_coordinates = False
+coords = {}
+with open(mesh_file, encoding="utf-8") as fh:
+    for line in fh:
+        t = line.strip()
+        if t == "Coordinates":
+            in_coordinates = True
+            continue
+        if t == "End Coordinates":
+            break
+        if in_coordinates and t:
+            parts = t.split()
+            coords[int(parts[0])] = tuple(float(v) for v in parts[1:4])
+if coords.get(7) != (2.0, 2.0, 2.0):
+    raise SystemExit(f"expected scaled node 7 at (2,2,2), got {coords.get(7)}")
+PY
+}
+assert_octree_scaled "$OCTREE_EXPLICIT_OUT"
+
 TRANSFORM_STATS_OUT="$TMP_DIR/transform_stats_stdout.txt"
 "$BIN" --in "$FIX" --out "$TMP_DIR/out_transform_stats.post.msh" --op scale:2 --op translate:1,0,-1 --mesh_stats >"$TRANSFORM_STATS_OUT"
 rg -n "^mesh\.stats\.min\.x=1\.000000$" "$TRANSFORM_STATS_OUT"

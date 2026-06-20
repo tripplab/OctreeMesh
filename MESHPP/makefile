@@ -1,7 +1,7 @@
 CXX ?= g++
 CXXFLAGS ?= -O2 -std=c++17 -Wall -Wextra -pedantic
 
-COMMON_SRC = src/post_msh_reader.cc src/post_msh_writer.cc src/operations.cc
+COMMON_SRC = src/post_msh_reader.cc src/post_msh_writer.cc src/octreemesh_reader.cc src/operations.cc
 ROUNDTRIP_SRC = src/roundtrip_main.cc
 APPLY_SRC = src/apply_main.cc
 
@@ -22,8 +22,8 @@ clean:
 SAN_FLAGS = -fsanitize=address,undefined -fno-omit-frame-pointer
 
 sanitize:
-	$(CXX) $(CXXFLAGS) $(SAN_FLAGS) -o meshpp_roundtrip_asan src/post_msh_reader.cc src/post_msh_writer.cc src/operations.cc src/roundtrip_main.cc
-	$(CXX) $(CXXFLAGS) $(SAN_FLAGS) -o meshpp_apply_asan src/post_msh_reader.cc src/post_msh_writer.cc src/operations.cc src/apply_main.cc
+	$(CXX) $(CXXFLAGS) $(SAN_FLAGS) -o meshpp_roundtrip_asan src/post_msh_reader.cc src/post_msh_writer.cc src/octreemesh_reader.cc src/operations.cc src/roundtrip_main.cc
+	$(CXX) $(CXXFLAGS) $(SAN_FLAGS) -o meshpp_apply_asan src/post_msh_reader.cc src/post_msh_writer.cc src/octreemesh_reader.cc src/operations.cc src/apply_main.cc
 
 clean-sanitize:
 	rm -f meshpp_roundtrip_asan meshpp_apply_asan

@@ -26,6 +26,9 @@ expect_code 3 "$ROUNDTRIP_BIN" "$FIX/missing_mesh_header.post.msh" "$TMP_DIR/out
 expect_code 3 "$ROUNDTRIP_BIN" "$FIX/duplicate_node.post.msh" "$TMP_DIR/out.post.msh"
 expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op nope
 expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op translate:1,2
+expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --in_format banana --out "$TMP_DIR/out_bad_format.post.msh" --op scale:1
+expect_code 4 "$APPLY_BIN" --in "$FIX/bad_octree_element_type.octree" --out "$TMP_DIR/out_bad_octree_type.post.msh" --op scale:1
+expect_code 3 "$APPLY_BIN" --in "$FIX/bad_octree_node_reference.octree" --out "$TMP_DIR/out_bad_octree_ref.post.msh" --op scale:1
 
 expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op rotate:0,0,1
 expect_code 2 "$APPLY_BIN" --in "$ROOT_DIR/tests/fixtures/meshpp/valid/single_hex.post.msh" --out "$TMP_DIR/out2.post.msh" --op rotate:z,90
