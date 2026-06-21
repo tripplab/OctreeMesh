@@ -334,7 +334,7 @@ void Mesh::SaveMeshOnGiDFile( int mpi_rank , char* output_ ){
 		fprintf( fp , "%d ", (int)(i_node+1) );
 		for(  int i_dim = 0  ;  i_dim < 3  ;  i_dim++  ){
 			double coord = this->GetCoord( (int)i_node , i_dim );
-			fprintf( fp , "%lf ", scale_->UnscaleCoord( i_dim , coord ) );
+			fprintf( fp , "%.12g ", scale_->UnscaleCoord( i_dim , coord ) );
 		}
 		fprintf( fp, "\n" ); 
 	}
@@ -398,7 +398,7 @@ void Mesh::SaveEmbededMeshOnGiDFile( int mpi_rank , char* output_ ){
 			fprintf( fp , "%d ", nodes_index[ i_node ] );
 			for(  int i_dim = 0  ;  i_dim < 3  ;  i_dim++  ){
 				double coord = this->GetCoord( (int)i_node , i_dim );
-				fprintf( fp , "%lf ", scale_->UnscaleCoord( i_dim , coord ) );
+				fprintf( fp , "%.12g ", scale_->UnscaleCoord( i_dim , coord ) );
 			}
 			fprintf( fp, "\n" ); 
 		}
@@ -469,7 +469,7 @@ void Mesh::SaveBodyFittedMeshOnGiDFile( int mpi_rank , char* output_ ){
 			fprintf( fp , "%d ", nodes_index[ i_node ] );
 			for(  int i_dim = 0  ;  i_dim < 3  ;  i_dim++  ){
 				double coord = this->GetCoord( (int)i_node , i_dim );
-				fprintf( fp , "%lf ", scale_->UnscaleCoord( i_dim , coord ) );
+				fprintf( fp , "%.12g ", scale_->UnscaleCoord( i_dim , coord ) );
 			}
 			fprintf( fp, "\n" ); 
 		}
@@ -871,7 +871,7 @@ void Spheres::SaveMeshOnGiDFile( char* output_ ){
 		fprintf( fp , "%d ", (int)( i_elem + 1 ) );
 		for(  int i_dim = 0  ;  i_dim < 3  ;  i_dim++  ){
 			double coord = elements_[ i_elem ]->GetCoord( i_dim );
-			fprintf( fp , "%lf ", coord );
+			fprintf( fp , "%.12g ", coord );
 		}
 		fprintf( fp, "\n" ); 
 	}

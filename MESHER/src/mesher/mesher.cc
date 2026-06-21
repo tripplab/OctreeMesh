@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <iomanip>
 #include "mesher.h"
 
 namespace {
@@ -71,6 +72,7 @@ Mesher::Mesher(){
 	Fx_ = 0.0;
 	Fy_ = 0.0;
 	Fz_ = 1.0;
+	meshing_orientation_mode_ = ROTATE_MESHED_ATOMS;
 
 
 }
@@ -104,6 +106,14 @@ Mesher::Mesher( int argc , char** argv ){
 	cone_amplitude_ = cone_amplitude_ * 3.14159265358979323846264338327950 /180.00;
 	prop_variation_ = atof( argv[ 12 ] );
 	young_modulus_ = atof( argv[ 13 ] );
+	if(  !strcmp( argv[ 14 ] , "--rotate_meshed_atoms" )  ){
+		meshing_orientation_mode_ = ROTATE_MESHED_ATOMS;
+	}else if(  !strcmp( argv[ 14 ] , "--mesh_rotated_atoms" )  ){
+		meshing_orientation_mode_ = MESH_ROTATED_ATOMS;
+	}else{
+		std::cout << "Invalid meshing orientation mode " << argv[ 14 ] << std::endl;
+		assert( 0 );
+	}
 
 
 	//Checking if folds are correct values
@@ -127,6 +137,8 @@ Mesher::Mesher( int argc , char** argv ){
 	printf(" Will look for structure in file: %s \n", input_);
 	printf(" Will generate a mesh with resolution of: %f angstrom \n", resolution_capside_);
 	printf(" Will align vector: %f %f %f to Z \n", Fx_, Fy_, Fz_);
+	printf(" Meshing orientation mode: %s \n",
+			( meshing_orientation_mode_ == MESH_ROTATED_ATOMS ) ? "--mesh_rotated_atoms" : "--rotate_meshed_atoms" );
 	printf(" Will configure nanoindentation on the aligned vector \n");
 	//printf(" Will configure nanoindentation on the %d-fold id %d \n", fold_, fold_index_);
 	printf("%s \n"," - Leaving constructor -");
@@ -887,7 +899,8 @@ void Mesher::SetAlign2Z( double Fx, double Fy, double Fz){
  */
 void Mesher::ReadVdbFile(  ){
 
-	vdb_->ReadCompleteFile( fold_, align2Z_00, align2Z_01, align2Z_02, align2Z_10, align2Z_11, align2Z_12, align2Z_20, align2Z_21, align2Z_22 );
+	vdb_->ReadCompleteFile( fold_, align2Z_00, align2Z_01, align2Z_02, align2Z_10, align2Z_11, align2Z_12, align2Z_20, align2Z_21, align2Z_22,
+			( meshing_orientation_mode_ == MESH_ROTATED_ATOMS ) );
 }
 
 /**
@@ -2593,8 +2606,10 @@ void Mesher::PrintGeometryDataFileForFEMT( std::string name ){
 							new_coord[ 0 ] = vdb_->UnscaleCoordinate( 0 , coord[ 0 ] );
 							new_coord[ 1 ] = vdb_->UnscaleCoordinate( 1 , coord[ 1 ] );
 							new_coord[ 2 ] = vdb_->UnscaleCoordinate( 2 , coord[ 2 ] );
-							this->RotateCoordianteToFold( new_coord );
-							fp << new_coord[ 0 ] << " " << new_coord[ 1 ] << " " << new_coord[ 2 ] << endl;
+							if(  meshing_orientation_mode_ == ROTATE_MESHED_ATOMS  ){
+								this->RotateCoordianteToFold( new_coord );
+							}
+							fp << std::setprecision( 12 ) << new_coord[ 0 ] << " " << new_coord[ 1 ] << " " << new_coord[ 2 ] << endl;
 							this->SetPrintedOnNodeAndNeighbours( node , cell );
 						}
 					}

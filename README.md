@@ -183,6 +183,7 @@ Use `run_capsim_batch.sh` to execute many simulations **sequentially** across co
 ### Optional flags
 - `--steps SPEC`: pass a step selection through to `run_capsim.sh`; default is `1-5`. Use a range such as `2-4` or a comma list such as `1,3,5`.
 - `--cleanup-checkpoints MODE`: pass checkpoint cleanup mode to `run_capsim.sh`; batch defaults to `no`, and accepted values are `yes` or `no`.
+- `--mesh-orientation MODE`: pass the octree meshing orientation mode to `run_capsim.sh`; accepted values are `--rotate_meshed_atoms`/`rotate_meshed_atoms` and `--mesh_rotated_atoms`/`mesh_rotated_atoms`. The default is `--rotate_meshed_atoms`.
 - Long options support both `--option value` and `--option=value` forms where the option takes a value.
 - `--patch-radius R`: patch radius in Å; the batch script computes a cone angle per PDB diameter and writes it into each generated config.
 - `--strict-skips`: if any job is skipped because VDB is missing, final batch exit becomes non-zero.
@@ -422,6 +423,7 @@ The pipeline creates checkpoints automatically. To resume:
 | `--shear` | Enable shear force simulation |
 | `-t, --threads N` | Set number of FEM threads |
 | `--cleanup-checkpoints MODE` | Checkpoint cleanup mode after a full 1-5 run (`ask`, `yes`, or `no`; default `ask`) |
+| `--mesh-orientation MODE` | Override octree meshing orientation mode (`--rotate_meshed_atoms` or `--mesh_rotated_atoms`) |
 | `-l, --list` | List available indentation points |
 | `-h, --help` | Show help message |
 
@@ -491,7 +493,11 @@ Parallelized? No (single-threaded C++ without OpenMP pragmas).
 
 Purpose: builds capsid volumetric mesh and FEM input data.
 
-Inputs (13 args after exe): vdb file, T-number, solution type, resolution, fold/id alignment, vector (x,y,z), virus id, cone angle, load proportion variation, Young’s modulus scaling.
+Inputs (14 args after exe): vdb file, T-number, solution type, resolution, fold/id alignment, vector (x,y,z), virus id, cone angle, load proportion variation, Young’s modulus scaling, and exactly one meshing orientation mode flag.
+
+Meshing orientation modes:
+- `--rotate_meshed_atoms`: mesh original atom coordinates, then rotate exported mesh nodes with the fold-to-Z matrix. This preserves the historical path.
+- `--mesh_rotated_atoms`: rotate atom coordinates before meshing, then export mesh nodes as-is without another node rotation.
 
 Outputs: mesh/problem/solver files consumed by FEM solver (and other intermediate files).
 

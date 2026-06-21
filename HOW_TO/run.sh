@@ -33,6 +33,7 @@ load_ele=0.00  ## variation in the proportion of loaded elements [float]
 Young=0.020  ## Young modulus / 10,000 [float]
 log_lev=2  ## 0: only fatal errors, 1: current process, 2: solver iterations [int]
 ref_lev=5  ##  to use in the octree searching of elemnts per atom to interpolate results written to PDB [int]
+MESH_ORIENTATION_MODE=--rotate_meshed_atoms  ## --rotate_meshed_atoms or --mesh_rotated_atoms
 
 ## Set absolute path to executables
 BIN=/path/to/OctreeMesh/bin
@@ -68,7 +69,7 @@ PDB_back=${resn}_back.pdb
   ${BIN}/extract_ATOM ${inp}
 
   ## Generate the mesh and simulation config files
-  inp="${VDB}_ATOMS.vdb ${T} ${VDW} ${Res} ${Fold} ${inx} ${Fx} ${Fy} ${Fz} ${PDB} ${cone} ${load_ele} ${Young}"
+  inp="${VDB}_ATOMS.vdb ${T} ${VDW} ${Res} ${Fold} ${inx} ${Fx} ${Fy} ${Fz} ${PDB} ${cone} ${load_ele} ${Young} ${MESH_ORIENTATION_MODE}"
   echo "Running octree_mesh $inp"
   ${BIN}/octree_mesh ${inp}
 
@@ -110,6 +111,5 @@ else
 fi
 
   echo "#############################################################################################"
-
 
 

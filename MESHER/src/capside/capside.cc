@@ -1397,7 +1397,7 @@ bool Vdb::AddProtein( char kind ){
 /**
  *Reading the complete vdb file in PDB format
  */
-void Vdb::ReadCompleteFile( int fold_id, double align2Z_00, double align2Z_01, double align2Z_02, double align2Z_10, double align2Z_11, double align2Z_12, double align2Z_20, double align2Z_21, double align2Z_22 ){
+void Vdb::ReadCompleteFile( int fold_id, double align2Z_00, double align2Z_01, double align2Z_02, double align2Z_10, double align2Z_11, double align2Z_12, double align2Z_20, double align2Z_21, double align2Z_22, bool mesh_rotated_atoms ){
 
 	FILE* fp = this->GetPointer();
 
@@ -1410,7 +1410,7 @@ void Vdb::ReadCompleteFile( int fold_id, double align2Z_00, double align2Z_01, d
 
 	while( !feof( fp ) ){
 		int read;
-		read = this->ReadLine(rotated_file,align2Z_00, align2Z_01, align2Z_02, align2Z_10, align2Z_11, align2Z_12, align2Z_20, align2Z_21, align2Z_22);
+		read = this->ReadLine(rotated_file,align2Z_00, align2Z_01, align2Z_02, align2Z_10, align2Z_11, align2Z_12, align2Z_20, align2Z_21, align2Z_22, mesh_rotated_atoms);
 		if( read == EOF ){
 			break;
 		}
@@ -1426,7 +1426,7 @@ void Vdb::ReadCompleteFile( int fold_id, double align2Z_00, double align2Z_01, d
  *Reading a line from file in PDB format
  *This method adds the required information on the data structure
  */
-int Vdb::ReadLine( char* rotated_file, double align2Z_00, double align2Z_01, double align2Z_02, double align2Z_10, double align2Z_11, double align2Z_12, double align2Z_20, double align2Z_21, double align2Z_22 ){
+int Vdb::ReadLine( char* rotated_file, double align2Z_00, double align2Z_01, double align2Z_02, double align2Z_10, double align2Z_11, double align2Z_12, double align2Z_20, double align2Z_21, double align2Z_22, bool mesh_rotated_atoms ){
 	char params[ 11 ][ 500 ];
 	FILE* fp = this->GetPointer();
 	char line[500];
@@ -1559,6 +1559,12 @@ int Vdb::ReadLine( char* rotated_file, double align2Z_00, double align2Z_01, dou
 	fprintf(fr, "%4s%7d %4s %3s %s%s    %8.3f%8.3f%8.3f%6s%6s \n", params[ 0 ], AtomSerialNumber, params[ 2 ], params[ 3 ], params[ 4 ], params[ 5 ], coordXr, coordYr, coordZr, params[ 9 ], params[ 10 ]);
 
 	fclose(fr);
+
+	if(  mesh_rotated_atoms  ){
+		snprintf( params[ 6 ] , 500 , "%8.3f" , coordXr );
+		snprintf( params[ 7 ] , 500 , "%8.3f" , coordYr );
+		snprintf( params[ 8 ] , 500 , "%8.3f" , coordZr );
+	}
 
 	this->SetAtomOnCapside( params );
 
@@ -1784,7 +1790,6 @@ void Vdb::PrintInfo(){
 		aux->PrintInfo();
 	}
 }
-
 
 
 

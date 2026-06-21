@@ -52,13 +52,13 @@ clean:
 
 shear:
 	./bin/extract_ATOM ./CLEANER/input/1cwp_full.vdb ./T3_1cwp_full.vdb
-	./bin/octree_mesh ./T3_1cwp_full.vdb 3 1 16.00 2 0 1CWP 15.00 0.000 0.0200
+	./bin/octree_mesh ./T3_1cwp_full.vdb 3 1 16.00 2 0 0.000 0.000 125.100 1CWP 15.00 0.000 0.0200 --rotate_meshed_atoms
 	./bin/shear_rotate ./2_T3_1CWP.geometry.dat ./2_T3_1CWP.geometry.dat
 	./bin/meshsolver ./2_T3_1CWP 2
 	./bin/mesh2pdb ./T3_1cwp_full.vdb ./2_T3_1CWP.post.msh ./2_T3_1CWP.post.res ./2_T3_1CWP.pdb 5
 nanoindentation:
 	./bin/extract_ATOM ./CLEANER/input/1cwp_full.vdb ./T3_1cwp_full.vdb
-	./bin/octree_mesh ./T3_1cwp_full.vdb 3 1 16.00 2 0 1CWP 15.00 0.000 0.0200
+	./bin/octree_mesh ./T3_1cwp_full.vdb 3 1 16.00 2 0 0.000 0.000 125.100 1CWP 15.00 0.000 0.0200 --rotate_meshed_atoms
 	./bin/meshsolver ./2_T3_1CWP 2
 	./bin/mesh2pdb ./T3_1cwp_full.vdb ./2_T3_1CWP.post.msh ./2_T3_1CWP.post.res ./2_T3_1CWP.pdb 5
 
