@@ -25,7 +25,8 @@ int main( int argc , char** argv ){
 
 	double t_ini = clock();
 	std::cout << " ****************** " << std::endl;
-	std::cout << " OCTREEMESH v310122 " << std::endl;
+	std::cout << " OCTREEMESH v200626 " << std::endl;
+	std::cout << " by trippm@tripplab " << std::endl;
 	std::cout << " ****************** " << std::endl;
 
 	std::cout << " 0/100 START MESHING " << std::endl;
