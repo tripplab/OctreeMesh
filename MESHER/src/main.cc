@@ -2,7 +2,7 @@
 
 /**
  *This program generates a capside mesh by using a vdb input file
- *The main idea is generate a mesh composed by spheres representing different kind of 
+ *The main idea is generate a mesh composed by spheres representing different kind of
  *atoms and then determine the octree hexahedral elements intersecting the spherical mesh.
  *The parameters receied by the program are:
  *     1-Name of the vdb input file
@@ -17,11 +17,11 @@
  *     10-Young modulus used in the simulation
  */
 
-void CheckParameters( int argc );
+void CheckParameters( int argc , char** argv );
 
 int main( int argc , char** argv ){
 
-	CheckParameters( argc );
+	CheckParameters( argc , argv );
 
 	double t_ini = clock();
 	std::cout << " ****************** " << std::endl;
@@ -40,7 +40,7 @@ int main( int argc , char** argv ){
 	com->RefineLocalRoot();
 	com->SetAllOctreeNodes();
 	std::cout << " 60/100 OCTREE REFINED " << std::endl;
-	com->SetLoadedAndFixedElements();	
+	com->SetLoadedAndFixedElements();
 	std::cout << " 80/100 BOUNDARY CONDITIONS SET  " << std::endl;
 	com->PrintMeshSummary();
 	com->PrintDataFilesForFEMT(  );
@@ -54,11 +54,11 @@ int main( int argc , char** argv ){
  *Checking if number of arguments is correct or not
  *@param[in] argc Number of arguments in program
  */
-void CheckParameters( int argc ){
-	if(  argc != 14  ){
+void CheckParameters( int argc , char** argv ){
+	if(  argc != 15  ){
 		std::cout << "\n\n";
 		std::cout << "**************************************************************************************" << std::endl;
-		std::cout << "Received wrong number of arguments " << std::endl; 
+		std::cout << "Received wrong number of arguments " << std::endl;
 		std::cout << "Arguments must be: " << std::endl;
 		std::cout << "  --[ 1][string][input ] Name of vdb file containing the atoms information" << std::endl;
 		std::cout << "  --[ 2][int   ][input ] Virus type (3 , 5 , 7, etc)" << std::endl;
@@ -73,6 +73,18 @@ void CheckParameters( int argc ){
 		std::cout << "  --[11][double][input ] Cone amplitude in degrees" << std::endl;
 		std::cout << "  --[12][double][input ] Variation in the proportion of loaded volume (positive or negative)" << std::endl;
 		std::cout << "  --[13][double][input ] Young modulus divided by 10,000" << std::endl;
+		std::cout << "  --[14][string][input ] Meshing orientation mode: --rotate_meshed_atoms or --mesh_rotated_atoms" << std::endl;
+		std::cout << "**************************************************************************************" << std::endl;
+		std::cout << "\n\n";
+		assert( 0 );
+	}
+	if(  strcmp( argv[ 14 ] , "--rotate_meshed_atoms" ) && strcmp( argv[ 14 ] , "--mesh_rotated_atoms" )  ){
+		std::cout << "\n\n";
+		std::cout << "**************************************************************************************" << std::endl;
+		std::cout << "Invalid meshing orientation mode: " << argv[ 14 ] << std::endl;
+		std::cout << "Use exactly one of:" << std::endl;
+		std::cout << "  --rotate_meshed_atoms : mesh original atom coordinates, then rotate exported mesh nodes" << std::endl;
+		std::cout << "  --mesh_rotated_atoms  : rotate atom coordinates first, mesh them, export mesh nodes as-is" << std::endl;
 		std::cout << "**************************************************************************************" << std::endl;
 		std::cout << "\n\n";
 		assert( 0 );

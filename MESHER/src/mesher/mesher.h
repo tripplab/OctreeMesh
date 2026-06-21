@@ -16,6 +16,11 @@
 
 using namespace std;
 
+enum MeshingOrientationMode{
+	ROTATE_MESHED_ATOMS = 1,
+	MESH_ROTATED_ATOMS = 2
+};
+
 /**
  *Comunicator class
  *This class contains the information requiered to create a mesh based on a octree
@@ -73,6 +78,7 @@ class Mesher{
 	 double Fx_;
 	 double Fy_;
 	 double Fz_;
+	 MeshingOrientationMode meshing_orientation_mode_;
  
 	public:
 		//CONSTRUCTOR AND DESTRUCTOR

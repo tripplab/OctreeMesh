@@ -3,7 +3,7 @@ set -u
 
 usage() {
   cat <<USAGE
-Usage: $0 --pdb LIST --folds LIST --res SPEC --threads N --bin PATH --vdb-dir DIR [--steps SPEC] [--cleanup-checkpoints MODE] [--patch-radius R] [--strict-skips] [--smoke]
+Usage: $0 --pdb LIST --folds LIST --res SPEC --threads N --bin PATH --vdb-dir DIR [--steps SPEC] [--cleanup-checkpoints MODE] [--mesh-orientation MODE] [--patch-radius R] [--strict-skips] [--smoke]
 
 Required:
   --pdb         Comma list of pdb IDs (allowed: 1cwp,3j4u,3izg,4g93)
@@ -16,6 +16,10 @@ Optional:
   --steps SPEC      Steps passed to run_capsim.sh (default: 1-5; e.g. 1-5 or 2,3,4)
   --cleanup-checkpoints MODE
                     Checkpoint cleanup mode passed to run_capsim.sh: yes or no (default: no)
+  --mesh-orientation MODE
+                    octree_mesh orientation mode passed to run_capsim.sh:
+                    --rotate_meshed_atoms/rotate_meshed_atoms or --mesh_rotated_atoms/mesh_rotated_atoms
+                    (default: --rotate_meshed_atoms)
   --patch-radius R  Patch radius in Å; computes cone angle per PDB diameter
   --strict-skips    Missing VDB skips trigger non-zero exit
   --smoke           Build/validate/summarize only, do not run simulations
@@ -29,7 +33,7 @@ done
 
 ORIG_ARGS=("$@")
 
-PDB_LIST=""; FOLD_LIST=""; RES_SPEC=""; THREADS=""; BIN_PATH=""; VDB_DIR=""; STEPS_SPEC="1-5"; CLEANUP_CHECKPOINTS="no"; PATCH_RADIUS=""; STRICT_SKIPS=0; SMOKE=0
+PDB_LIST=""; FOLD_LIST=""; RES_SPEC=""; THREADS=""; BIN_PATH=""; VDB_DIR=""; STEPS_SPEC="1-5"; CLEANUP_CHECKPOINTS="no"; MESH_ORIENTATION_MODE="--rotate_meshed_atoms"; PATCH_RADIUS=""; STRICT_SKIPS=0; SMOKE=0
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -49,6 +53,8 @@ while [[ $# -gt 0 ]]; do
     --steps=*) STEPS_SPEC="${1#*=}"; shift ;;
     --cleanup-checkpoints) CLEANUP_CHECKPOINTS="$2"; shift 2 ;;
     --cleanup-checkpoints=*) CLEANUP_CHECKPOINTS="${1#*=}"; shift ;;
+    --mesh-orientation) MESH_ORIENTATION_MODE="$2"; shift 2 ;;
+    --mesh-orientation=*) MESH_ORIENTATION_MODE="${1#*=}"; shift ;;
     --patch-radius) PATCH_RADIUS="$2"; shift 2 ;;
     --patch-radius=*) PATCH_RADIUS="${1#*=}"; shift ;;
     --strict-skips) STRICT_SKIPS=1; shift ;;
@@ -75,6 +81,12 @@ fi
 case "$CLEANUP_CHECKPOINTS" in
   yes|no) ;;
   *) echo "--cleanup-checkpoints must be yes or no"; exit 1 ;;
+esac
+case "$MESH_ORIENTATION_MODE" in
+  --rotate_meshed_atoms|--mesh_rotated_atoms) ;;
+  rotate_meshed_atoms) MESH_ORIENTATION_MODE="--rotate_meshed_atoms" ;;
+  mesh_rotated_atoms) MESH_ORIENTATION_MODE="--mesh_rotated_atoms" ;;
+  *) echo "--mesh-orientation must be --rotate_meshed_atoms or --mesh_rotated_atoms"; exit 1 ;;
 esac
 [[ -d "$BIN_PATH" ]] || { echo "--bin directory not found: $BIN_PATH"; exit 1; }
 [[ -d "$VDB_DIR" ]] || { echo "--vdb-dir not found: $VDB_DIR"; exit 1; }
@@ -117,7 +129,7 @@ csv_file="${out_prefix}.csv"
 work_dir="$SCRIPT_DIR/runs/batch_${ts}_$$"
 mkdir -p "$work_dir/tmp_configs"
 
-echo -e "status\texit_code\truntime_sec\tpdb\tvdb\tres\tyoung\tfold_type\tfold_index\tthreads\tsteps\tpatch_radius\tcapsid_diameter\tcone_deg\trun_dir" > "$tsv_file"
+echo -e "status\texit_code\truntime_sec\tpdb\tvdb\tres\tyoung\tfold_type\tfold_index\tthreads\tsteps\tmesh_orientation_mode\tpatch_radius\tcapsid_diameter\tcone_deg\trun_dir" > "$tsv_file"
 echo "job_name,total_proteins,total_atoms,nodes,elements,mesh_volume,volume_loaded,octree_mesh_sec,meshsolver_sec,mesh2pdb_sec" > "$csv_file"
 
 young_for_pdb() {
@@ -278,7 +290,7 @@ for pdb_l in "${pdb_arr[@]}"; do
           pre_ckpt=$(find "$SCRIPT_DIR/runs" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort)
           tmp_log="$work_dir/current_job.log"
           set +e
-          "$RUN_SCRIPT" -c "$cfg" -t "$THREADS" --steps "$STEPS_SPEC" --cleanup-checkpoints "$CLEANUP_CHECKPOINTS" > "$tmp_log" 2>&1
+          "$RUN_SCRIPT" -c "$cfg" -t "$THREADS" --steps "$STEPS_SPEC" --cleanup-checkpoints "$CLEANUP_CHECKPOINTS" --mesh-orientation "$MESH_ORIENTATION_MODE" > "$tmp_log" 2>&1
           rc=$?
           set -e
           post_ckpt=$(find "$SCRIPT_DIR/runs" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' 2>/dev/null | sort)
@@ -330,8 +342,8 @@ for pdb_l in "${pdb_arr[@]}"; do
         fi
       fi
 
-      printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
-        "$status" "$exit_code" "$runtime" "$pdb_u" "$vdb" "$res_f" "$young" "$fold_type" "$fold_index" "$THREADS" "$STEPS_SPEC" "$patch_radius_tsv" "$capsid_diameter_tsv" "$cone_deg_tsv" "$run_dir" >> "$tsv_file"
+      printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" \
+        "$status" "$exit_code" "$runtime" "$pdb_u" "$vdb" "$res_f" "$young" "$fold_type" "$fold_index" "$THREADS" "$STEPS_SPEC" "$MESH_ORIENTATION_MODE" "$patch_radius_tsv" "$capsid_diameter_tsv" "$cone_deg_tsv" "$run_dir" >> "$tsv_file"
       echo "${job_name},${tp},${ta},${nodes},${elems},${mv},${vl},${t2},${t3},${t4}" >> "$csv_file"
     done
   done

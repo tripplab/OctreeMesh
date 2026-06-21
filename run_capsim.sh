@@ -19,6 +19,9 @@ usage() {
     echo "  -t, --threads N       Number of threads for FEM solver (overrides config)"
     echo "  --cleanup-checkpoints MODE"
     echo "                        Checkpoint cleanup after full 1-5 completion: ask, yes, or no (default: ask)"
+    echo "  --mesh-orientation MODE"
+    echo "                        octree_mesh atom/mesh orientation: --rotate_meshed_atoms or --mesh_rotated_atoms"
+    echo "                        (default: --rotate_meshed_atoms)"
     echo "  -l, --list            List available fold configurations"
     echo "  -h, --help            Display this help message"
     exit 1
@@ -193,6 +196,7 @@ STEPS_SPEC="1-5"  # Default: run all steps
 SHEAR_MODE=0
 CLI_THREADS=""
 CLEANUP_CHECKPOINTS="ask"
+CLI_MESH_ORIENTATION_MODE=""
 
 # Parse command line arguments
 while [[ $# -gt 0 ]]; do
@@ -233,6 +237,14 @@ while [[ $# -gt 0 ]]; do
             CLEANUP_CHECKPOINTS="${1#*=}"
             shift
             ;;
+        --mesh-orientation)
+            CLI_MESH_ORIENTATION_MODE="$2"
+            shift 2
+            ;;
+        --mesh-orientation=*)
+            CLI_MESH_ORIENTATION_MODE="${1#*=}"
+            shift
+            ;;
         -l|--list)
             list_folds
             exit 0
@@ -270,6 +282,21 @@ if [[ -n "$CLI_THREADS" ]]; then
     SOLVER_THREADS=$CLI_THREADS
 fi
 
+MESH_ORIENTATION_MODE="--rotate_meshed_atoms"
+if [[ -n "$CLI_MESH_ORIENTATION_MODE" ]]; then
+    MESH_ORIENTATION_MODE="$CLI_MESH_ORIENTATION_MODE"
+fi
+case "$MESH_ORIENTATION_MODE" in
+    --rotate_meshed_atoms|--mesh_rotated_atoms) ;;
+    rotate_meshed_atoms) MESH_ORIENTATION_MODE="--rotate_meshed_atoms" ;;
+    mesh_rotated_atoms) MESH_ORIENTATION_MODE="--mesh_rotated_atoms" ;;
+    *)
+        echo "Error: Invalid mesh orientation mode '$MESH_ORIENTATION_MODE'"
+        echo "Valid options: --rotate_meshed_atoms or --mesh_rotated_atoms"
+        exit 1
+        ;;
+esac
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 # Export threads for FEM solver
@@ -303,6 +330,7 @@ echo "Steps to run: ${STEPS_TO_RUN[@]}"
 echo "Shear mode: $([ $SHEAR_MODE -eq 1 ] && echo "Enabled" || echo "Disabled")"
 echo "FEM threads: $SOLVER_THREADS"
 echo "PDB: $PDB, Resolution: $Res Å"
+echo "Mesh orientation mode: $MESH_ORIENTATION_MODE"
 echo "Indentation: $FOLD_DESC"
 if [[ $FOLD_TYPE != "custom" ]]; then
     echo "  (Type $FOLD_TYPE, Index $FOLD_INDEX)"
@@ -349,6 +377,7 @@ FX_VAL="$Fx" \
 FY_VAL="$Fy" \
 FZ_VAL="$Fz" \
 SOLVER_THREADS_VAL="$SOLVER_THREADS" \
+MESH_ORIENTATION_MODE_VAL="$MESH_ORIENTATION_MODE" \
 STEPS_SPEC_VAL="$STEPS_SPEC" \
 SHEAR_MODE_VAL="$SHEAR_MODE" \
 ATOMS_VDB_VAL="$ATOMS_VDB" \
@@ -377,6 +406,7 @@ manifest = {
     "fold_index": os.environ["FOLD_INDEX_VAL"],
     "fold_vector": [os.environ["FX_VAL"], os.environ["FY_VAL"], os.environ["FZ_VAL"]],
     "solver_threads": os.environ["SOLVER_THREADS_VAL"],
+    "mesh_orientation_mode": os.environ["MESH_ORIENTATION_MODE_VAL"],
     "steps_spec": os.environ["STEPS_SPEC_VAL"],
     "shear_mode": os.environ["SHEAR_MODE_VAL"],
     "atoms_vdb": os.environ["ATOMS_VDB_VAL"],
@@ -447,7 +477,7 @@ if should_run 2; then
         step_start="$(now_epoch)"
         (
             cd "$RUN_DIR" || exit 1
-            "${BIN}/octree_mesh" "$(basename "$ATOMS_VDB")" "$T" "$VDW" "$Res" "$Fold" "$inx" "$Fx" "$Fy" "$Fz" "$PDB" "$cone" "$load_ele" "$Young"
+            "${BIN}/octree_mesh" "$(basename "$ATOMS_VDB")" "$T" "$VDW" "$Res" "$Fold" "$inx" "$Fx" "$Fy" "$Fz" "$PDB" "$cone" "$load_ele" "$Young" "$MESH_ORIENTATION_MODE"
         )
         step_rc=$?
         step_elapsed="$(elapsed_seconds "$step_start" "$(now_epoch)")"
