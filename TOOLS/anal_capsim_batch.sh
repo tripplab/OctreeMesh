@@ -9,8 +9,10 @@ Analyze Stage 1 capsim batch run directories and optionally extract completed
 simulation result statistics into an accumulated CSV.
 
 Expected run directory format:
-  <capsid>_F<fold>id<fold_id>_R<resolution>_<time_stamp>
-  <capsid>_F<fold>id<fold_id>_R<resolution>_S<seed>_<time_stamp>
+  <capsid>_F<fold>id<fold_id>_R<resolution>_<tag>
+
+The trailing <tag> may be any non-empty suffix, for example a timestamp,
+a seed plus timestamp, or batch/job metadata.
 
 Example run directory:
   3J4U_F5id0_R16.00_S0_20260511T041629Z
@@ -94,10 +96,10 @@ if (( EXTRACT_SIM_DATA == 1 )); then
   fi
 fi
 
-# Match both styles seen in runs:
-#   <capsid>_F<fold>id<fold_id>_R<resolution>_<timestamp>
-#   <capsid>_F<fold>id<fold_id>_R<resolution>_S<seed>_<timestamp>
-DIR_RE='^([A-Za-z0-9]+)_F([0-9]+)id([0-9]+)_R([0-9]+(\.[0-9]+)?)(_S[0-9]+)?_([0-9]{8}T[0-9]{6}Z)$'
+# Match run names by the required metadata prefix and allow any non-empty
+# trailing tag after the resolution. Historical runs used timestamp-only or
+# seed-plus-timestamp tags; batch-generated runs may append batch/job metadata.
+DIR_RE='^([A-Za-z0-9]+)_F([0-9]+)id([0-9]+)_R([0-9]+(\.[0-9]+)?)_.+$'
 
 summary_header=$'run_dir\tcapsid\tfold\tfold_id\tresolution\tstatus\tresult'
 rows=()
