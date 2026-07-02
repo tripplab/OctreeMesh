@@ -294,14 +294,14 @@ TOOLS/anal_capsim_batch.sh --work_dir sims_constant_angle
 The script expects immediate child directories named like:
 
 ```text
-<capsid>_F<fold>id<fold_id>_R<resolution>_<time_stamp>
-<capsid>_F<fold>id<fold_id>_R<resolution>_S<seed>_<time_stamp>
+<capsid>_F<fold>id<fold_id>_R<resolution>_<tag>
 ```
 
-Example:
+The trailing `<tag>` may be any non-empty suffix. Examples:
 
 ```text
 3J4U_F5id0_R16.00_S0_20260511T041629Z
+3J4U_F5id0_R1.00_B20260621T145317Z_417937_J000009
 ```
 
 Directories named `batch_*` are ignored without malformed-directory warnings.
